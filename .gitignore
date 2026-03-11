@@ -1,0 +1,6 @@
+.api_token.json
+__pycache__/
+*.pyc
+output*.json
+*.env
+.env.*

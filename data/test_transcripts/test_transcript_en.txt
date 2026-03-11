@@ -1,0 +1,82 @@
+Doctor-Patient Consultation – Test Transcript (English)
+Duration: ~10 minutes
+Complaints: headache/migraine, abdominal pain, fatigue/weakness
+--------------------------------------------------------------
+
+DOCTOR: Good morning, please take a seat. What brings you in today?
+
+PATIENT: Good morning. I've been feeling off for a while now, but this past week it got bad enough that I figured I should come in.
+
+DOCTOR: I see. Can you walk me through your symptoms?
+
+PATIENT: So, I've had this headache for about... two weeks maybe? It's not constant, it comes and goes. But when it comes, it's really intense. Mostly on my temples, and sometimes behind my eyes too.
+
+DOCTOR: When does the headache tend to come on? Morning, afternoon, evening?
+
+PATIENT: More in the afternoon and evening. I'm usually okay in the morning, but as the day goes on it gets worse. I also work in front of a screen all day, which probably doesn't help.
+
+DOCTOR: Are you more sensitive to light or noise when it happens?
+
+PATIENT: Yes, definitely light. I didn't mention that. Bright light makes it much worse. Noise doesn't bother me as much, but light does.
+
+DOCTOR: Any nausea with it?
+
+PATIENT: A few times, yes, but I haven't actually vomited. It's more just an unsettled feeling in my stomach.
+
+DOCTOR: Okay. Tell me about the abdominal pain — how long has that been going on and where exactly?
+
+PATIENT: That's been going on about as long, maybe a little longer. It's mostly in the middle of my abdomen, sometimes lower. It comes in cramps, it's not constant. It usually gets worse after eating.
+
+DOCTOR: Before or after eating?
+
+PATIENT: After eating, yes. Especially if I eat something fatty, or drink coffee. I drink a lot of coffee because I'm so tired all the time.
+
+DOCTOR: Yes, I wanted to ask about that — the fatigue. How long have you been feeling this exhausted?
+
+PATIENT: Honestly? About a month, maybe a month and a half. I wake up in the morning already tired. I go to bed early but I don't sleep well. I wake up during the night and can't get back to sleep.
+
+DOCTOR: How much sleep are you getting roughly?
+
+PATIENT: I'm in bed maybe seven or eight hours, but actual sleep... I don't know, maybe five? Could be less.
+
+DOCTOR: Is there anything you think is disrupting your sleep? Stress, work?
+
+PATIENT: Yes, it's been a stressful period. We switched systems at work, there's been a lot of overtime. And my husband was sick recently too, so that added to it.
+
+DOCTOR: I'm sorry to hear that. Do you have any known medical conditions? Any regular medications?
+
+PATIENT: I take Euthyrox for my thyroid, 75 micrograms. That's been going on for a while. Nothing else regularly.
+
+DOCTOR: When did you last have your thyroid levels checked?
+
+PATIENT: Oh, it's been a while. Maybe... last spring? I haven't had a follow-up since then.
+
+DOCTOR: We'll definitely need to check that. TSH levels can contribute to fatigue and headaches. Is there any family history of migraines?
+
+PATIENT: My mother had them, yes. She suffered a lot with them when she was younger.
+
+DOCTOR: Understood. Do you smoke?
+
+PATIENT: No, never.
+
+DOCTOR: Alcohol?
+
+PATIENT: Occasionally a glass of wine, nothing regular.
+
+DOCTOR: Alright, let me examine you and then we'll talk through next steps.
+
+[Physical examination – pause]
+
+DOCTOR: So, on examination the abdomen is tender in the central and right lower quadrant, but I don't see anything acutely concerning. Your blood pressure is slightly elevated at 145/90, which we should keep an eye on. Based on your description — the unilateral temple pain, light sensitivity, nausea, and the family history — this is consistent with migraine.
+
+PATIENT: Yes, I suspected that but wasn't sure.
+
+DOCTOR: The abdominal pain is likely related to the high coffee intake and stress — irritable bowel syndrome or functional dyspepsia are the most probable causes, though we should confirm that. The fatigue and sleep disturbance could be stress-related, but given that your thyroid hasn't been checked in a while, I'd like to run some bloods.
+
+PATIENT: Sure, what should I do?
+
+DOCTOR: I'm ordering a full panel — TSH, full blood count, liver and kidney function, iron and ferritin. Cut the coffee down to one or two a day if you can, and try to get a short walk in after meals. For the headaches, Ibuprofen for now, but if they continue we can look at migraine-specific treatment. Come back in two weeks with the lab results.
+
+PATIENT: Thank you very much, doctor.
+
+DOCTOR: You're welcome. Take care of yourself.
