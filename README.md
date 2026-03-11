@@ -4,7 +4,7 @@ Doctors currently dedicate a significant portion of their workday to manual clin
 ---
 # Git/GitHub guide
 
-See [docs/git_guide.md](docs/git_guide.md) for API key setup and usage instructions.
+See [docs/git_guide.md](docs/git_guide.md) for basic Git and Github usage.
 
 
 # Setup
