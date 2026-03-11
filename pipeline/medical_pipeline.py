@@ -211,8 +211,8 @@ def save_output(transcript: str, summary: str, soap_notes: str, output_path: str
 def main():
     parser = argparse.ArgumentParser(description="Medical consultation transcription & summarization pipeline.")
 
-    parser.add_argument("--audio", type=str, default="../test_data/test_audio.mp3",
-                        help="Path to audio file (default: ../test_data/test_audio.mp3)")
+    parser.add_argument("--audio", type=str, default="../data/test_audio/test_audio.mp3",
+                        help="Path to audio file (default: ../data/test_audio/test_audio.mp3)")
     parser.add_argument("--transcript", type=str, default=None,
                         help="Path to existing transcript (.txt) — skips transcription if provided")
     parser.add_argument("--output", type=str, default="../output.json",
