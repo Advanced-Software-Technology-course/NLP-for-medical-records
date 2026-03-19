@@ -122,67 +122,147 @@ function HelpPopup({ onClose }) {
 }
 
 
-export default function HomePage({ onNavigate, onDurationSave }) {
+export default function HomePage({ onNavigate, onDurationSave, onDataReceived }) {
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [showHelp, setShowHelp] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const timerRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const secondsRef = useRef(0);
 
   useEffect(() => {
+    let interval = null;
     if (recording) {
-      timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
+      interval = setInterval(() => {
+        setSeconds(s => {
+            const next = s + 1;
+            secondsRef.current = next;
+            return next;
+        });
+      }, 1000);
     } else {
-      clearInterval(timerRef.current);
+      clearInterval(interval);
     }
-    return () => clearInterval(timerRef.current);
+    return () => clearInterval(interval);
   }, [recording]);
 
-  const toggle = () => setRecording(r => !r);
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
 
-  const handleStop = () => {
-    setRecording(false);
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
 
-    const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
-    const ss = String(seconds % 60).padStart(2, "0");
-    onDurationSave(`${mm}:${ss}`);
-    setSeconds(0);
-    setGenerating(true);
-    setTimeout(() => {
-      setGenerating(false);
-      onNavigate("Transcript");
-    }, 2000);
+      // We assign onstop here, but handleUpload needs current state.
+      // Since handleUpload is a stable function reference (well, in this render), 
+      // it might close over old state if not careful.
+      // However, to be safe, we'll define the logic inside onstop or 
+      // rely on a ref for seconds.
+      mediaRecorderRef.current.onstop = () => {
+         // Define the upload logic here to ensure it runs when stopped
+         handleUpload(); 
+      };
+
+      mediaRecorderRef.current.start();
+      setRecording(true);
+      setSeconds(0);
+      secondsRef.current = 0;
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+      alert("Could not access microphone. Please ensure you have granted permission.");
+    }
   };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop();
+      // Stop all tracks to release microphone
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setRecording(false);
+    }
+  };
+
+  const handleUpload = async () => {
+    setGenerating(true);
+    
+    // Create blob from chunks
+    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' }); 
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'recording.wav');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/process', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Save duration using ref to avoid stale closure
+        const s = secondsRef.current;
+        const mm = String(Math.floor(s / 60)).padStart(2, "0");
+        const ss = String(s % 60).padStart(2, "0");
+        onDurationSave(`${mm}:${ss}`);
+        
+        // Save data
+        if (onDataReceived) {
+          onDataReceived(data.data);
+        }
+        
+        onNavigate("Transcript");
+      } else {
+        alert(`Error: ${data.error || "Failed to process audio"}`);
+      }
+    } catch (error) {
+      console.error("Upload failed", error);
+      alert("Network error. Is the backend running?");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
 
   return (
     <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, gap: 40 }}>
+      {showHelp && <HelpPopup onClose={() => setShowHelp(false)} />}
       <RecordingCircle seconds={seconds} />
 
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button
-            onClick={toggle}
-            disabled={generating}
-            style={{
-              padding: "14px 48px", borderRadius: 40, border: "none", cursor: "pointer",
-              background: recording ? "#1e40af" : "#2563eb",
-              color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "inherit",
-              boxShadow: recording ? "0 0 0 4px rgba(37,99,235,0.25)" : "none",
-              transition: "all 0.2s",
-              opacity: generating ? 0.5 : 1,
-            }}
-          >
-            {recording ? "Recording" : "Start Recording"}
-          </button>
-          {recording && (
+          {!recording ? (
             <button
-              onClick={handleStop}
+              onClick={startRecording}
+              disabled={generating}
               style={{
-                width: 48, height: 48, borderRadius: "50%", border: "2px solid #ef4444",
-                background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                padding: "14px 48px", borderRadius: 40, border: "none", cursor: "pointer",
+                background: "#2563eb",
+                color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "inherit",
+                transition: "all 0.2s",
+                opacity: generating ? 0.5 : 1,
               }}
             >
-              <div style={{ width: 16, height: 16, background: "#ef4444", borderRadius: 3 }} />
+              Start Recording
+            </button>
+          ) : (
+            <button
+              onClick={stopRecording}
+              style={{
+                padding: "14px 48px", borderRadius: 40, border: "none", cursor: "pointer",
+                background: "#1e40af",
+                color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "inherit",
+                boxShadow: "0 0 0 4px rgba(37,99,235,0.25)",
+                display: "flex", alignItems: "center", gap: 10
+              }}
+            >
+              <div style={{ width: 12, height: 12, background: "#ef4444", borderRadius: 2 }} />
+              Stop Recording
             </button>
           )}
         </div>
@@ -195,7 +275,7 @@ export default function HomePage({ onNavigate, onDurationSave }) {
               animation: "fadeInUp 0.3s ease",
             }}
           >
-            Generating transcript
+            Processing audio... this may take a moment
           </p>
         )}
       </div>

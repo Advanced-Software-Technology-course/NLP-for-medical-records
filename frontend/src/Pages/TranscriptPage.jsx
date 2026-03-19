@@ -10,23 +10,38 @@ const MOCK_TRANSCRIPT = [
   { time: "00:30", speaker: "Patient", text: "Yes, especially when I walk." },
 ];
 
-export default function TranscriptPage({ onNavigate, doctorName, patientName, duration }) {
-  const [playing, setPlaying] = useState(true);
+export default function TranscriptPage({ onNavigate, doctorName, patientName, duration, data }) {
+  const [playing, setPlaying] = useState(false);
   const [activeLine, setActiveLine] = useState(0);
   const [summarizing, setSummarizing] = useState(false);
+
+  // Parse transcript data
+  const transcript = data?.transcript 
+    ? data.transcript.split('\n').map((line, i) => {
+        const [speaker, ...rest] = line.split(': ');
+        return {
+          time: `00:${String(Math.min(59, i * 4)).padStart(2, '0')}`, // Mock timestamps
+          speaker: speaker.includes('0') ? 'Doctor' : 'Patient', // Simple heuristic
+          text: rest.join(': ') || line
+        };
+      })
+    : MOCK_TRANSCRIPT;
 
   // cycle lines thru while playing
   useEffect(() => {
     if (!playing) return;
     const interval = setInterval(() => {
-      setActiveLine(prev => (prev + 1) % MOCK_TRANSCRIPT.length);
+      setActiveLine(prev => (prev + 1) % transcript.length);
     }, 2000);
     return () => clearInterval(interval);
-  }, [playing]);
+  }, [playing, transcript]);
 
   const handleSummarize = () => {
     setSummarizing(true);
-    setTimeout(() => { setSummarizing(false); onNavigate("Summary"); }, 1200);
+    setTimeout(() => { 
+        setSummarizing(false); 
+        onNavigate("Summary"); 
+    }, 800); // reduced delay as data is already there
   };
 
   return (
@@ -43,7 +58,7 @@ export default function TranscriptPage({ onNavigate, doctorName, patientName, du
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 18, marginBottom: 70 }}>
-        {MOCK_TRANSCRIPT.map((line, i) => {
+        {transcript.map((line, i) => {
           const isActive = i === activeLine;
           return (
             <p

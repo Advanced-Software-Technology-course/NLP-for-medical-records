@@ -1,34 +1,64 @@
-import { useState } from "react";
-import Navbar from "./Comp/Navbar";
-import HomePage from "./Pages/HomePage";
-import TranscriptPage from "./Pages/TranscriptPage";
-import SummaryPage from "./Pages/SummaryPage";
-import SettingsPage from "./Pages/SettingPage";
+import { useState } from 'react';
+import Navbar from './Comp/Navbar';
+import HomePage from './Pages/HomePage';
+import TranscriptPage from './Pages/TranscriptPage';
+import SummaryPage from './Pages/SummaryPage';
+import SettingsPage from './Pages/SettingPage';
 
-const DOCTOR_NAME = "Dr. Smith";
-const PATIENT_NAME = "John Doe";
+const DOCTOR_NAME = 'Dr. Smith';
+const PATIENT_NAME = 'John Doe';
 
 export default function App() {
-  const [active, setActive] = useState("Home");
-  const [duration, setDuration] = useState("00:00");
+  const [active, setActive] = useState('Home');
+  const [duration, setDuration] = useState('00:00');
+  const [consultationData, setConsultationData] = useState(null);
 
   const renderPage = () => {
     switch (active) {
-      case "Home":
-        return <HomePage onNavigate={setActive} onDurationSave={setDuration} />;
-      case "Transcript":
-        return <TranscriptPage onNavigate={setActive} doctorName={DOCTOR_NAME} patientName={PATIENT_NAME} duration={duration} />;
-      case "Summary":
-        return <SummaryPage onNavigate={setActive} doctorName={DOCTOR_NAME} patientName={PATIENT_NAME} duration={duration} />;
+      case 'Home':
+        return (
+          <HomePage
+            onNavigate={setActive}
+            onDurationSave={setDuration}
+            onDataReceived={setConsultationData}
+          />
+        );
+      case 'Transcript':
+        return (
+          <TranscriptPage
+            onNavigate={setActive}
+            doctorName={DOCTOR_NAME}
+            patientName={PATIENT_NAME}
+            duration={duration}
+            data={consultationData}
+          />
+        );
+      case 'Summary':
+        return (
+          <SummaryPage
+            onNavigate={setActive}
+            doctorName={DOCTOR_NAME}
+            patientName={PATIENT_NAME}
+            duration={duration}
+            data={consultationData}
+          />
+        );
       default:
         return <SettingsPage />;
     }
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", fontFamily: "'Google Sans', sans-serif" }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        fontFamily: "'Google Sans', sans-serif",
+      }}
+    >
       <Navbar active={active} onNavigate={setActive} />
-      <main style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {renderPage()}
       </main>
     </div>

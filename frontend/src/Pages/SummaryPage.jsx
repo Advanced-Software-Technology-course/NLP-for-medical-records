@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const MOCK_SUMMARY = {
   aiSummary: "Patient reports chest pain starting yesterday and the pain worsens during physical activity.",
@@ -10,10 +10,17 @@ const MOCK_SUMMARY = {
   },
 };
 
-export default function SummaryPage({ onNavigate, doctorName, patientName, duration }) {
+export default function SummaryPage({ onNavigate, doctorName, patientName, duration, data }) {
   const [editing, setEditing] = useState(false);
   const [aiSummary, setAiSummary] = useState(MOCK_SUMMARY.aiSummary);
   const [soap, setSoap] = useState(MOCK_SUMMARY.soap);
+
+  useEffect(() => {
+    if (data) {
+      if (data.aiSummary) setAiSummary(data.aiSummary);
+      if (data.soap) setSoap(data.soap);
+    }
+  }, [data]);
 
   const cols = ["Subjective", "Objective", "Assessment", "Plan"];
   const keys = ["subjective", "objective", "assessment", "plan"];

@@ -5,3 +5,7 @@ output*.json
 *.env
 .env.*
 .DS_Store
+backend/medical.db
+*.db
+/backend/uploads
+backend/medical.db
