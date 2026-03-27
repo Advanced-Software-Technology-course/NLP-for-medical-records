@@ -4,9 +4,6 @@ from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from models import Consultation, db
 
-# Add project root to sys.path so we can import 'pipeline'
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-
 try:
     from pipeline.medical_pipeline import transcribe_audio, summarize_transcript, summarize_soap_notes
 except ImportError as e:
@@ -45,8 +42,6 @@ def process_audio():
             groq_token = current_app.config.get('GROQ_TOKEN')
 
             if not gladia_token or not groq_token:
-               # Depending on setup, tokens might be critical or optional for mocking
-               # For now, warn but proceed if mocking
                print("Warning: Missing API tokens.")
 
             # 1. Transcribe
