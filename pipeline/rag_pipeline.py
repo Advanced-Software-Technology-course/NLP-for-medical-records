@@ -2,6 +2,7 @@ import csv
 import hashlib
 import json
 import os
+import re
 import shutil
 from typing import Optional, List
 
@@ -15,7 +16,6 @@ try:
 except ImportError:
     from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-
 DEFAULT_KB_PATH = "../data/knowledge_base"
 DEFAULT_CHROMA_PATH = "../data/chroma_db"
 DEFAULT_EMBED_MODEL = "all-MiniLM-L6-v2"
@@ -23,6 +23,102 @@ DEFAULT_CHUNK_SIZE = 1000
 DEFAULT_CHUNK_OVERLAP = 200
 DEFAULT_BATCH_SIZE = 500
 MANIFEST_NAME = "rag_manifest.json"
+ICD_LINE_RE = re.compile(
+    r"^\s*([A-TV-Z][0-9][0-9A-Z](?:\.[0-9A-Z]{1,4})?)\s*:\s+(.+)$"
+)
+
+KNOWN_MED_ABBREV_RE = re.compile(
+    r"\b(EKG|EEG|MRI|CT|UH|BP|HR|RR|SpO2|BMI|BNO|Hgb|WBC|RBC|CRP|PCT|INR|TSH|T3|T4|"
+    r"COPD|HTN|DM|CHF|MI|PE|DVT|UTI|GERD)\b",
+    re.IGNORECASE,
+)
+
+LATIN_MED_SUFFIX_RE = re.compile(
+    r"\b\w*(?:itis|osis|emia|uria|ectomy|otomy|plasty|scopy|algia|pathy|logy|graphy|metry|"
+    r"oma|ase|ine|ae|oe|yx|ix)\w*\b",
+    re.IGNORECASE,
+)
+
+
+def _extract_medical_candidates_local(text: str, max_terms: int = 40) -> List[str]:
+    candidates = []
+    seen = set()
+
+    def _add(token: str):
+        t = token.strip()
+        if len(t) < 3:
+            return
+        key = t.lower()
+        if key in seen:
+            return
+        seen.add(key)
+        candidates.append(t)
+
+    for m in KNOWN_MED_ABBREV_RE.finditer(text):
+        _add(m.group(0).upper())
+
+    for m in LATIN_MED_SUFFIX_RE.finditer(text):
+        _add(m.group(0).lower())
+
+    for m in re.finditer(r"\b[a-zA-Z\u00C0-\u017F]{8,}\b", text):
+        _add(m.group(0).lower())
+
+    return candidates[:max_terms]
+
+def _is_icd_like_line(line: str) -> bool:
+    return bool(ICD_LINE_RE.match((line or "").strip()))
+
+def _prepare_txt_documents(txt_docs: List[Document]) -> List[Document]:
+    prepared: List[Document] = []
+
+    for doc in txt_docs:
+        content = doc.page_content or ""
+        lines = [ln.strip() for ln in content.splitlines() if ln.strip()]
+        if not lines:
+            continue
+
+        source = str(doc.metadata.get("source", ""))
+        source_name = os.path.basename(source).lower()
+
+        icd_hits = [(idx, ln) for idx, ln in enumerate(lines) if _is_icd_like_line(ln)]
+        icd_ratio = (len(icd_hits) / len(lines)) if lines else 0.0
+
+        # Treat known ICD files OR ICD-dense docs as code lists.
+        is_icd_doc = ("icd" in source_name or source_name.endswith("icd10_codes.txt") or (len(icd_hits) >= 8 and icd_ratio >= 0.25))
+
+        if is_icd_doc and icd_hits:
+            for idx, line in icd_hits:
+                md = dict(doc.metadata)
+                md["doc_type"] = "icd_code"
+                md["line_index"] = idx
+                prepared.append(Document(page_content=line, metadata=md))
+        else:
+            prepared.append(doc)
+
+    return prepared
+
+def _tokenize_for_overlap(text: str) -> set:
+    return set(
+    re.findall(r"[a-zA-Z0-9\u00C0-\u017F]{3,}", (text or "").lower())
+    )
+
+def _lexical_overlap_ratio(query_text: str, doc_text: str) -> float:
+    q = _tokenize_for_overlap(query_text)
+    d = _tokenize_for_overlap(doc_text)
+    if not q or not d:
+        return 0.0
+    return len(q.intersection(d)) / len(q)
+
+
+def _truncate_snippet(text: str, max_chars: int) -> str:
+    compact = re.sub(r"\s+", " ", (text or "")).strip()
+    if len(compact) <= max_chars:
+        return compact
+
+    cut = compact[:max_chars]
+    if " " in cut:
+        cut = cut.rsplit(" ", 1)[0]
+    return cut + " ..."
 
 
 def _normalize_whitelist(csv_whitelist: Optional[List[str]]) -> List[str]:
@@ -250,25 +346,30 @@ def setup_knowledge_base(
         loader_cls=TextLoader,
         loader_kwargs={"encoding": "utf-8"},
     )
-    txt_docs = txt_loader.load()
-    if txt_docs:
-        print(f"[RAG] Loaded {len(txt_docs)} .txt file(s)")
+    txt_docs_raw = txt_loader.load()
+    txt_docs = _prepare_txt_documents(txt_docs_raw)
 
+    if txt_docs:
+        print(f"[RAG] Loaded {len(txt_docs_raw)} .txt file(s), prepared {len(txt_docs)} txt documents")
     csv_docs = load_csv_documents(kb_path=kb_path, limit=rag_limit, only=csv_whitelist)
 
     if not txt_docs and not csv_docs:
         print("[RAG] No documents found in knowledge base - RAG disabled.")
         return None
 
+    # ICD docs are already concise one-line docs; only chunk non-ICD docs.
+    icd_docs = [d for d in txt_docs if d.metadata.get("doc_type") == "icd_code"]
+    normal_txt_docs = [d for d in txt_docs if d.metadata.get("doc_type") != "icd_code"]
+
     txt_splits: List[Document] = []
-    if txt_docs:
+    if normal_txt_docs:
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
         )
-        txt_splits = splitter.split_documents(txt_docs)
+        txt_splits.extend(splitter.split_documents(normal_txt_docs))
 
-    print(f"[RAG] Embedding {len(txt_splits)} txt chunks + {len(csv_docs)} CSV rows...")
+    txt_splits.extend(icd_docs)
 
     if os.path.exists(chroma_path):
         shutil.rmtree(chroma_path)
@@ -316,16 +417,201 @@ def setup_knowledge_base(
 
     return vectorstore
 
+SYMPTOM_KEYWORDS = {
+    # EN
+    "pain", "fever", "cough", "headache", "nausea", "vomiting", "dizziness",
+    "fatigue", "rash", "diarrhea", "constipation", "chills", "dyspnea",
+    "shortness of breath", "chest pain", "abdominal pain", "sore throat",
+    # HU
+    "fajdalom", "laz", "kohoges", "fejfajas", "hanyinger", "hanyas",
+    "szedules", "faradtsag", "kiutes", "hasmenes", "szekrekedes", "hidegrazas",
+    "nehezlegzes", "mellkasi fajdalom", "hasi fajdalom", "torokfajas",
+}
 
-def get_relevant_context(query: str, vectorstore, k: int = 3) -> str:
+
+def _strip_speaker_tags(text: str) -> str:
+    return re.sub(r"\bSPEAKER_\d+:\s*", "", text, flags=re.IGNORECASE)
+
+
+def _norm_space(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _extract_chief_complaint(text: str, max_len: int = 280) -> str:
+    # Use first non-empty lines as a proxy for chief complaint.
+    lines = [_norm_space(x) for x in text.splitlines() if _norm_space(x)]
+    if not lines:
+        return ""
+    complaint = " ".join(lines[:2])
+    return complaint[:max_len].strip()
+
+
+def _extract_symptom_sentences(text: str, max_items: int = 4) -> list[str]:
+    sentences = re.split(r"[.!?\n;]+", text)
+    out = []
+    seen = set()
+
+    for s in sentences:
+        s_clean = _norm_space(s)
+        if not s_clean:
+            continue
+        low = s_clean.lower()
+        if any(k in low for k in SYMPTOM_KEYWORDS):
+            key = low[:200]
+            if key not in seen:
+                seen.add(key)
+                out.append(s_clean[:220])
+        if len(out) >= max_items:
+            break
+
+    return out
+
+
+def _extract_medical_entities(text: str, max_terms: int = 12) -> list[str]:
+    candidates = _extract_medical_candidates_local(text, max_terms=max_terms * 3)
+
+    # Deduplicate while keeping order, and remove tiny/noisy tokens.
+    out = []
+    seen = set()
+    for c in candidates:
+        token = _norm_space(c)
+        if len(token) < 3:
+            continue
+        key = token.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(token)
+        if len(out) >= max_terms:
+            break
+    return out
+
+
+def build_retrieval_queries(transcript: str, max_queries: int = 8) -> list[str]:
+    clean = _strip_speaker_tags(transcript)
+    clean = _norm_space(clean)
+
+    queries = []
+
+    complaint = _extract_chief_complaint(clean)
+    if complaint:
+        queries.append(f"chief complaint: {complaint}")
+
+    symptom_sentences = _extract_symptom_sentences(clean, max_items=4)
+    for s in symptom_sentences:
+        queries.append(f"symptoms: {s}")
+
+    entities = _extract_medical_entities(clean, max_terms=12)
+    if entities:
+        queries.append("medical entities: " + ", ".join(entities[:8]))
+
+    # Keep a short fallback semantic query, not the whole transcript.
+    if clean:
+        queries.append(clean[:700])
+
+    # Stable dedupe
+    uniq = []
+    seen = set()
+    for q in queries:
+        key = q.lower().strip()
+        if key and key not in seen:
+            seen.add(key)
+            uniq.append(q)
+
+    return uniq[:max_queries]
+
+
+
+"""
+Gets relevant context from the RAG vectorstore based on the transcript query, using a hybrid semantic + lexical scoring of retrieved documents. The retrieval queries are built by decomposing the transcript into chief complaint, symptom sentences, and medical entities, to improve recall of relevant information from the knowledge base. The final context is a concatenation of the top-ranked documents, which can then be fed into the LLM for response generation or enrichment.
+
+"""
+
+
+def get_relevant_context(
+    query: str,
+    vectorstore,
+    final_k: int = 5,
+    retrieve_k: int = 12,
+    max_queries: int = 8,
+    min_lexical_overlap: float = 0.10,
+    max_chars_per_snippet: int = 280,
+) -> str:
     if vectorstore is None:
         return ""
-    results = vectorstore.similarity_search(query, k=k)
-    if not results:
+
+    final_k = max(3, min(5, int(final_k)))
+
+    retrieval_queries = build_retrieval_queries(query, max_queries=max_queries)
+    if not retrieval_queries:
         return ""
-    return "\n\n".join([doc.page_content for doc in results])
 
+    merged = {}
 
+    for rq in retrieval_queries:
+        try:
+            scored = vectorstore.similarity_search_with_score(rq, k=retrieve_k)
+            docs_with_rank = [(doc, rank) for rank, (doc, _score) in enumerate(scored)]
+        except Exception:
+            docs = vectorstore.similarity_search(rq, k=retrieve_k)
+            docs_with_rank = [(doc, rank) for rank, doc in enumerate(docs)]
+
+        for doc, rank in docs_with_rank:
+            lex = _lexical_overlap_ratio(rq, doc.page_content)
+            if lex < min_lexical_overlap:
+                continue
+
+            source = doc.metadata.get("source", "unknown")
+            row = doc.metadata.get("row", -1)
+            line_index = doc.metadata.get("line_index", -1)
+            key = f"{source}|{row}|{line_index}|{hash(doc.page_content)}"
+
+            semantic_rrf = 1.0 / (rank + 1.0)
+
+            if key not in merged:
+                merged[key] = {
+                    "doc": doc,
+                    "hits": 1,
+                    "rrf_sum": semantic_rrf,
+                    "lex_max": lex,
+                    "best_rank": rank,
+                }
+            else:
+                item = merged[key]
+                item["hits"] += 1
+                item["rrf_sum"] += semantic_rrf
+                item["lex_max"] = max(item["lex_max"], lex)
+                item["best_rank"] = min(item["best_rank"], rank)
+
+    if not merged:
+        return ""
+
+    max_hits = max(item["hits"] for item in merged.values())
+
+    ranked = sorted(
+        merged.values(),
+        key=lambda item: (
+            0.60 * item["rrf_sum"]
+            + 0.30 * item["lex_max"]
+            + 0.10 * (item["hits"] / max_hits)
+        ),
+        reverse=True,
+    )
+
+    snippets = []
+    seen_text = set()
+
+    for item in ranked:
+        snippet = _truncate_snippet(item["doc"].page_content, max_chars_per_snippet)
+        key = snippet.lower()
+        if not snippet or key in seen_text:
+            continue
+        seen_text.add(key)
+        snippets.append(snippet)
+        if len(snippets) >= final_k:
+            break
+
+    return "\n\n".join(snippets)
 def build_context_block(rag_context: str, enrich_context: str) -> str:
     parts = []
 

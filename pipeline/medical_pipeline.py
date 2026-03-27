@@ -4,22 +4,19 @@ Medical Consultation Transcription & Summarization Pipeline
 Uses:
   - Gladia API for transcription + diarization
   - Groq (Llama 3.3 70B) via OpenAI API for summarization
-  - ChromaDB + HuggingFace Embeddings for RAG
-  - Super55 cache for medical term enrichment & abbreviation expansion
+    - ChromaDB + HuggingFace Embeddings for RAG
 
 Requirements:
-    pip install openai requests langchain langchain-community langchain-huggingface chromadb sentence-transformers beautifulsoup4
+    pip install openai requests langchain langchain-community langchain-huggingface chromadb sentence-transformers
 
 Usage:
     python medical_pipeline.py --audio ../data/test_audio/test_audio.mp3
     python medical_pipeline.py --transcript ../data/test_transcripts/test_transcript_en.txt
     python medical_pipeline.py --transcript ... --no-rag
-    python medical_pipeline.py --transcript ... --no-enrich   # skip super55 enrichment
     python medical_pipeline.py --transcript ... --rebuild-rag  # force rebuild of ChromaDB vectorstore
 """
 
 import sys
-import csv
 import requests
 import argparse
 import json
@@ -29,14 +26,10 @@ import mimetypes
 from openai import OpenAI
 
 from rag_pipeline import (
-setup_knowledge_base,
-get_relevant_context,
-build_context_block,
+    setup_knowledge_base,
+    get_relevant_context,
+    build_context_block,
 )
-
-
-# ── Medical Term Enrichment (super55 cache + abbreviation expansion) ──────────
-from medical_term_enrichment import MedicalTermEnricher
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 
@@ -46,19 +39,6 @@ RAG_LIMIT    = None   # set via --rag-limit; None = load everything
 CSV_WHITELIST = [     # filenames to include in RAG; empty list = load all
     "webbeteg_fogalomtar.csv",
 ]
-
-# Enricher is a singleton — initialised once, reused across all steps
-_enricher: MedicalTermEnricher | None = None
-
-def get_enricher() -> MedicalTermEnricher:
-    global _enricher
-    if _enricher is None:
-        _enricher = MedicalTermEnricher(
-            db_path="../data/super55_cache.db",
-            request_delay=2.5,
-            max_live_lookups=20,   # max live fetches per pipeline run
-        )
-    return _enricher
 
 # ── PROMPT TEMPLATES ──────────────────────────────────────────────────────────
 
@@ -216,34 +196,17 @@ def load_transcript(transcript_path: str) -> str:
     print(f"Loaded ({len(transcript)} characters)\n")
     return transcript
 
-# ── ENRICHMENT ────────────────────────────────────────────────────────────────
-
-def enrich_transcript(transcript: str) -> str:
-    """
-    Step 2: Extract medical terms from the transcript, look up unknowns
-    on super55 (cache-first), and return a formatted context block.
-    """
-    print("── Step 2/4: Medical Term Enrichment ──")
-    enricher = get_enricher()
-    context = enricher.build_rag_context(transcript)
-    if context:
-        print(f"[Enricher] Built context ({len(context)} chars)\n")
-    else:
-        print("[Enricher] No enrichment context generated.\n")
-    return context
-
 # ── SUMMARIZATION ─────────────────────────────────────────────────────────────
 
 def summarize_transcript(
     transcript: str,
     groq_token: str,
-    rag_context: str = "",
-    enrich_context: str = ""
+    rag_context: str = ""
 ) -> str:
     print("── Step 3/4: Summary ──")
     client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
 
-    context_block = build_context_block(rag_context, enrich_context)
+    context_block = build_context_block(rag_context, "")
     prompt = SUMMARY_PROMPT_TEMPLATE.format(
         transcript=transcript,
         context_block=context_block
@@ -258,10 +221,6 @@ def summarize_transcript(
 
     summary = response.choices[0].message.content.strip()
 
-    # Post-process: expand any abbreviations the LLM used
-    enricher = get_enricher()
-    summary = enricher.expand_abbreviations(summary)
-
     print("Summary complete.\n")
     return summary
 
@@ -269,13 +228,12 @@ def summarize_transcript(
 def summarize_soap_notes(
     transcript: str,
     groq_token: str,
-    rag_context: str = "",
-    enrich_context: str = ""
+    rag_context: str = ""
 ) -> str:
     print("── Step 4/4: SOAP Notes ──")
     client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
 
-    context_block = build_context_block(rag_context, enrich_context)
+    context_block = build_context_block(rag_context, "")
     prompt = SOAP_PROMPT_TEMPLATE.format(
         transcript=transcript,
         context_block=context_block
@@ -290,10 +248,6 @@ def summarize_soap_notes(
 
     soap_notes = response.choices[0].message.content.strip()
 
-    # Post-process: expand any abbreviations the LLM used
-    enricher = get_enricher()
-    soap_notes = enricher.expand_abbreviations(soap_notes)
-
     print("SOAP notes complete.\n")
     return soap_notes
 
@@ -303,7 +257,6 @@ def save_output(
     transcript: str,
     summary: str,
     soap_notes: str,
-    enrich_context: str = "",
     output_path: str = "../output.json",
     sentence_confidences: list | None = None,
     transcription_confidence_avg: float | None = None,
@@ -312,7 +265,6 @@ def save_output(
         "transcript": transcript,
         "summary": summary,
         "soap_notes": soap_notes,
-        "term_enrichment": enrich_context,
         "transcription_confidence_avg": transcription_confidence_avg,
         "transcription_confidence_avg_percent": (
             round(transcription_confidence_avg * 100, 1)
@@ -335,7 +287,6 @@ def main():
                         help="Path to existing transcript — skips transcription")
     parser.add_argument("--output",     type=str, default="../output.json")
     parser.add_argument("--no-rag",     action="store_true", help="Disable ChromaDB RAG")
-    parser.add_argument("--no-enrich",  action="store_true", help="Disable super55 term enrichment")
     parser.add_argument("--rag-limit",   type=int, default=None,
                         help="Cap CSV rows per file for RAG (e.g. 500 for quick testing)")
     parser.add_argument("--rebuild-rag", action="store_true", help="Force rebuild Chroma index even if manifest matches")
@@ -364,18 +315,11 @@ def main():
         transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(
             args.audio, gladia_token=gladia_token
         )
-    # ── Step 2: Enrichment (super55 cache) ────────────────────────────────────
-    enrich_context = ""
-    if not args.no_enrich:
-        enrich_context = enrich_transcript(transcript)
-    else:
-        print("[Enricher] Skipped (--no-enrich)\n")
-
-    # ── Step 3: ChromaDB RAG ──────────────────────────────────────────────────
+    # ── Step 2: ChromaDB RAG ──────────────────────────────────────────────────
     rag_context = ""
     if not args.no_rag:
-        vectorstore = setup_knowledge_base(rag_limit=args.rag_limit, rebuild=args.rebuild_rag, whitelist=CSV_WHITELIST, kb_path=KB_PATH, chroma_path=CHROMA_PATH)
-        rag_context = get_relevant_context(transcript, vectorstore)
+        vectorstore = setup_knowledge_base(rag_limit=args.rag_limit, force_rebuild=args.rebuild_rag, csv_whitelist=CSV_WHITELIST, kb_path=KB_PATH, chroma_path=CHROMA_PATH)
+        rag_context = get_relevant_context(transcript, vectorstore, final_k=5, retrieve_k=12, max_queries=8)
         if rag_context:
             print(f"[RAG] Retrieved {len(rag_context)} chars of context.\n")
         else:
@@ -383,26 +327,23 @@ def main():
     else:
         print("[RAG] Skipped (--no-rag)\n")
 
-    # ── Step 4: Summary ───────────────────────────────────────────────────────
+    # ── Step 3: Summary ───────────────────────────────────────────────────────
     summary = summarize_transcript(
         transcript, groq_token,
-        rag_context=rag_context,
-        enrich_context=enrich_context
+        rag_context=rag_context
     )
 
-    # ── Step 5: SOAP Notes ────────────────────────────────────────────────────
+    # ── Step 4: SOAP Notes ────────────────────────────────────────────────────
     soap_notes = summarize_soap_notes(
         transcript, groq_token,
-        rag_context=rag_context,
-        enrich_context=enrich_context
+        rag_context=rag_context
     )
 
-    # ── Step 6: Save & Print ──────────────────────────────────────────────────
+    # ── Step 5: Save & Print ──────────────────────────────────────────────────
     save_output(
         transcript=transcript,
         summary=summary,
         soap_notes=soap_notes,
-        enrich_context=enrich_context,
         output_path=args.output,
         sentence_confidences=sentence_confidences,
         transcription_confidence_avg=transcription_confidence_avg
