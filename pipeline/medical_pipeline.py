@@ -15,6 +15,7 @@ Usage:
     python medical_pipeline.py --transcript ../data/test_transcripts/test_transcript_en.txt
     python medical_pipeline.py --transcript ... --no-rag
     python medical_pipeline.py --transcript ... --no-enrich   # skip super55 enrichment
+    python medical_pipeline.py --transcript ... --rebuild-rag  # force rebuild of ChromaDB vectorstore
 """
 
 import sys
@@ -27,18 +28,12 @@ import time
 import mimetypes
 from openai import OpenAI
 
-# RAG Imports
-from langchain_community.document_loaders import DirectoryLoader, TextLoader
-from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_core.documents import Document
+from rag_pipeline import (
+setup_knowledge_base,
+get_relevant_context,
+build_context_block,
+)
 
-try:
-    # langchain >= 0.2
-    from langchain_text_splitters import RecursiveCharacterTextSplitter
-except ImportError:
-    # langchain < 0.2 fallback
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # ── Medical Term Enrichment (super55 cache + abbreviation expansion) ──────────
 from medical_term_enrichment import MedicalTermEnricher
@@ -101,176 +96,17 @@ Transcript:
 
 SOAP Notes:"""
 
-# ── KNOWLEDGE BASE (RAG) ──────────────────────────────────────────────────────
-
-def load_csv_documents(kb_path: str, limit: int = None, only: list = None) -> list:
-    """
-    Walk kb_path for *.csv files and convert each row into a LangChain Document.
-
-    Supported CSV layouts (auto-detected by column names):
-      1. term + definition   e.g. orvosi_kifejezesek.csv
-      2. term + translation  e.g. webbeteg_fogalomtar.csv, super55 exports
-      3. Generic             all columns joined as "col: value" pairs
-
-    Each Document carries metadata: {"source": filename, "row": row_index}
-    """
-    docs = []
-
-    for root, _, files in os.walk(kb_path):
-        for fname in files:
-            if not fname.lower().endswith(".csv"):
-                continue
-
-            fpath = os.path.join(root, fname)
-            if only and fname not in only:
-                print(f"[RAG] Skipping CSV: {fname} (not in whitelist)")
-                continue
-            print(f"[RAG] Loading CSV: {fname}")
-            row_count = 0
-
-            with open(fpath, encoding="utf-8") as f:
-                reader = csv.DictReader(f)
-                fieldnames = reader.fieldnames or []
-                cols = [c.lower().strip() for c in fieldnames]
-
-                has_term        = "term" in cols
-                has_definition  = "definition" in cols
-                has_translation = "translation" in cols
-
-                for i, row in enumerate(reader):
-                    if limit and row_count >= limit:
-                        break
-                    if has_term and has_definition:
-                        term = row.get("term", "").strip()
-                        defn = row.get("definition", "").strip()
-                        if not term:
-                            continue
-                        text = f"term: {term}\ndefinition: {defn}"
-
-                    elif has_term and has_translation:
-                        term        = row.get("term", "").strip()
-                        translation = row.get("translation", "").strip()
-                        if not term:
-                            continue
-                        text = f"term: {term}\ntranslation: {translation}"
-
-                    else:
-                        parts = [f"{col}: {val.strip()}" for col, val in row.items() if val and val.strip()]
-                        if not parts:
-                            continue
-                        text = "\n".join(parts)
-
-                    docs.append(Document(
-                        page_content=text,
-                        metadata={"source": fname, "row": i}
-                    ))
-                    row_count += 1
-
-            print(f"[RAG]   -> {row_count} rows loaded from {fname}")
-
-    return docs
-
-
-def setup_knowledge_base(rag_limit: int = None):
-    """
-    Loads .txt AND .csv documents from KB_PATH, chunks them, and builds a
-    local ChromaDB vector store. Returns the vectorstore, or None if nothing found.
-
-    Supported files in KB_PATH (and subdirectories):
-      *.txt  plain text reference documents
-      *.csv  term/definition or term/translation tables (auto-detected)
-             e.g. orvosi_kifejezesek.csv, webbeteg_fogalomtar.csv
-    """
-    print(f"[RAG] Loading knowledge base from {KB_PATH}...")
-
-    if not os.path.exists(KB_PATH):
-        os.makedirs(KB_PATH)
-        print(f"[RAG] Created {KB_PATH} — add .txt / .csv reference files there.")
-        return None
-
-    # Load .txt files
-    txt_loader = DirectoryLoader(KB_PATH, glob="**/*.txt", loader_cls=TextLoader)
-    txt_docs   = txt_loader.load()
-    if txt_docs:
-        print(f"[RAG] Loaded {len(txt_docs)} .txt file(s)")
-
-    # Load .csv files
-    global RAG_LIMIT
-    if rag_limit is not None:
-        RAG_LIMIT = rag_limit
-    csv_docs = load_csv_documents(KB_PATH, limit=RAG_LIMIT, only=CSV_WHITELIST)
-
-    if not txt_docs and not csv_docs:
-        print("[RAG] No documents found in knowledge base — RAG disabled.")
-        return None
-
-    embedding_fn = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-
-    # .txt files: chunk normally then embed
-    txt_splits = []
-    if txt_docs:
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-        txt_splits = text_splitter.split_documents(txt_docs)
-
-    # CSV rows are already tiny (one term+definition per doc) — skip chunking,
-    # embed in batches of 500 to avoid memory/timeout issues with 30k+ rows
-    BATCH_SIZE = 500
-
-    print(f"[RAG] Embedding {len(txt_splits)} txt chunks + {len(csv_docs)} CSV rows...")
-
-    # Seed the vectorstore with txt chunks first (or first CSV batch if no txt)
-    first_batch = txt_splits if txt_splits else csv_docs[:BATCH_SIZE]
-    remaining   = csv_docs   if txt_splits else csv_docs[BATCH_SIZE:]
-
-    vectorstore = Chroma.from_documents(
-        documents=first_batch,
-        embedding=embedding_fn,
-        persist_directory=CHROMA_PATH
-    )
-
-    # Add CSV rows in batches
-    csv_start = 0 if txt_splits else BATCH_SIZE
-    total_csv = len(csv_docs)
-    for i in range(csv_start, total_csv, BATCH_SIZE):
-        batch = csv_docs[i : i + BATCH_SIZE]
-        vectorstore.add_documents(batch)
-        print(f"[RAG]   CSV batch {i // BATCH_SIZE + 1}/{(total_csv // BATCH_SIZE) + 1} done", end="\r")
-
-    print()  # newline after batch progress
-    print(
-        f"[RAG] Ready — {len(txt_splits)} txt chunks + {total_csv} CSV rows indexed.\n"
-    )
-    return vectorstore
-
-
-def get_relevant_context(query: str, vectorstore) -> str:
-    if vectorstore is None:
-        return ""
-    results = vectorstore.similarity_search(query, k=3)
-    if not results:
-        return ""
-    return "\n\n".join([doc.page_content for doc in results])
-
-
-def build_context_block(rag_context: str, enrich_context: str) -> str:
-    """
-    Merges ChromaDB RAG context and super55 term enrichment context
-    into a single prompt-ready block.
-    """
-    parts = []
-
-    if rag_context:
-        parts.append(f"Relevant medical reference information:\n{rag_context}")
-
-    if enrich_context:
-        parts.append(enrich_context)   # already formatted by MedicalTermEnricher
-
-    return "\n\n".join(parts) + "\n" if parts else ""
 
 # ── TRANSCRIPTION ─────────────────────────────────────────────────────────────
 
-def transcribe_audio(audio_path: str, gladia_token: str) -> str:
-    """Transcribe audio with diarization using Gladia API."""
+def transcribe_audio(audio_path: str, gladia_token: str):
+    """Transcribe audio with diarization using Gladia API.
+
+    Returns:
+      transcript: str
+      sentence_confidences: list[dict]
+      transcription_confidence_avg: float | None
+    """
     print("── Step 1/4: Transcription ──")
     print(f"Transcribing: {audio_path}")
 
@@ -329,21 +165,48 @@ def transcribe_audio(audio_path: str, gladia_token: str) -> str:
         time.sleep(3)
 
     utterances = result["result"]["transcription"].get("utterances", [])
+    sentence_confidences = []
+    transcription_confidence_avg = None
 
     if utterances:
-        lines = [f"SPEAKER_{utt['speaker']}: {utt['text'].strip()}" for utt in utterances]
+        lines = []
+        for i, utt in enumerate(utterances):
+            text = (utt.get("text") or "").strip()
+            if not text:
+                continue
+
+            speaker = utt.get("speaker")
+            conf = utt.get("confidence")
+            try:
+                conf = float(conf) if conf is not None else None
+            except (TypeError, ValueError):
+                conf = None
+
+            lines.append(f"SPEAKER_{speaker}: {text}")
+            sentence_confidences.append(
+                {
+                    "sentence_index": i,
+                    "speaker": speaker,
+                    "text": text,
+                    "confidence": conf,
+                    "confidence_percent": round(conf * 100, 1) if conf is not None else None,
+                    "start": utt.get("start"),
+                    "end": utt.get("end"),
+                }
+            )
+
         transcript = "\n".join(lines)
-        confidences = [utt.get("confidence") for utt in utterances if utt.get("confidence")]
+
+        confidences = [s["confidence"] for s in sentence_confidences if s["confidence"] is not None]
         if confidences:
-            avg = sum(confidences) / len(confidences)
-            print(f"Average transcription confidence: {avg * 100:.1f}%")
+            transcription_confidence_avg = sum(confidences) / len(confidences)
+            print(f"Average transcription confidence: {transcription_confidence_avg * 100:.1f}%")
     else:
         transcript = result["result"]["transcription"]["full_transcript"]
         print("Warning: no diarization data, using plain transcript.")
 
     print(f"Transcription complete ({len(transcript)} characters)\n")
-    return transcript
-
+    return transcript, sentence_confidences, transcription_confidence_avg
 
 def load_transcript(transcript_path: str) -> str:
     print("── Step 1/4: Load Transcript ──")
@@ -441,18 +304,26 @@ def save_output(
     summary: str,
     soap_notes: str,
     enrich_context: str = "",
-    output_path: str = "../output.json"
+    output_path: str = "../output.json",
+    sentence_confidences: list | None = None,
+    transcription_confidence_avg: float | None = None,
 ):
     output = {
-        "transcript":      transcript,
-        "summary":         summary,
-        "soap_notes":      soap_notes,
-        "term_enrichment": enrich_context,   # save what was injected for debugging
+        "transcript": transcript,
+        "summary": summary,
+        "soap_notes": soap_notes,
+        "term_enrichment": enrich_context,
+        "transcription_confidence_avg": transcription_confidence_avg,
+        "transcription_confidence_avg_percent": (
+            round(transcription_confidence_avg * 100, 1)
+            if transcription_confidence_avg is not None
+            else None
+        ),
+        "sentence_confidences": sentence_confidences or [],
     }
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     print(f"Output saved to: {output_path}")
-
 # ── MAIN ──────────────────────────────────────────────────────────────────────
 
 def main():
@@ -467,7 +338,7 @@ def main():
     parser.add_argument("--no-enrich",  action="store_true", help="Disable super55 term enrichment")
     parser.add_argument("--rag-limit",   type=int, default=None,
                         help="Cap CSV rows per file for RAG (e.g. 500 for quick testing)")
-
+    parser.add_argument("--rebuild-rag", action="store_true", help="Force rebuild Chroma index even if manifest matches")
     args = parser.parse_args()
 
     # Load API tokens
@@ -484,11 +355,15 @@ def main():
         sys.exit(1)
 
     # ── Step 1: Transcript ────────────────────────────────────────────────────
+    sentence_confidences = []
+    transcription_confidence_avg = None
+
     if args.transcript:
         transcript = load_transcript(args.transcript)
     else:
-        transcript = transcribe_audio(args.audio, gladia_token=gladia_token)
-
+        transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(
+            args.audio, gladia_token=gladia_token
+        )
     # ── Step 2: Enrichment (super55 cache) ────────────────────────────────────
     enrich_context = ""
     if not args.no_enrich:
@@ -499,7 +374,7 @@ def main():
     # ── Step 3: ChromaDB RAG ──────────────────────────────────────────────────
     rag_context = ""
     if not args.no_rag:
-        vectorstore = setup_knowledge_base(rag_limit=args.rag_limit)
+        vectorstore = setup_knowledge_base(rag_limit=args.rag_limit, rebuild=args.rebuild_rag, whitelist=CSV_WHITELIST, kb_path=KB_PATH, chroma_path=CHROMA_PATH)
         rag_context = get_relevant_context(transcript, vectorstore)
         if rag_context:
             print(f"[RAG] Retrieved {len(rag_context)} chars of context.\n")
@@ -523,7 +398,15 @@ def main():
     )
 
     # ── Step 6: Save & Print ──────────────────────────────────────────────────
-    save_output(transcript, summary, soap_notes, enrich_context, output_path=args.output)
+    save_output(
+        transcript=transcript,
+        summary=summary,
+        soap_notes=soap_notes,
+        enrich_context=enrich_context,
+        output_path=args.output,
+        sentence_confidences=sentence_confidences,
+        transcription_confidence_avg=transcription_confidence_avg
+    )
 
     print("=" * 60)
     print("\nTRANSCRIPT:")
