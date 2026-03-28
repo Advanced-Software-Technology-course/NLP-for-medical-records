@@ -1,7 +1,12 @@
 .api_token.json
 __pycache__/
 *.pyc
-output*.json
 *.env
 .env.*
 .DS_Store
+venv/
+*.bin
+uploads/
+output.json
+data/chroma_db/
+*.sqlite3
