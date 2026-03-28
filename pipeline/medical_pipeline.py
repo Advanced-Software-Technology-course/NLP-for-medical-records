@@ -305,6 +305,9 @@ def main():
         print("Gladia API token missing.")
         sys.exit(1)
 
+    run_time_start = time.time()
+    print(f"Pipeline started at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(run_time_start))}\n")
+
     # ── Step 1: Transcript ────────────────────────────────────────────────────
     sentence_confidences = []
     transcription_confidence_avg = None
@@ -359,6 +362,10 @@ def main():
     print(soap_notes)
     print("=" * 60)
 
+    run_time_end = time.time()
+    duration = run_time_end - run_time_start
+    print(f"\nPipeline completed at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(run_time_end))}")
+    print(f"\nDuration: {duration:.1f} seconds.")
 
 if __name__ == "__main__":
     main()

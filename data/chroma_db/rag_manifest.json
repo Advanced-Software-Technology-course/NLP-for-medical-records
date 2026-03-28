@@ -1,0 +1,6 @@
+{
+  "fingerprint": "403b35d8cf27d4d8c0a67a74ad6eb9dde31844714ecabffa30a5fd0a2cc18e8e",
+  "indexed_at_epoch": 1774641017,
+  "kb_path": "../data/knowledge_base",
+  "chroma_path": "../data/chroma_db"
+}
