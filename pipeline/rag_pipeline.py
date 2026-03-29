@@ -21,7 +21,7 @@ DEFAULT_CHROMA_PATH = "../data/chroma_db"
 DEFAULT_EMBED_MODEL = "all-MiniLM-L6-v2"
 DEFAULT_CHUNK_SIZE = 1000
 DEFAULT_CHUNK_OVERLAP = 200
-DEFAULT_BATCH_SIZE = 500
+DEFAULT_BATCH_SIZE = 2000
 MANIFEST_NAME = "rag_manifest.json"
 ICD_LINE_RE = re.compile(
     r"^\s*([A-TV-Z][0-9][0-9A-Z](?:\.[0-9A-Z]{1,4})?)\s*:\s+(.+)$"
@@ -38,6 +38,54 @@ LATIN_MED_SUFFIX_RE = re.compile(
     r"oma|ase|ine|ae|oe|yx|ix)\w*\b",
     re.IGNORECASE,
 )
+
+
+def _build_embedding_function(embedding_model: str = DEFAULT_EMBED_MODEL):
+    """Create embedding function and return (embedding_fn, effective_model_name)."""
+    if embedding_model == DEFAULT_EMBED_MODEL:
+        # Prefer a biomedical model when available.
+        preferred_model = "NeuML/pubmedbert-base-embeddings"
+        try:
+            embedding_fn = HuggingFaceEmbeddings(model_name=preferred_model)
+            return embedding_fn, preferred_model
+        except Exception:
+            pass
+
+    embedding_fn = HuggingFaceEmbeddings(model_name=embedding_model)
+    return embedding_fn, embedding_model
+
+
+def load_existing_vectorstore(
+    chroma_path: str = DEFAULT_CHROMA_PATH,
+    embedding_model: str = DEFAULT_EMBED_MODEL,
+):
+    """Load an existing Chroma index from disk without triggering any rebuild.
+
+    Returns None if the path does not exist, cannot be loaded, or has zero vectors.
+    """
+    if not os.path.exists(chroma_path):
+        print(f"[RAG] No existing Chroma directory at: {chroma_path}")
+        return None
+
+    try:
+        embedding_fn, effective_embedding_model = _build_embedding_function(embedding_model)
+        vectorstore = Chroma(
+            persist_directory=chroma_path,
+            embedding_function=embedding_fn,
+        )
+        doc_count = _vectorstore_count(vectorstore)
+        if doc_count <= 0:
+            print("[RAG] Existing Chroma index is empty.")
+            return None
+
+        print(
+            f"[RAG] Loaded existing Chroma index ({doc_count} vectors) "
+            f"using embeddings: {effective_embedding_model}"
+        )
+        return vectorstore
+    except Exception as ex:
+        print(f"[RAG] Failed to load existing Chroma index: {ex}")
+        return None
 
 
 def _extract_medical_candidates_local(text: str, max_terms: int = 40) -> List[str]:
@@ -68,6 +116,74 @@ def _extract_medical_candidates_local(text: str, max_terms: int = 40) -> List[st
 def _is_icd_like_line(line: str) -> bool:
     return bool(ICD_LINE_RE.match((line or "").strip()))
 
+DRUG_SECTION_RE = re.compile(
+    r"^(Indications|Dosage|Warnings|Contraindications|Interactions.*?):\s*",
+    re.IGNORECASE
+)
+DRUG_HEADER_RE = re.compile(r"^===\s*(.+?)\s*===$")
+
+def _prepare_drug_documents(doc: Document) -> List[Document]:
+    """
+    Parse drugs.txt into one Document per (drug, section),
+    deduplicating repeated label text within each section.
+    """
+    content = doc.page_content
+    out = []
+    current_drug = None
+    current_section = None
+    current_lines = []
+
+    def _flush():
+        if not current_drug or not current_lines:
+            return
+        # Deduplicate sentences within this section
+        seen_sentences = set()
+        unique_lines = []
+        for line in current_lines:
+            # Split on sentence boundaries
+            for sent in re.split(r'(?<=[.!?])\s+', line):
+                s = sent.strip()
+                if not s:
+                    continue
+                key = re.sub(r'\s+', ' ', s.lower())
+                if key not in seen_sentences:
+                    seen_sentences.add(key)
+                    unique_lines.append(s)
+        if not unique_lines:
+            return
+        text = f"drug: {current_drug}\nsection: {current_section}\n" + " ".join(unique_lines)
+        out.append(Document(
+            page_content=text,
+            metadata={**doc.metadata, "drug": current_drug, "section": current_section, "doc_type": "drug_monograph"},
+        ))
+
+    for raw_line in content.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        header_m = DRUG_HEADER_RE.match(line)
+        if header_m:
+            _flush()
+            current_drug = header_m.group(1)
+            current_section = None
+            current_lines = []
+            continue
+        section_m = DRUG_SECTION_RE.match(line)
+        if section_m and current_drug:
+            _flush()
+            current_section = section_m.group(1).strip()
+            # Section body is the rest of the line after "SectionName: "
+            rest = line[section_m.end():].strip()
+            current_lines = [rest] if rest else []
+            continue
+        if current_drug:
+            current_lines.append(line)
+
+    _flush()
+    return out
+
+
+
 def _prepare_txt_documents(txt_docs: List[Document]) -> List[Document]:
     prepared: List[Document] = []
 
@@ -79,6 +195,11 @@ def _prepare_txt_documents(txt_docs: List[Document]) -> List[Document]:
 
         source = str(doc.metadata.get("source", ""))
         source_name = os.path.basename(source).lower()
+        is_drug_doc = "drug" in source_name  # drugs.txt, drug_list.txt, etc.
+
+        if is_drug_doc:
+            prepared.extend(_prepare_drug_documents(doc))
+            continue
 
         icd_hits = [(idx, ln) for idx, ln in enumerate(lines) if _is_icd_like_line(ln)]
         icd_ratio = (len(icd_hits) / len(lines)) if lines else 0.0
@@ -96,6 +217,18 @@ def _prepare_txt_documents(txt_docs: List[Document]) -> List[Document]:
             prepared.append(doc)
 
     return prepared
+
+LAB_TRIGGER_RE = re.compile(
+    r"\b(CBC|WBC|RBC|Hgb|Hct|MCV|PLT|CRP|ESR|TSH|T3|T4|INR|PT|PTT|"
+    r"ALT|AST|GGT|ALP|LDH|BUN|creatinine|eGFR|HbA1c|glucose|sodium|"
+    r"potassium|chloride|bicarbonate|calcium|magnesium|phosphate|"
+    r"albumin|bilirubin|troponin|BNP|procalcitonin|ferritin|"
+    r"lab|result|reference\s+range|normal\s+range|level[s]?)\b",
+    re.IGNORECASE,
+)
+
+def _transcript_mentions_labs(transcript: str) -> bool:
+    return bool(LAB_TRIGGER_RE.search(transcript))
 
 def _tokenize_for_overlap(text: str) -> set:
     return set(
@@ -233,6 +366,9 @@ def load_csv_documents(kb_path: str, limit: Optional[int] = None, only: Optional
             print(f"[RAG] Loading CSV: {fname}")
             row_count = 0
 
+            is_ddi = fname == "DDI_data_clean.csv"
+            seen_ddi = set()  # reset per file
+
             with open(fpath, encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 fieldnames = reader.fieldnames or []
@@ -246,7 +382,25 @@ def load_csv_documents(kb_path: str, limit: Optional[int] = None, only: Optional
                     if limit is not None and row_count >= limit:
                         break
 
-                    if has_term and has_definition:
+                    if is_ddi:
+                        d1 = (row.get("drug1_name") or "").strip().lower()
+                        d2 = (row.get("drug2_name") or "").strip().lower()
+                        itype = (row.get("interaction_type") or "").strip().lower()
+                        if not d1 or not d2 or not itype:
+                            continue
+                        if d1 == d2 or len(d1) < 3 or len(d2) < 3:
+                            continue
+
+
+                        a, b = sorted((d1, d2))
+                        ddi_key = (a, b)
+                        if ddi_key in seen_ddi:
+                            continue
+                        seen_ddi.add(ddi_key)
+
+                        text = f"drug_pair: {a} + {b}\ninteraction: {itype}"
+
+                    elif has_term and has_definition:
                         term = (row.get("term") or "").strip()
                         definition = (row.get("definition") or "").strip()
                         if not term:
@@ -282,7 +436,6 @@ def load_csv_documents(kb_path: str, limit: Optional[int] = None, only: Optional
 
     return docs
 
-
 def setup_knowledge_base(
     rag_limit: Optional[int] = None,
     kb_path: str = DEFAULT_KB_PATH,
@@ -292,7 +445,7 @@ def setup_knowledge_base(
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
     batch_size: int = DEFAULT_BATCH_SIZE,
-    force_rebuild: bool = False,
+    force_rebuild: bool = False
 ):
     print(f"[RAG] Loading knowledge base from {kb_path}...")
 
@@ -301,13 +454,15 @@ def setup_knowledge_base(
         print(f"[RAG] Created {kb_path} - add .txt / .csv reference files there.")
         return None
 
-    embedding_fn = HuggingFaceEmbeddings(model_name=embedding_model)
+    # Choose an embedding model once and use the same effective model in the
+    # fingerprint so unchanged inputs reliably reuse the existing index.
+    embedding_fn, effective_embedding_model = _build_embedding_function(embedding_model)
 
     current_fingerprint = _build_fingerprint(
         kb_path=kb_path,
         csv_whitelist=csv_whitelist,
         rag_limit=rag_limit,
-        embedding_model=embedding_model,
+        embedding_model=effective_embedding_model,
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
         batch_size=batch_size,
@@ -327,7 +482,7 @@ def setup_knowledge_base(
             )
             doc_count = _vectorstore_count(vectorstore)
             if doc_count > 0:
-                print(f"[RAG] Reusing existing Chroma index ({doc_count} vectors).")
+                print(f"[RAG] Reusing existing Chroma index ({doc_count} vectors). No source changes detected.")
                 return vectorstore
             print("[RAG] Existing index is empty. Rebuilding...")
         except Exception as ex:
@@ -358,8 +513,9 @@ def setup_knowledge_base(
         return None
 
     # ICD docs are already concise one-line docs; only chunk non-ICD docs.
-    icd_docs = [d for d in txt_docs if d.metadata.get("doc_type") == "icd_code"]
-    normal_txt_docs = [d for d in txt_docs if d.metadata.get("doc_type") != "icd_code"]
+    icd_docs        = [d for d in txt_docs if d.metadata.get("doc_type") == "icd_code"]
+    drug_docs       = [d for d in txt_docs if d.metadata.get("doc_type") == "drug_monograph"]
+    normal_txt_docs = [d for d in txt_docs if d.metadata.get("doc_type") not in ("icd_code", "drug_monograph")]
 
     txt_splits: List[Document] = []
     if normal_txt_docs:
@@ -370,31 +526,61 @@ def setup_knowledge_base(
         txt_splits.extend(splitter.split_documents(normal_txt_docs))
 
     txt_splits.extend(icd_docs)
+    txt_splits.extend(drug_docs)
 
     if os.path.exists(chroma_path):
         shutil.rmtree(chroma_path)
 
     os.makedirs(chroma_path, exist_ok=True)
 
-    first_batch = txt_splits if txt_splits else csv_docs[:batch_size]
-    if not first_batch:
+    total_txt = len(txt_splits)
+    total_csv = len(csv_docs)
+
+    if total_txt == 0 and total_csv == 0:
         print("[RAG] No content to index after preprocessing.")
         return None
 
+    def _num_batches(n: int, bs: int) -> int:
+        return (n + bs - 1) // bs if n > 0 else 0
+
+    # Seed Chroma with a small first batch (required to initialize collection).
+    seed_from_txt = total_txt > 0
+    seed_source = txt_splits if seed_from_txt else csv_docs
+    seed_batch = seed_source[:batch_size]
+
+    print(
+        f"[RAG] Initializing index from {'TXT' if seed_from_txt else 'CSV'} "
+        f"seed batch ({len(seed_batch)} docs)..."
+    )
     vectorstore = Chroma.from_documents(
-        documents=first_batch,
+        documents=seed_batch,
         embedding=embedding_fn,
         persist_directory=chroma_path,
     )
 
-    csv_start = 0 if txt_splits else batch_size
-    total_csv = len(csv_docs)
+    # Index TXT in batches (including progress), if present.
+    if total_txt > 0:
+        txt_batches = _num_batches(total_txt, batch_size)
+        print(f"[RAG] Indexing TXT chunks: {total_txt} docs in {txt_batches} batches")
+        txt_start = batch_size  # first TXT batch already used as seed
+        for i in range(txt_start, total_txt, batch_size):
+            batch = txt_splits[i : i + batch_size]
+            vectorstore.add_documents(batch)
+            batch_no = (i // batch_size) + 1
+            print(f"[RAG]   TXT batch {batch_no}/{txt_batches} done")
+        print("[RAG] Finished TXT indexing.")
 
-    for i in range(csv_start, total_csv, batch_size):
-        batch = csv_docs[i : i + batch_size]
-        vectorstore.add_documents(batch)
-        total_batches = (total_csv // batch_size) + 1
-        print(f"[RAG]   CSV batch {i // batch_size + 1}/{total_batches} done", end="\r")
+    # Index CSV in batches (including progress).
+    if total_csv > 0:
+        csv_batches = _num_batches(total_csv, batch_size)
+        print(f"[RAG] Indexing CSV rows: {total_csv} docs in {csv_batches} batches")
+        csv_start = batch_size if not seed_from_txt else 0
+        for i in range(csv_start, total_csv, batch_size):
+            batch = csv_docs[i : i + batch_size]
+            vectorstore.add_documents(batch)
+            batch_no = (i // batch_size) + 1
+            print(f"[RAG]   CSV batch {batch_no}/{csv_batches} done")
+        print("[RAG] Finished CSV indexing.")
 
     try:
         if hasattr(vectorstore, "persist"):
@@ -412,10 +598,17 @@ def setup_knowledge_base(
             "indexed_at_epoch": int(__import__("time").time()),
             "kb_path": kb_path,
             "chroma_path": chroma_path,
+            "embedding_model": effective_embedding_model,
+            "chunk_size": chunk_size,
+            "chunk_overlap": chunk_overlap,
+            "batch_size": batch_size,
+            "rag_limit": rag_limit,
+            "csv_whitelist": _normalize_whitelist(csv_whitelist),
         },
     )
 
     return vectorstore
+
 
 SYMPTOM_KEYWORDS = {
     # EN
@@ -527,7 +720,6 @@ Gets relevant context from the RAG vectorstore based on the transcript query, us
 
 """
 
-
 def get_relevant_context(
     query: str,
     vectorstore,
@@ -541,22 +733,57 @@ def get_relevant_context(
         return ""
 
     final_k = max(3, min(5, int(final_k)))
-
+    mentions_labs = _transcript_mentions_labs(query)
     retrieval_queries = build_retrieval_queries(query, max_queries=max_queries)
-    if not retrieval_queries:
-        return ""
+
+    if mentions_labs:
+        lab_terms = [m.group(0) for m in LAB_TRIGGER_RE.finditer(query)][:6]
+        retrieval_queries.append("lab test reference range: " + ", ".join(lab_terms))
 
     merged = {}
 
     for rq in retrieval_queries:
         try:
-            scored = vectorstore.similarity_search_with_score(rq, k=retrieve_k)
-            docs_with_rank = [(doc, rank) for rank, (doc, _score) in enumerate(scored)]
-        except Exception:
-            docs = vectorstore.similarity_search(rq, k=retrieve_k)
-            docs_with_rank = [(doc, rank) for rank, doc in enumerate(docs)]
+            raw = vectorstore.similarity_search_with_score(rq, k=retrieve_k)
+            if not raw:
+                continue
 
-        for doc, rank in docs_with_rank:
+            # Figure out score direction from returned ordering:
+            # if first <= last, treat it as distance (lower is better),
+            # otherwise treat it as similarity/relevance (higher is better).
+            first_score = float(raw[0][1])
+            last_score = float(raw[-1][1])
+            lower_is_better = first_score <= last_score
+
+            score_values = [float(s) for _, s in raw]
+            s_min, s_max = min(score_values), max(score_values)
+            s_span = (s_max - s_min) or 1.0
+
+            docs_with_semantic = []
+            for rank, (doc, score) in enumerate(raw):
+                score = float(score)
+
+                # Normalize score to 0..1 where higher is better.
+                if lower_is_better:
+                    score_norm = (s_max - score) / s_span
+                else:
+                    score_norm = (score - s_min) / s_span
+
+                rank_rrf = 1.0 / (rank + 1.0)
+
+                # Blend numeric score + rank robustness.
+                semantic = 0.70 * score_norm + 0.30 * rank_rrf
+                docs_with_semantic.append((doc, semantic))
+
+        except Exception:
+            # Fallback if backend does not expose scores
+            docs = vectorstore.similarity_search(rq, k=retrieve_k)
+            docs_with_semantic = [
+                (doc, 1.0 / (rank + 1.0))
+                for rank, doc in enumerate(docs)
+            ]
+
+        for doc, semantic in docs_with_semantic:
             lex = _lexical_overlap_ratio(rq, doc.page_content)
             if lex < min_lexical_overlap:
                 continue
@@ -566,22 +793,18 @@ def get_relevant_context(
             line_index = doc.metadata.get("line_index", -1)
             key = f"{source}|{row}|{line_index}|{hash(doc.page_content)}"
 
-            semantic_rrf = 1.0 / (rank + 1.0)
-
             if key not in merged:
                 merged[key] = {
                     "doc": doc,
                     "hits": 1,
-                    "rrf_sum": semantic_rrf,
+                    "semantic_sum": semantic,
                     "lex_max": lex,
-                    "best_rank": rank,
                 }
             else:
                 item = merged[key]
                 item["hits"] += 1
-                item["rrf_sum"] += semantic_rrf
+                item["semantic_sum"] += semantic
                 item["lex_max"] = max(item["lex_max"], lex)
-                item["best_rank"] = min(item["best_rank"], rank)
 
     if not merged:
         return ""
@@ -591,9 +814,9 @@ def get_relevant_context(
     ranked = sorted(
         merged.values(),
         key=lambda item: (
-            0.60 * item["rrf_sum"]
-            + 0.30 * item["lex_max"]
-            + 0.10 * (item["hits"] / max_hits)
+            0.65 * (item["semantic_sum"] / item["hits"])  # avg semantic quality
+            + 0.25 * item["lex_max"]                      # lexical support
+            + 0.10 * (item["hits"] / max_hits)           # multi-query consistency
         ),
         reverse=True,
     )
@@ -612,6 +835,8 @@ def get_relevant_context(
             break
 
     return "\n\n".join(snippets)
+
+
 def build_context_block(rag_context: str, enrich_context: str) -> str:
     parts = []
 

@@ -14,3 +14,17 @@ langchain-huggingface>=0.0.300
 langchain-community>=0.0.300
 chromadb>=0.3.0
 sentence-transformers>=2.3.0
+
+# Data Scraping
+beautifulsoup4>=4.13.0
+pandas>=2.0.0
+
+# Data handling
+datasets>=3.2.0
+
+# Backend FLASK
+flask>=2.3.0
+flask-cors>=3.0.0
+
+# Testing dependencies
+pytest>=7.0.0

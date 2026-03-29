@@ -1,6 +1,16 @@
 {
-  "fingerprint": "403b35d8cf27d4d8c0a67a74ad6eb9dde31844714ecabffa30a5fd0a2cc18e8e",
-  "indexed_at_epoch": 1774641017,
+  "fingerprint": "80fd18f4eeee10a3f7efbf62b95b8daf7615f883ef0df54c93414d48f3e62269",
+  "indexed_at_epoch": 1774791944,
   "kb_path": "../data/knowledge_base",
-  "chroma_path": "../data/chroma_db"
+  "chroma_path": "../data/chroma_db",
+  "embedding_model": "NeuML/pubmedbert-base-embeddings",
+  "chunk_size": 1000,
+  "chunk_overlap": 200,
+  "batch_size": 2000,
+  "rag_limit": null,
+  "csv_whitelist": [
+    "DDI_data_clean.csv",
+    "clinical_lab_facts.csv",
+    "webbeteg_fogalomtar.csv"
+  ]
 }

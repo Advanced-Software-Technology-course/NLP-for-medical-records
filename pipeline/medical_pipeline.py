@@ -14,6 +14,7 @@ Usage:
     python medical_pipeline.py --transcript ../data/test_transcripts/test_transcript_en.txt
     python medical_pipeline.py --transcript ... --no-rag
     python medical_pipeline.py --transcript ... --rebuild-rag  # force rebuild of ChromaDB vectorstore
+    python medical_pipeline.py --transcript ... --use-precompiled-rag  # download/load precompiled Chroma index instead of rebuilding
 """
 
 import sys
@@ -23,10 +24,12 @@ import json
 import os
 import time
 import mimetypes
+import importlib.util
 from openai import OpenAI
 
 from rag_pipeline import (
     setup_knowledge_base,
+    load_existing_vectorstore,
     get_relevant_context,
     build_context_block,
 )
@@ -38,7 +41,39 @@ CHROMA_PATH = "../data/chroma_db"
 RAG_LIMIT    = None   # set via --rag-limit; None = load everything
 CSV_WHITELIST = [     # filenames to include in RAG; empty list = load all
     "webbeteg_fogalomtar.csv",
+    "clinical_lab_facts.csv",
+    "DDI_data_clean.csv",
 ]
+
+
+def _download_precompiled_rag(force_download: bool = False):
+    """Download/extract a precompiled Chroma index via data/download_pre_compiled_rag.py."""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    chroma_dir_abs = os.path.abspath(os.path.join(script_dir, CHROMA_PATH))
+
+    if os.path.exists(chroma_dir_abs) and os.listdir(chroma_dir_abs) and not force_download:
+        print(f"[RAG] Existing precompiled index found at {chroma_dir_abs}. Skipping download.")
+        return
+
+    downloader_path = os.path.abspath(
+        os.path.join(script_dir, "..", "data", "download_pre_compiled_rag.py")
+    )
+    if not os.path.exists(downloader_path):
+        raise FileNotFoundError(f"Precompiled RAG downloader not found: {downloader_path}")
+
+    spec = importlib.util.spec_from_file_location("download_pre_compiled_rag", downloader_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Could not load precompiled RAG downloader module.")
+
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    if not hasattr(module, "download_index"):
+        raise AttributeError("download_pre_compiled_rag.py does not define download_index().")
+
+    print("[RAG] Downloading precompiled Chroma index...")
+    module.download_index()
+    print("[RAG] Precompiled index download/extract complete.")
 
 # ── PROMPT TEMPLATES ──────────────────────────────────────────────────────────
 
@@ -61,6 +96,33 @@ Flag any parts you are uncertain about with '[UNCERTAIN]'.
 Transcript:
 {transcript}
 
+Example format of summary (but adapt to content, and keep it concise):
+'''
+**Chief Complaint:** The patient presents with complaints of headache/migraine, abdominal pain, and fatigue/weakness.
+
+**Key Symptoms:**
+- Headache: intermittent, intense, mostly in the temples and behind the eyes, worsened by bright light, more frequent in the afternoon and evening.
+- Abdominal pain: crampy, mid and lower abdomen, worsened after eating, especially fatty foods and coffee.
+- Fatigue/weakness: persistent, waking up tired, poor sleep quality.
+- Nausea: occasional, no vomiting, described as an unsettled feeling in the stomach.
+
+**Relevant Medical History:**
+- Known medical condition: hypothyroidism, managed with Euthyrox 75 micrograms.
+- Last thyroid level check: approximately last spring.
+- Family history: mother had migraines.
+
+**Diagnosis or Working Diagnosis:**
+- Migraine: suggested by unilateral temple pain, light sensitivity, nausea, and family history.
+- [UNCERTAIN] Irritable bowel syndrome or functional dyspepsia: probable causes for abdominal pain, related to high coffee intake and stress.
+- [UNCERTAIN] Thyroid dysfunction: potential contributor to fatigue and headaches, given the lack of recent thyroid level checks.
+
+**Treatment Plan or Next Steps:**
+- Laboratory tests: full panel including TSH, full blood count, liver and kidney function, iron, and ferritin.
+- Lifestyle modifications: reduce coffee intake to one or two cups a day, short walks after meals.
+- Medication: Ibuprofen for headaches, with consideration for migraine-specific treatment if headaches continue.
+- Follow-up: scheduled for two weeks to review lab results and assess symptom progression.
+'''
+
 Summary:"""
 
 
@@ -73,6 +135,21 @@ Keep it in the original language of the transcript.
 
 Transcript:
 {transcript}
+
+Example format of SOAP notes (but adapt to content):
+'''
+**S (Subjective):**
+The patient reports feeling off for a while, with symptoms worsening over the past week. They complain of a headache that has been present for about two weeks, described as intense and located on the temples and behind the eyes, worsening in the afternoon and evening. The patient also experiences sensitivity to light, but not noise, and has had a few episodes of nausea without vomiting. Additionally, they report abdominal pain, mostly in the middle and lower abdomen, which worsens after eating, especially fatty foods and coffee. The patient also complains of fatigue, waking up tired, and having difficulty sleeping, averaging about 5 hours of sleep per night. They attribute their fatigue to stress, work overtime, and their husband's recent illness. The patient has a family history of migraines, takes Euthyrox for thyroid issues, and has not had their thyroid levels checked since last spring.
+
+**O (Objective):**
+On examination, the abdomen is tender in the central and right lower quadrant. The patient's blood pressure is slightly elevated at 145/90. The physical examination does not reveal any acutely concerning findings.
+
+**A (Assessment):**
+The patient's symptoms are consistent with migraines, given the unilateral temple pain, light sensitivity, nausea, and family history. The abdominal pain is likely related to high coffee intake and stress, possibly indicating irritable bowel syndrome or functional dyspepsia. The fatigue and sleep disturbance could be stress-related, but the patient's thyroid levels should be checked, as they have not been evaluated since last spring.
+
+**P (Plan):**
+The plan includes ordering a full panel of blood tests, including TSH, full blood count, liver and kidney function, iron, and ferritin. The patient is advised to reduce coffee intake to one or two cups a day and take short walks after meals. Ibuprofen is recommended for headache management, with the possibility of migraine-specific treatment if symptoms persist. The patient is scheduled to return in two weeks with lab results for further evaluation and management.
+'''
 
 SOAP Notes:"""
 
@@ -290,6 +367,11 @@ def main():
     parser.add_argument("--rag-limit",   type=int, default=None,
                         help="Cap CSV rows per file for RAG (e.g. 500 for quick testing)")
     parser.add_argument("--rebuild-rag", action="store_true", help="Force rebuild Chroma index even if manifest matches")
+    parser.add_argument(
+        "--use-precompiled-rag",
+        action="store_true",
+        help="Download/load precompiled Chroma index instead of local rebuild/indexing",
+    )
     args = parser.parse_args()
 
     # Load API tokens
@@ -321,7 +403,25 @@ def main():
     # ── Step 2: ChromaDB RAG ──────────────────────────────────────────────────
     rag_context = ""
     if not args.no_rag:
-        vectorstore = setup_knowledge_base(rag_limit=args.rag_limit, force_rebuild=args.rebuild_rag, csv_whitelist=CSV_WHITELIST, kb_path=KB_PATH, chroma_path=CHROMA_PATH)
+        if args.use_precompiled_rag:
+            try:
+                _download_precompiled_rag(force_download=args.rebuild_rag)
+                vectorstore = load_existing_vectorstore(chroma_path=CHROMA_PATH)
+                if vectorstore is None:
+                    print("[RAG] Failed to load precompiled index. Exiting.")
+                    sys.exit(1)
+            except Exception as ex:
+                print(f"[RAG] Precompiled mode failed: {ex}")
+                sys.exit(1)
+        else:
+            vectorstore = setup_knowledge_base(
+                rag_limit=args.rag_limit,
+                force_rebuild=args.rebuild_rag,
+                csv_whitelist=CSV_WHITELIST,
+                kb_path=KB_PATH,
+                chroma_path=CHROMA_PATH,
+            )
+
         rag_context = get_relevant_context(transcript, vectorstore, final_k=5, retrieve_k=12, max_queries=8)
         if rag_context:
             print(f"[RAG] Retrieved {len(rag_context)} chars of context.\n")

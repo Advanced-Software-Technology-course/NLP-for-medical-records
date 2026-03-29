@@ -10,3 +10,5 @@ uploads/
 output.json
 data/chroma_db/
 *.sqlite3
+.venv/
+.vscode/
