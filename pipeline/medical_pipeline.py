@@ -14,6 +14,7 @@ Usage:
     python medical_pipeline.py --transcript ../data/test_transcripts/test_transcript_en.txt
     python medical_pipeline.py --transcript ... --no-rag
     python medical_pipeline.py --transcript ... --rebuild-rag  # force rebuild of ChromaDB vectorstore
+    python medical_pipeline.py --transcript ...  # auto-downloads precompiled Chroma on first run if missing
     python medical_pipeline.py --transcript ... --use-precompiled-rag  # download/load precompiled Chroma index instead of rebuilding
 """
 
@@ -32,15 +33,16 @@ from rag_pipeline import (
     load_existing_vectorstore,
     get_relevant_context,
     build_context_block,
+    suggest_icd_codes_local,
 )
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 
 KB_PATH     = "../data/knowledge_base"
+ICD_CODES_PATH = "../data/icd10_codes.txt"
 CHROMA_PATH = "../data/chroma_db"
 RAG_LIMIT    = None   # set via --rag-limit; None = load everything
 CSV_WHITELIST = [     # filenames to include in RAG; empty list = load all
-    "webbeteg_fogalomtar.csv",
     "clinical_lab_facts.csv",
     "DDI_data_clean.csv",
 ]
@@ -74,6 +76,13 @@ def _download_precompiled_rag(force_download: bool = False):
     print("[RAG] Downloading precompiled Chroma index...")
     module.download_index()
     print("[RAG] Precompiled index download/extract complete.")
+
+
+def _chroma_dir_missing_or_empty() -> bool:
+    """Return True when the configured Chroma directory does not exist or is empty."""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    chroma_dir_abs = os.path.abspath(os.path.join(script_dir, CHROMA_PATH))
+    return not (os.path.exists(chroma_dir_abs) and os.listdir(chroma_dir_abs))
 
 # ── PROMPT TEMPLATES ──────────────────────────────────────────────────────────
 
@@ -278,12 +287,13 @@ def load_transcript(transcript_path: str) -> str:
 def summarize_transcript(
     transcript: str,
     groq_token: str,
-    rag_context: str = ""
+    rag_context: str = "",
+    suggested_codes: list | None = None,
 ) -> str:
     print("── Step 3/4: Summary ──")
     client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
 
-    context_block = build_context_block(rag_context, "")
+    context_block = build_context_block(rag_context, "", suggested_codes=suggested_codes)
     prompt = SUMMARY_PROMPT_TEMPLATE.format(
         transcript=transcript,
         context_block=context_block
@@ -293,7 +303,7 @@ def summarize_transcript(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=512,
-        temperature=0.3
+        temperature=0.2
     )
 
     summary = response.choices[0].message.content.strip()
@@ -305,12 +315,13 @@ def summarize_transcript(
 def summarize_soap_notes(
     transcript: str,
     groq_token: str,
-    rag_context: str = ""
+    rag_context: str = "",
+    suggested_codes: list | None = None,
 ) -> str:
     print("── Step 4/4: SOAP Notes ──")
     client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
 
-    context_block = build_context_block(rag_context, "")
+    context_block = build_context_block(rag_context, "", suggested_codes=suggested_codes)
     prompt = SOAP_PROMPT_TEMPLATE.format(
         transcript=transcript,
         context_block=context_block
@@ -320,7 +331,7 @@ def summarize_soap_notes(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=512,
-        temperature=0.3
+        temperature=0.2
     )
 
     soap_notes = response.choices[0].message.content.strip()
@@ -401,6 +412,18 @@ def main():
             args.audio, gladia_token=gladia_token
         )
     # ── Step 2: ChromaDB RAG ──────────────────────────────────────────────────
+    suggested_codes = suggest_icd_codes_local(transcript, icd_path=ICD_CODES_PATH, top_k=3)
+    if suggested_codes:
+        print("[ICD] Local lookup suggested codes:")
+        for item in suggested_codes:
+            print(
+                f"[ICD]   {item['code']}: {item['description']} "
+                f"(matched symptom: {item['matched_symptom']}, score={item['score']})"
+            )
+        print()
+    else:
+        print("[ICD] No local suggested ICD codes found.\n")
+
     rag_context = ""
     if not args.no_rag:
         if args.use_precompiled_rag:
@@ -414,13 +437,28 @@ def main():
                 print(f"[RAG] Precompiled mode failed: {ex}")
                 sys.exit(1)
         else:
-            vectorstore = setup_knowledge_base(
-                rag_limit=args.rag_limit,
-                force_rebuild=args.rebuild_rag,
-                csv_whitelist=CSV_WHITELIST,
-                kb_path=KB_PATH,
-                chroma_path=CHROMA_PATH,
-            )
+            vectorstore = None
+
+            # First-run behavior: if Chroma is missing, try downloading the precompiled
+            # index before falling back to expensive local reindexing.
+            if not args.rebuild_rag and _chroma_dir_missing_or_empty():
+                print("[RAG] No local Chroma index found. Attempting precompiled download...")
+                try:
+                    _download_precompiled_rag(force_download=False)
+                    vectorstore = load_existing_vectorstore(chroma_path=CHROMA_PATH)
+                    if vectorstore is None:
+                        print("[RAG] Precompiled download completed but index could not be loaded. Falling back to local rebuild.")
+                except Exception as ex:
+                    print(f"[RAG] Precompiled download failed: {ex}. Falling back to local rebuild.")
+
+            if vectorstore is None:
+                vectorstore = setup_knowledge_base(
+                    rag_limit=args.rag_limit,
+                    force_rebuild=args.rebuild_rag,
+                    csv_whitelist=CSV_WHITELIST,
+                    kb_path=KB_PATH,
+                    chroma_path=CHROMA_PATH,
+                )
 
         rag_context = get_relevant_context(transcript, vectorstore, final_k=5, retrieve_k=12, max_queries=8)
         if rag_context:
@@ -433,13 +471,15 @@ def main():
     # ── Step 3: Summary ───────────────────────────────────────────────────────
     summary = summarize_transcript(
         transcript, groq_token,
-        rag_context=rag_context
+        rag_context=rag_context,
+        suggested_codes=suggested_codes,
     )
 
     # ── Step 4: SOAP Notes ────────────────────────────────────────────────────
     soap_notes = summarize_soap_notes(
         transcript, groq_token,
-        rag_context=rag_context
+        rag_context=rag_context,
+        suggested_codes=suggested_codes,
     )
 
     # ── Step 5: Save & Print ──────────────────────────────────────────────────

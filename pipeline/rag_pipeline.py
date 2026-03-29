@@ -1,4 +1,5 @@
 import csv
+import difflib
 import hashlib
 import json
 import os
@@ -16,16 +17,20 @@ try:
 except ImportError:
     from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+try:
+    from rapidfuzz import fuzz, process
+except Exception:
+    fuzz = None
+    process = None
+
 DEFAULT_KB_PATH = "../data/knowledge_base"
+DEFAULT_ICD_CODES_PATH = "../data/icd10_codes.txt"
 DEFAULT_CHROMA_PATH = "../data/chroma_db"
 DEFAULT_EMBED_MODEL = "all-MiniLM-L6-v2"
 DEFAULT_CHUNK_SIZE = 1000
 DEFAULT_CHUNK_OVERLAP = 200
 DEFAULT_BATCH_SIZE = 2000
 MANIFEST_NAME = "rag_manifest.json"
-ICD_LINE_RE = re.compile(
-    r"^\s*([A-TV-Z][0-9][0-9A-Z](?:\.[0-9A-Z]{1,4})?)\s*:\s+(.+)$"
-)
 
 KNOWN_MED_ABBREV_RE = re.compile(
     r"\b(EKG|EEG|MRI|CT|UH|BP|HR|RR|SpO2|BMI|BNO|Hgb|WBC|RBC|CRP|PCT|INR|TSH|T3|T4|"
@@ -42,16 +47,17 @@ LATIN_MED_SUFFIX_RE = re.compile(
 
 def _build_embedding_function(embedding_model: str = DEFAULT_EMBED_MODEL):
     """Create embedding function and return (embedding_fn, effective_model_name)."""
+    encode_kwargs = {'normalize_embeddings': True}
     if embedding_model == DEFAULT_EMBED_MODEL:
         # Prefer a biomedical model when available.
         preferred_model = "NeuML/pubmedbert-base-embeddings"
         try:
-            embedding_fn = HuggingFaceEmbeddings(model_name=preferred_model)
+            embedding_fn = HuggingFaceEmbeddings(model_name=preferred_model, encode_kwargs=encode_kwargs)
             return embedding_fn, preferred_model
         except Exception:
             pass
 
-    embedding_fn = HuggingFaceEmbeddings(model_name=embedding_model)
+    embedding_fn = HuggingFaceEmbeddings(model_name=embedding_model, encode_kwargs=encode_kwargs)
     return embedding_fn, embedding_model
 
 
@@ -88,33 +94,34 @@ def load_existing_vectorstore(
         return None
 
 
-def _extract_medical_candidates_local(text: str, max_terms: int = 40) -> List[str]:
+def _extract_medical_entities(text: str, max_terms: int = 10) -> list[str]:
+    """Pure regex-based extraction to replace scispaCy."""
     candidates = []
     seen = set()
 
     def _add(token: str):
         t = token.strip()
-        if len(t) < 3:
-            return
+        if len(t) < 3: return
         key = t.lower()
-        if key in seen:
-            return
-        seen.add(key)
-        candidates.append(t)
+        if key not in seen:
+            seen.add(key)
+            candidates.append(t)
 
+    # 1. Match known medical abbreviations (EKG, MRI, etc.)
     for m in KNOWN_MED_ABBREV_RE.finditer(text):
         _add(m.group(0).upper())
 
+    # 2. Match Latin-style medical terms (e.g., Gastritis, Nephropathy)
     for m in LATIN_MED_SUFFIX_RE.finditer(text):
         _add(m.group(0).lower())
 
+    # 3. Match long words (8+ chars) which are often clinical descriptions
     for m in re.finditer(r"\b[a-zA-Z\u00C0-\u017F]{8,}\b", text):
         _add(m.group(0).lower())
 
     return candidates[:max_terms]
 
-def _is_icd_like_line(line: str) -> bool:
-    return bool(ICD_LINE_RE.match((line or "").strip()))
+
 
 DRUG_SECTION_RE = re.compile(
     r"^(Indications|Dosage|Warnings|Contraindications|Interactions.*?):\s*",
@@ -196,25 +203,18 @@ def _prepare_txt_documents(txt_docs: List[Document]) -> List[Document]:
         source = str(doc.metadata.get("source", ""))
         source_name = os.path.basename(source).lower()
         is_drug_doc = "drug" in source_name  # drugs.txt, drug_list.txt, etc.
-
+        if "icd" in source_name or source_name.endswith("icd10_codes.txt"):
+            continue
         if is_drug_doc:
             prepared.extend(_prepare_drug_documents(doc))
             continue
 
-        icd_hits = [(idx, ln) for idx, ln in enumerate(lines) if _is_icd_like_line(ln)]
-        icd_ratio = (len(icd_hits) / len(lines)) if lines else 0.0
+        # ICD code lists are intentionally excluded from the vector DB.
+        if "icd" in source_name or source_name.endswith("icd10_codes.txt"):
+            print(f"[RAG] Skipping ICD-10 TXT from vector DB: {source_name}")
+            continue
 
-        # Treat known ICD files OR ICD-dense docs as code lists.
-        is_icd_doc = ("icd" in source_name or source_name.endswith("icd10_codes.txt") or (len(icd_hits) >= 8 and icd_ratio >= 0.25))
-
-        if is_icd_doc and icd_hits:
-            for idx, line in icd_hits:
-                md = dict(doc.metadata)
-                md["doc_type"] = "icd_code"
-                md["line_index"] = idx
-                prepared.append(Document(page_content=line, metadata=md))
-        else:
-            prepared.append(doc)
+        prepared.append(doc)
 
     return prepared
 
@@ -269,6 +269,8 @@ def _collect_processed_files(kb_path: str, csv_whitelist: Optional[List[str]]) -
             include = False
 
             if lower.endswith(".txt"):
+                if "icd" in lower or lower.endswith("icd10_codes.txt"):
+                    continue
                 include = True
             elif lower.endswith(".csv"):
                 if whitelist_enabled:
@@ -314,7 +316,7 @@ def _build_fingerprint(
         "chunk_size": chunk_size,
         "chunk_overlap": chunk_overlap,
         "batch_size": batch_size,
-        "version": 1,
+        "version": 2,
     }
     blob = json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
     return hashlib.sha256(blob).hexdigest()
@@ -512,10 +514,8 @@ def setup_knowledge_base(
         print("[RAG] No documents found in knowledge base - RAG disabled.")
         return None
 
-    # ICD docs are already concise one-line docs; only chunk non-ICD docs.
-    icd_docs        = [d for d in txt_docs if d.metadata.get("doc_type") == "icd_code"]
     drug_docs       = [d for d in txt_docs if d.metadata.get("doc_type") == "drug_monograph"]
-    normal_txt_docs = [d for d in txt_docs if d.metadata.get("doc_type") not in ("icd_code", "drug_monograph")]
+    normal_txt_docs = [d for d in txt_docs if d.metadata.get("doc_type") != "drug_monograph"]
 
     txt_splits: List[Document] = []
     if normal_txt_docs:
@@ -525,7 +525,6 @@ def setup_knowledge_base(
         )
         txt_splits.extend(splitter.split_documents(normal_txt_docs))
 
-    txt_splits.extend(icd_docs)
     txt_splits.extend(drug_docs)
 
     if os.path.exists(chroma_path):
@@ -660,49 +659,133 @@ def _extract_symptom_sentences(text: str, max_items: int = 4) -> list[str]:
     return out
 
 
-def _extract_medical_entities(text: str, max_terms: int = 12) -> list[str]:
-    candidates = _extract_medical_candidates_local(text, max_terms=max_terms * 3)
+def _extract_symptom_terms(text: str, max_items: int = 8) -> list[str]:
+    clean = _norm_space(_strip_speaker_tags(text)).lower()
+    if not clean:
+        return []
 
-    # Deduplicate while keeping order, and remove tiny/noisy tokens.
     out = []
     seen = set()
-    for c in candidates:
-        token = _norm_space(c)
-        if len(token) < 3:
-            continue
-        key = token.lower()
-        if key in seen:
-            continue
-        seen.add(key)
-        out.append(token)
-        if len(out) >= max_terms:
+    # Match longer multi-word symptoms first to avoid splitting e.g. chest pain.
+    sorted_keywords = sorted(SYMPTOM_KEYWORDS, key=len, reverse=True)
+    for kw in sorted_keywords:
+        pattern = r"\b" + re.escape(kw.lower()) + r"\b"
+        if re.search(pattern, clean):
+            key = kw.lower()
+            if key not in seen:
+                seen.add(key)
+                out.append(kw)
+        if len(out) >= max_items:
             break
+
     return out
 
 
-def build_retrieval_queries(transcript: str, max_queries: int = 8) -> list[str]:
+def _parse_icd_code_lines(icd_path: str) -> list[tuple[str, str]]:
+    if not os.path.exists(icd_path):
+        return []
+
+    parsed: list[tuple[str, str]] = []
+    with open(icd_path, "r", encoding="utf-8") as f:
+        for raw in f:
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            if ":" not in line:
+                continue
+            code, desc = line.split(":", 1)
+            code = code.strip()
+            desc = desc.strip()
+            if code and desc:
+                parsed.append((code, desc))
+
+    return parsed
+
+
+def suggest_icd_codes_local(
+    transcript: str,
+    icd_path: str = DEFAULT_ICD_CODES_PATH,
+    top_k: int = 3,
+) -> list[dict]:
+    """Suggest top ICD codes using local symptom extraction + fuzzy lookup."""
+    symptom_terms = _extract_symptom_terms(transcript)
+    if not symptom_terms:
+        return []
+
+    icd_entries = _parse_icd_code_lines(icd_path)
+    if not icd_entries:
+        return []
+
+    descriptions = [desc for _, desc in icd_entries]
+    by_desc = {desc: code for code, desc in icd_entries}
+
+    scored: dict[str, dict] = {}
+    for symptom in symptom_terms:
+        if process is not None and fuzz is not None:
+            # Use a robust fuzzy scorer for partial phrase matching.
+            best = process.extract(
+                symptom,
+                descriptions,
+                scorer=fuzz.WRatio,
+                limit=max(top_k * 3, 6),
+            )
+            matches = [(desc, float(score)) for desc, score, _ in best]
+        else:
+            # Fallback without extra dependency.
+            matches = []
+            symptom_l = symptom.lower()
+            for desc in descriptions:
+                ratio = difflib.SequenceMatcher(None, symptom_l, desc.lower()).ratio() * 100.0
+                if symptom_l in desc.lower():
+                    ratio = max(ratio, 95.0)
+                matches.append((desc, ratio))
+            matches.sort(key=lambda x: x[1], reverse=True)
+            matches = matches[: max(top_k * 3, 6)]
+
+        for desc, score in matches:
+            code = by_desc.get(desc)
+            if not code:
+                continue
+            key = f"{code}|{desc}"
+            existing = scored.get(key)
+            if existing is None or score > existing["score"]:
+                scored[key] = {
+                    "code": code,
+                    "description": desc,
+                    "matched_symptom": symptom,
+                    "score": round(float(score), 2),
+                }
+
+    ranked = sorted(scored.values(), key=lambda x: x["score"], reverse=True)
+    return ranked[:top_k]
+
+def build_retrieval_queries(transcript: str, max_queries: int = 4) -> list[str]:
     clean = _strip_speaker_tags(transcript)
     clean = _norm_space(clean)
 
     queries = []
 
+    # 1. Chief complaint anchor query (kept diagnosis-focused, not code-focused).
     complaint = _extract_chief_complaint(clean)
     if complaint:
-        queries.append(f"chief complaint: {complaint}")
+        queries.append(f"possible clinical diagnosis for: {complaint}")
 
-    symptom_sentences = _extract_symptom_sentences(clean, max_items=4)
+    # 2. Symptom Sentences (Contextual search)
+    symptom_sentences = _extract_symptom_sentences(clean, max_items=3)
     for s in symptom_sentences:
-        queries.append(f"symptoms: {s}")
+        queries.append(f"clinical symptoms: {s}")
 
-    entities = _extract_medical_entities(clean, max_terms=12)
+    entities = _extract_medical_entities(clean, max_terms=10)
     if entities:
-        queries.append("medical entities: " + ", ".join(entities[:8]))
+        # We create two types of entity queries for better recall
+        queries.append("medical conditions: " + ", ".join(entities[:5]))
+        queries.append("differential diagnosis: " + ", ".join(entities[5:10]))
 
-    # Keep a short fallback semantic query, not the whole transcript.
+    # 4. Fallback: Short Transcript Chunk
     if clean:
-        queries.append(clean[:700])
+        queries.append(clean[:500])
 
-    # Stable dedupe
+    # Unique & Truncate
     uniq = []
     seen = set()
     for q in queries:
@@ -714,43 +797,49 @@ def build_retrieval_queries(transcript: str, max_queries: int = 8) -> list[str]:
     return uniq[:max_queries]
 
 
-
 """
 Gets relevant context from the RAG vectorstore based on the transcript query, using a hybrid semantic + lexical scoring of retrieved documents. The retrieval queries are built by decomposing the transcript into chief complaint, symptom sentences, and medical entities, to improve recall of relevant information from the knowledge base. The final context is a concatenation of the top-ranked documents, which can then be fed into the LLM for response generation or enrichment.
 
 """
 
+from concurrent.futures import ThreadPoolExecutor
+
 def get_relevant_context(
     query: str,
     vectorstore,
     final_k: int = 5,
-    retrieve_k: int = 12,
-    max_queries: int = 8,
-    min_lexical_overlap: float = 0.10,
+    retrieve_k: int = 8,
+    max_queries: int = 4,
+    min_lexical_overlap: float = 0.1,
     max_chars_per_snippet: int = 280,
 ) -> str:
     if vectorstore is None:
         return ""
 
-    final_k = max(3, min(5, int(final_k)))
-    mentions_labs = _transcript_mentions_labs(query)
     retrieval_queries = build_retrieval_queries(query, max_queries=max_queries)
+    
+    # 1. Threaded Search Task
+    def _threaded_search(rq):
+        try:
+            # We return the query string AND the results so we can use rq later
+            return rq, vectorstore.similarity_search_with_score(rq, k=retrieve_k)
+        except Exception:
+            return rq, []
 
-    if mentions_labs:
-        lab_terms = [m.group(0) for m in LAB_TRIGGER_RE.finditer(query)][:6]
-        retrieval_queries.append("lab test reference range: " + ", ".join(lab_terms))
+    # 2. Fire all queries in parallel
+    with ThreadPoolExecutor(max_workers=max_queries) as executor:
+        # map returns results in the same order as retrieval_queries
+        all_results = list(executor.map(_threaded_search, retrieval_queries))
 
     merged = {}
 
-    for rq in retrieval_queries:
-        try:
-            raw = vectorstore.similarity_search_with_score(rq, k=retrieve_k)
-            if not raw:
-                continue
+    # 3. Process the results we already fetched
+    for rq, raw in all_results: # <--- Iterating through the pre-fetched results
+        if not raw:
+            continue
 
-            # Figure out score direction from returned ordering:
-            # if first <= last, treat it as distance (lower is better),
-            # otherwise treat it as similarity/relevance (higher is better).
+        try:
+            # Determine score direction
             first_score = float(raw[0][1])
             last_score = float(raw[-1][1])
             lower_is_better = first_score <= last_score
@@ -762,27 +851,21 @@ def get_relevant_context(
             docs_with_semantic = []
             for rank, (doc, score) in enumerate(raw):
                 score = float(score)
-
-                # Normalize score to 0..1 where higher is better.
+                # Normalize
                 if lower_is_better:
                     score_norm = (s_max - score) / s_span
                 else:
                     score_norm = (score - s_min) / s_span
 
                 rank_rrf = 1.0 / (rank + 1.0)
-
-                # Blend numeric score + rank robustness.
                 semantic = 0.70 * score_norm + 0.30 * rank_rrf
                 docs_with_semantic.append((doc, semantic))
-
+        
         except Exception:
-            # Fallback if backend does not expose scores
-            docs = vectorstore.similarity_search(rq, k=retrieve_k)
-            docs_with_semantic = [
-                (doc, 1.0 / (rank + 1.0))
-                for rank, doc in enumerate(docs)
-            ]
+            # Fallback if scoring fails
+            docs_with_semantic = [(doc, 1.0 / (rank + 1.0)) for rank, (doc, _) in enumerate(raw)]
 
+        # 4. Lexical Filter and Merging
         for doc, semantic in docs_with_semantic:
             lex = _lexical_overlap_ratio(rq, doc.page_content)
             if lex < min_lexical_overlap:
@@ -837,11 +920,26 @@ def get_relevant_context(
     return "\n\n".join(snippets)
 
 
-def build_context_block(rag_context: str, enrich_context: str) -> str:
+def build_context_block(
+    rag_context: str,
+    enrich_context: str,
+    suggested_codes: Optional[List[dict]] = None,
+) -> str:
     parts = []
 
     if rag_context:
         parts.append(f"Relevant medical reference information:\n{rag_context}")
+
+    if suggested_codes:
+        lines = ["Suggested Codes:"]
+        for item in suggested_codes:
+            code = item.get("code", "")
+            desc = item.get("description", "")
+            symptom = item.get("matched_symptom", "")
+            if code and desc:
+                lines.append(f"- {code}: {desc} (matched symptom: {symptom})")
+        if len(lines) > 1:
+            parts.append("\n".join(lines))
 
     if enrich_context:
         parts.append(enrich_context)
