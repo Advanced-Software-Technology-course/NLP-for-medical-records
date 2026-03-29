@@ -14,6 +14,8 @@ langchain-huggingface>=0.0.300
 langchain-community>=0.0.300
 chromadb>=0.3.0
 sentence-transformers>=2.3.0
+rapidfuzz>=3.10.0
+
 
 # Data Scraping
 beautifulsoup4>=4.13.0

@@ -3,7 +3,7 @@ import os
 import zipfile
 import requests
 
-RELEASE_URL = "https://github.com/yourname/yourrepo/releases/download/kb-v1/chroma_db.zip"
+RELEASE_URL = "https://github.com/saxovia/kb_for_medical_nlp/releases/download/DB/chroma_db.zip"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = SCRIPT_DIR
 

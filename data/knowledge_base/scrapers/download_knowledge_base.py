@@ -31,10 +31,16 @@ sys.stdout.reconfigure(encoding="utf-8")
 # ── Paths ─────────────────────────────────────────────────────────────────────
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 KB_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))  # .../data/knowledge_base
+DATA_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", ".."))
 os.makedirs(KB_DIR, exist_ok=True)
+os.makedirs(DATA_DIR, exist_ok=True)
 
 def kb(filename: str) -> str:
     return os.path.join(KB_DIR, filename)
+
+
+def data_file(filename: str) -> str:
+    return os.path.join(DATA_DIR, filename)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -48,7 +54,7 @@ def download_icd10():
     response.raise_for_status()
 
     df = pd.read_csv(io.StringIO(response.text))
-    out = kb("icd10_codes.txt")
+    out = data_file("icd10_codes.txt")
 
     with open(out, "w", encoding="utf-8") as f:
         f.write("# ICD-10-CM Codes\n")
@@ -454,11 +460,11 @@ def clean_ddi_csv(input_path: str, output_path: str):
 # ─────────────────────────────────────────────────────────────────────────────
 
 STEPS = {
-    #"icd":        ("ICD-10 codes",           download_icd10),
+    #"icd":        ("ICD-10 codes",           download_icd10), # MOVED
     #"drugs":      ("Drug info",download_drugs),
     #"labs":       ("Lab reference ranges",    download_lab_ranges),
-    #"abbrev":     ("Medical abbreviations",   download_abbreviations),
-    #"hu":         ("Hungarian glossary",      download_hungarian_glossary),
+    ##"abbrev":     ("Medical abbreviations",   download_abbreviations), #DEPRECATED - source is very noisy and not critical for initial testing
+    ##"hu":         ("Hungarian glossary",      download_hungarian_glossary), #DEPRECATED - also very noisy and not critical for initial testing
     "ddi_clean":  ("Clean DDI CSV",           lambda: clean_ddi_csv(kb("DDI_data.csv"), kb("DDI_data_clean.csv"))),
 }
 
