@@ -4,10 +4,10 @@ start_time = time.time()
 print("Starting imports at timestamp:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 from rag_pipeline import setup_knowledge_base, get_relevant_context
 import os
-transcript = """
-SPEAKER_0: Since yesterday I have chest pain and shortness of breath.
-SPEAKER_1: Any fever, cough, or prior cardiac history?
-SPEAKER_0: Mild fever, no prior heart disease.
+transcript =  """
+SPEAKER_0: Tegnap óta mellkasi fájdalmam és légszomjam van.
+SPEAKER_1: Volt láza, köhögése vagy korábbi szívbetegsége?
+SPEAKER_0: Enyhe láz, korábbi szívbetegsége nem volt.
 """
 base_dir = os.path.dirname(os.path.abspath(__file__))
 

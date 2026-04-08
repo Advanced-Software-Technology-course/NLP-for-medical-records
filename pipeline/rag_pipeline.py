@@ -5,6 +5,7 @@ import json
 import os
 import re
 import shutil
+import unicodedata
 from typing import Optional, List
 
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
@@ -678,9 +679,54 @@ SYMPTOM_KEYWORDS = {
     "fatigue", "rash", "diarrhea", "constipation", "chills", "dyspnea",
     "shortness of breath", "chest pain", "abdominal pain", "sore throat",
     # HU
-    "fajdalom", "laz", "kohoges", "fejfajas", "hanyinger", "hanyas",
-    "szedules", "faradtsag", "kiutes", "hasmenes", "szekrekedes", "hidegrazas",
-    "nehezlegzes", "mellkasi fajdalom", "hasi fajdalom", "torokfajas",
+    "fajdalom", "fájdalom", "laz", "láz", "kohoges", "köhögés", "köhög", "fejfajas", "fejfájás",
+    "hanyinger", "hányinger", "hanyas", "hányás", "szedules", "szédülés", "faradtsag", "fáradtság",
+    "kiutes", "kiütés", "hasmenes", "hasmenés", "szekrekedes", "székrekedés", "hidegrazas", "hidegrázás",
+    "nehezlegzes", "nehézlégzés", "mellkasi fajdalom", "mellkasi fájdalom", "hasi fajdalom", "hasi fájdalom",
+    "torokfajas", "torokfájás", "fulladas", "fulladás", "légszomj", "legszomj",
+}
+
+HU_TO_EN_MEDICAL_TERMS = {
+    "mellkasi fajdalom": "chest pain",
+    "mellkasi fájdalom": "chest pain",
+    "hasi fajdalom": "abdominal pain",
+    "hasi fájdalom": "abdominal pain",
+    "fajdalom": "pain",
+    "fájdalom": "pain",
+    "laz": "fever",
+    "láz": "fever",
+    "kohoges": "cough",
+    "köhögés": "cough",
+    "köhög": "cough",
+    "fejfajas": "headache",
+    "fejfájás": "headache",
+    "hanyinger": "nausea",
+    "hányinger": "nausea",
+    "hanyas": "vomiting",
+    "hányás": "vomiting",
+    "szedules": "dizziness",
+    "szédülés": "dizziness",
+    "faradtsag": "fatigue",
+    "fáradtság": "fatigue",
+    "kiutes": "rash",
+    "kiütés": "rash",
+    "hasmenes": "diarrhea",
+    "hasmenés": "diarrhea",
+    "szekrekedes": "constipation",
+    "székrekedés": "constipation",
+    "hidegrazas": "chills",
+    "hidegrázás": "chills",
+    "nehezlegzes": "shortness of breath",
+    "nehézlégzés": "shortness of breath",
+    "legszomj": "shortness of breath",
+    "légszomj": "shortness of breath",
+    "torokfajas": "sore throat",
+    "torokfájás": "sore throat",
+}
+
+HU_MARKERS = {
+    "hogy", "vagy", "nem", "van", "volt", "mert", "az", "egy", "es", "és",
+    "fajdalom", "fájdalom", "laz", "láz", "kohoges", "köhögés", "legszomj", "légszomj",
 }
 
 
@@ -690,6 +736,69 @@ def _strip_speaker_tags(text: str) -> str:
 
 def _norm_space(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
+
+
+def _strip_accents(text: str) -> str:
+    norm = unicodedata.normalize("NFD", text or "")
+    return "".join(ch for ch in norm if unicodedata.category(ch) != "Mn")
+
+
+def _norm_for_match(text: str) -> str:
+    return _norm_space(_strip_accents((text or "").lower()))
+
+
+def _symptom_keyword_matches_text(keyword: str, normalized_text: str, normalized_tokens: list[str]) -> bool:
+    """Match symptom keywords against normalized text, tolerant to Hungarian inflected forms."""
+    kw = _norm_for_match(keyword)
+    if not kw:
+        return False
+
+    # First try strict phrase boundary matching.
+    if re.search(r"\b" + re.escape(kw) + r"\b", normalized_text):
+        return True
+
+    # Hungarian inflection-tolerant fallback.
+    parts = [p for p in kw.split() if p]
+    if not parts:
+        return False
+
+    # Single-word symptom: allow token-prefix match (e.g., "legszomj" vs "legszomjam").
+    if len(parts) == 1:
+        stem = parts[0]
+        if len(stem) >= 4 and any(tok.startswith(stem) for tok in normalized_tokens):
+            return True
+        return False
+
+    # Multi-word symptom: each part should match at least one token by prefix.
+    for part in parts:
+        if len(part) < 3:
+            continue
+        if not any(tok.startswith(part) for tok in normalized_tokens):
+            return False
+    return True
+
+
+def _detect_language(text: str) -> str:
+    low = (text or "").lower()
+    if not low:
+        return "en"
+
+    accent_hits = sum(low.count(ch) for ch in "áéíóöőúüű")
+    tokens = re.findall(r"[a-zA-Z\u00C0-\u017F]{2,}", low)
+    hu_hits = sum(1 for t in tokens if t in HU_MARKERS)
+
+    if accent_hits >= 2 or hu_hits >= 2:
+        return "hu"
+    return "en"
+
+
+def _translate_hu_to_en_text(text: str) -> str:
+    out = _norm_space(text)
+    pairs = sorted(HU_TO_EN_MEDICAL_TERMS.items(), key=lambda x: len(x[0]), reverse=True)
+    for hu, en in pairs:
+        pattern = r"\b" + re.escape(hu) + r"\b"
+        out = re.sub(pattern, en, out, flags=re.IGNORECASE)
+    return out
 
 
 def _extract_chief_complaint(text: str, max_len: int = 280) -> str:
@@ -710,8 +819,9 @@ def _extract_symptom_sentences(text: str, max_items: int = 4) -> list[str]:
         s_clean = _norm_space(s)
         if not s_clean:
             continue
-        low = s_clean.lower()
-        if any(k in low for k in SYMPTOM_KEYWORDS):
+        low = _norm_for_match(s_clean)
+        tokens = re.findall(r"[a-z0-9\u00C0-\u017F]+", low)
+        if any(_symptom_keyword_matches_text(k, low, tokens) for k in SYMPTOM_KEYWORDS):
             key = low[:200]
             if key not in seen:
                 seen.add(key)
@@ -723,17 +833,19 @@ def _extract_symptom_sentences(text: str, max_items: int = 4) -> list[str]:
 
 
 def _extract_symptom_terms(text: str, max_items: int = 8) -> list[str]:
-    clean = _norm_space(_strip_speaker_tags(text)).lower()
+    clean = _norm_space(_strip_speaker_tags(text))
+    clean_match = _norm_for_match(clean)
     if not clean:
         return []
+
+    clean_tokens = re.findall(r"[a-z0-9\u00C0-\u017F]+", clean_match)
 
     out = []
     seen = set()
     # Match longer multi-word symptoms first to avoid splitting e.g. chest pain.
     sorted_keywords = sorted(SYMPTOM_KEYWORDS, key=len, reverse=True)
     for kw in sorted_keywords:
-        pattern = r"\b" + re.escape(kw.lower()) + r"\b"
-        if re.search(pattern, clean):
+        if _symptom_keyword_matches_text(kw, clean_match, clean_tokens):
             key = kw.lower()
             if key not in seen:
                 seen.add(key)
@@ -771,9 +883,17 @@ def suggest_icd_codes_local(
     top_k: int = 3,
 ) -> list[dict]:
     """Suggest top ICD codes using local symptom extraction + fuzzy lookup."""
+    language = _detect_language(transcript)
     symptom_terms = _extract_symptom_terms(transcript)
     if not symptom_terms:
         return []
+
+    if language == "hu":
+        mapped = []
+        for term in symptom_terms:
+            mapped_term = HU_TO_EN_MEDICAL_TERMS.get(_norm_for_match(term), term)
+            mapped.append(mapped_term)
+        symptom_terms = mapped
 
     icd_entries = _parse_icd_code_lines(icd_path)
     if not icd_entries:
@@ -781,6 +901,20 @@ def suggest_icd_codes_local(
 
     descriptions = [desc for _, desc in icd_entries]
     by_desc = {desc: code for code, desc in icd_entries}
+
+    symptom_preferred_prefix = {
+        "fever": ("R50",),
+        "cough": ("R05",),
+        "shortness of breath": ("R06",),
+        "dyspnea": ("R06",),
+        "chest pain": ("R07",),
+        "abdominal pain": ("R10",),
+    }
+
+    infection_markers = {
+        "infection", "infectious", "viral", "bacterial", "sepsis", "pneumonia",
+        "influenza", "covid", "typhoid", "paratyphoid",
+    }
 
     scored: dict[str, dict] = {}
     for symptom in symptom_terms:
@@ -809,14 +943,28 @@ def suggest_icd_codes_local(
             code = by_desc.get(desc)
             if not code:
                 continue
+
+            score_adj = float(score)
+            symptom_key = symptom.lower().strip()
+            preferred = symptom_preferred_prefix.get(symptom_key, ())
+            if preferred and any(code.startswith(pref) for pref in preferred):
+                score_adj += 8.0
+
+            # Penalize infectious disease codes for generic symptom-only matching.
+            if symptom_key in {"fever", "cough", "shortness of breath", "chest pain"}:
+                desc_low = desc.lower()
+                code_upper = code.upper()
+                if code_upper.startswith(("A", "B")) and any(m in desc_low for m in infection_markers):
+                    score_adj -= 6.0
+
             key = f"{code}|{desc}"
             existing = scored.get(key)
-            if existing is None or score > existing["score"]:
+            if existing is None or score_adj > existing["score"]:
                 scored[key] = {
                     "code": code,
                     "description": desc,
                     "matched_symptom": symptom,
-                    "score": round(float(score), 2),
+                    "score": round(float(score_adj), 2),
                 }
 
     ranked = sorted(scored.values(), key=lambda x: x["score"], reverse=True)
@@ -825,27 +973,36 @@ def suggest_icd_codes_local(
 def build_retrieval_queries(transcript: str, max_queries: int = 4) -> list[str]:
     clean = _strip_speaker_tags(transcript)
     clean = _norm_space(clean)
+    language = _detect_language(clean)
+
+    retrieval_text = clean
+    if language == "hu":
+        retrieval_text = _translate_hu_to_en_text(clean)
 
     queries = []
 
     # 1. Chief complaint anchor query (kept diagnosis-focused, not code-focused).
-    complaint = _extract_chief_complaint(clean)
+    complaint = _extract_chief_complaint(retrieval_text)
     if complaint:
         queries.append(f"possible clinical diagnosis for: {complaint}")
 
     # 2. Symptom Sentences (Contextual search)
-    symptom_sentences = _extract_symptom_sentences(clean, max_items=3)
+    symptom_sentences = _extract_symptom_sentences(retrieval_text, max_items=3)
     for s in symptom_sentences:
         queries.append(f"clinical symptoms: {s}")
 
-    entities = _extract_medical_entities(clean, max_terms=10)
+    entities = _extract_medical_entities(retrieval_text, max_terms=10)
     if entities:
         # We create two types of entity queries for better recall
         queries.append("medical conditions: " + ", ".join(entities[:5]))
         queries.append("differential diagnosis: " + ", ".join(entities[5:10]))
 
     # 4. Fallback: Short Transcript Chunk
-    if clean:
+    if retrieval_text:
+        queries.append(retrieval_text[:500])
+
+    # Keep one native-language fallback query for bilingual recall.
+    if language == "hu" and clean:
         queries.append(clean[:500])
 
     # Unique & Truncate

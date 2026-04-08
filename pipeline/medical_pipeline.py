@@ -26,6 +26,7 @@ import os
 import time
 import mimetypes
 import importlib.util
+import re
 from openai import OpenAI
 
 from rag_pipeline import (
@@ -94,7 +95,10 @@ def _chroma_dir_missing_or_empty() -> bool:
 SUMMARY_PROMPT_TEMPLATE = """You are a clinical documentation assistant.
 Given the following doctor-patient consultation transcript, generate a concise medical summary.
 Skip pleasantries and small talk, and focus on the medically relevant information.
-Keep it in the original language of the transcript. Always include physical examination results.
+Output language must be strictly: {output_language}.
+Do not mix languages.
+Do not add parenthetical translations like "X (Y)" unless that parenthetical translation already exists in the transcript.
+Always include physical examination results in Key Symptoms.
 
 Retrieved context from medical knowledge base (if any):
 {context_block}
@@ -144,7 +148,9 @@ Summary:"""
 SOAP_PROMPT_TEMPLATE = """You are a clinical documentation assistant.
 Given the following doctor-patient consultation transcript, generate SOAP notes.
 Focus on extracting the Subjective, Objective, Assessment, and Plan sections.
-Keep it in the original language of the transcript.
+Output language must be strictly: {output_language}.
+Do not mix languages.
+Do not add parenthetical translations like "X (Y)" unless that parenthetical translation already exists in the transcript.
 
 Retrieved context from medical knowledge base (if any):
 {context_block}
@@ -168,6 +174,29 @@ The plan includes ordering a full panel of blood tests, including TSH, full bloo
 '''
 
 SOAP Notes:"""
+
+
+def _detect_transcript_language(transcript: str) -> str:
+    """Return a coarse language code for prompt control ("hu" or "en")."""
+    low = (transcript or "").lower()
+    if not low:
+        return "en"
+
+    hu_markers = {
+        "hogy", "vagy", "nem", "van", "volt", "mert", "beteg", "orvos", "fajdalom", "fájdalom",
+        "laz", "láz", "kohoges", "köhög", "hanyinger", "hányinger", "legszomj", "légszomj",
+    }
+    accent_hits = sum(low.count(ch) for ch in "áéíóöőúüű")
+    tokens = re.findall(r"[a-zA-Z\u00C0-\u017F]{2,}", low)
+    hu_hits = sum(1 for t in tokens if t in hu_markers)
+
+    if accent_hits >= 2 or hu_hits >= 2:
+        return "hu"
+    return "en"
+
+
+def _prompt_language_name(transcript: str) -> str:
+    return "Hungarian" if _detect_transcript_language(transcript) == "hu" else "English"
 
 
 # ── TRANSCRIPTION ─────────────────────────────────────────────────────────────
@@ -299,17 +328,19 @@ def summarize_transcript(
 ) -> str:
     print("── Step 3/4: Summary ──")
     client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
+    output_language = _prompt_language_name(transcript)
 
     context_block = build_context_block(rag_context, "", suggested_codes=suggested_codes)
     prompt = SUMMARY_PROMPT_TEMPLATE.format(
         transcript=transcript,
-        context_block=context_block
+        context_block=context_block,
+        output_language=output_language,
     )
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
-        max_tokens=512,
+        max_tokens=900,
         temperature=0.2
     )
 
@@ -327,17 +358,19 @@ def summarize_soap_notes(
 ) -> str:
     print("── Step 4/4: SOAP Notes ──")
     client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
+    output_language = _prompt_language_name(transcript)
 
     context_block = build_context_block(rag_context, "", suggested_codes=suggested_codes)
     prompt = SOAP_PROMPT_TEMPLATE.format(
         transcript=transcript,
-        context_block=context_block
+        context_block=context_block,
+        output_language=output_language,
     )
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
-        max_tokens=512,
+        max_tokens=900,
         temperature=0.2
     )
 
