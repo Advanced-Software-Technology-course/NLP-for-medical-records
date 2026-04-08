@@ -56,7 +56,12 @@ def _download_precompiled_rag(force_download: bool = False):
     if os.path.exists(chroma_dir_abs) and os.listdir(chroma_dir_abs) and not force_download:
         print(f"[RAG] Existing precompiled index found at {chroma_dir_abs}. Skipping download.")
         return
-
+    print("-" * 50)
+    print("\n")
+    print("[RAG]! ALERT ! THIS WILL TAKE A WHILE (at most 10 mins). ONLY HAPPENS ON FIRST RUN OR IF --rebuild-rag IS USED.")
+    print("This isn't a problem in production env since you'd build the index ahead of time, but for local testing it means the script will appear to hang for a while during the download/extract step. Please be patient and wait for the completion message before running any other steps or interrupting.")
+    print("\n")
+    print("-" * 50)
     downloader_path = os.path.abspath(
         os.path.join(script_dir, "..", "data", "download_pre_compiled_rag.py")
     )
@@ -89,8 +94,9 @@ def _chroma_dir_missing_or_empty() -> bool:
 SUMMARY_PROMPT_TEMPLATE = """You are a clinical documentation assistant.
 Given the following doctor-patient consultation transcript, generate a concise medical summary.
 Skip pleasantries and small talk, and focus on the medically relevant information.
-Keep it in the original language of the transcript.
+Keep it in the original language of the transcript. Always include physical examination results.
 
+Retrieved context from medical knowledge base (if any):
 {context_block}
 
 Include:
@@ -100,7 +106,7 @@ Include:
 - Diagnosis or working diagnosis (if mentioned)
 - Treatment plan or next steps (if mentioned)
 
-Flag any parts you are uncertain about with '[UNCERTAIN]'.
+Flag any parts you are uncertain about with '[UNCERTAIN]'. Use it liberally for anything that is not explicitly stated or is ambiguous in the transcript.
 
 Transcript:
 {transcript}
@@ -140,6 +146,7 @@ Given the following doctor-patient consultation transcript, generate SOAP notes.
 Focus on extracting the Subjective, Objective, Assessment, and Plan sections.
 Keep it in the original language of the transcript.
 
+Retrieved context from medical knowledge base (if any):
 {context_block}
 
 Transcript:

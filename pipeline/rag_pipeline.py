@@ -31,6 +31,9 @@ DEFAULT_CHUNK_SIZE = 1000
 DEFAULT_CHUNK_OVERLAP = 200
 DEFAULT_BATCH_SIZE = 2000
 MANIFEST_NAME = "rag_manifest.json"
+PREFER_BIOMED_EMBEDDINGS = os.getenv("RAG_PREFER_BIOMED_EMBEDDINGS", "0").strip().lower() in {
+    "1", "true", "yes", "on"
+}
 
 KNOWN_MED_ABBREV_RE = re.compile(
     r"\b(EKG|EEG|MRI|CT|UH|BP|HR|RR|SpO2|BMI|BNO|Hgb|WBC|RBC|CRP|PCT|INR|TSH|T3|T4|"
@@ -48,7 +51,7 @@ LATIN_MED_SUFFIX_RE = re.compile(
 def _build_embedding_function(embedding_model: str = DEFAULT_EMBED_MODEL):
     """Create embedding function and return (embedding_fn, effective_model_name)."""
     encode_kwargs = {'normalize_embeddings': True}
-    if embedding_model == DEFAULT_EMBED_MODEL:
+    if embedding_model == DEFAULT_EMBED_MODEL and PREFER_BIOMED_EMBEDDINGS:
         # Prefer a biomedical model when available.
         preferred_model = "NeuML/pubmedbert-base-embeddings"
         try:
@@ -227,8 +230,49 @@ LAB_TRIGGER_RE = re.compile(
     re.IGNORECASE,
 )
 
+MEDICATION_FOCUS_RE = re.compile(
+    r"\b(medication|medicine|drug|dose|dosage|tablet|pill|capsule|prescription|"
+    r"interaction|side\s*effect|contraindication|allergy\s*to)\b",
+    re.IGNORECASE,
+)
+
 def _transcript_mentions_labs(transcript: str) -> bool:
     return bool(LAB_TRIGGER_RE.search(transcript))
+
+
+def _query_likely_medication_focused(text: str) -> bool:
+    return bool(MEDICATION_FOCUS_RE.search(text or ""))
+
+
+MED_QUERY_DRUG_RE = re.compile(
+    r"\b(?:taking|on|use|using|used|prescribed|medication|medicine|drug)\s+([a-zA-Z][a-zA-Z0-9\-]{2,})\b",
+    re.IGNORECASE,
+)
+DDI_PAIR_RE = re.compile(r"drug_pair:\s*([^+\n]+)\+\s*([^\n]+)", re.IGNORECASE)
+
+
+def _extract_query_medication_terms(text: str) -> set[str]:
+    terms: set[str] = set()
+    for m in MED_QUERY_DRUG_RE.finditer(text or ""):
+        term = m.group(1).strip().lower()
+        if len(term) >= 3:
+            terms.add(term)
+    return terms
+
+
+def _extract_ddi_pair_terms(doc: Document) -> set[str]:
+    content = doc.page_content or ""
+    m = DDI_PAIR_RE.search(content)
+    if not m:
+        return set()
+    a = m.group(1).strip().lower()
+    b = m.group(2).strip().lower()
+    out = set()
+    if len(a) >= 3:
+        out.add(a)
+    if len(b) >= 3:
+        out.add(b)
+    return out
 
 def _tokenize_for_overlap(text: str) -> set:
     return set(
@@ -252,6 +296,25 @@ def _truncate_snippet(text: str, max_chars: int) -> str:
     if " " in cut:
         cut = cut.rsplit(" ", 1)[0]
     return cut + " ..."
+
+
+def _doc_category(doc: Document) -> str:
+    """Map a document to a broad knowledge category for diversity-aware retrieval."""
+    meta = doc.metadata or {}
+    doc_type = str(meta.get("doc_type", "")).lower()
+    source = str(meta.get("source", "")).lower()
+
+    if doc_type == "drug_monograph":
+        return "drug_monograph"
+
+    if source.endswith(".csv"):
+        if "ddi" in source:
+            return "drug_interactions"
+        if "lab" in source or "loinc" in source:
+            return "lab_reference"
+        return "csv_reference"
+
+    return "clinical_text"
 
 
 def _normalize_whitelist(csv_whitelist: Optional[List[str]]) -> List[str]:
@@ -804,6 +867,19 @@ Gets relevant context from the RAG vectorstore based on the transcript query, us
 
 from concurrent.futures import ThreadPoolExecutor
 
+
+def _similarity_search_with_optional_filter(vectorstore, query: str, k: int, where: Optional[dict] = None):
+    """Run similarity search, using metadata filter only when supported by the backend."""
+    try:
+        if where:
+            return vectorstore.similarity_search_with_score(query, k=k, filter=where)
+        return vectorstore.similarity_search_with_score(query, k=k)
+    except TypeError:
+        # Some vectorstore adapters may not accept `filter`; fall back to unfiltered search.
+        return vectorstore.similarity_search_with_score(query, k=k)
+    except Exception:
+        return []
+
 def get_relevant_context(
     query: str,
     vectorstore,
@@ -812,29 +888,47 @@ def get_relevant_context(
     max_queries: int = 4,
     min_lexical_overlap: float = 0.1,
     max_chars_per_snippet: int = 280,
+    include_icd_suggestions: bool = False,
+    icd_path: str = DEFAULT_ICD_CODES_PATH,
+    icd_top_k: int = 3,
 ) -> str:
     if vectorstore is None:
         return ""
 
     retrieval_queries = build_retrieval_queries(query, max_queries=max_queries)
+    pool_k = max(retrieve_k * 2, 12)
+    medication_focused = _query_likely_medication_focused(query)
+    query_med_terms = _extract_query_medication_terms(query)
+    allow_ddi = medication_focused or bool(query_med_terms)
     
     # 1. Threaded Search Task
     def _threaded_search(rq):
         try:
-            # We return the query string AND the results so we can use rq later
-            return rq, vectorstore.similarity_search_with_score(rq, k=retrieve_k)
+            # Return query + search results so scoring can remain query-aware.
+            return rq, _similarity_search_with_optional_filter(vectorstore, rq, k=pool_k), False
         except Exception:
-            return rq, []
+            return rq, [], False
 
     # 2. Fire all queries in parallel
     with ThreadPoolExecutor(max_workers=max_queries) as executor:
         # map returns results in the same order as retrieval_queries
         all_results = list(executor.map(_threaded_search, retrieval_queries))
 
+    # Run category-targeted retrieval for key CSV sources to improve source diversity.
+    targeted_filters = [{"source": "clinical_lab_facts.csv"}]
+    if allow_ddi:
+        targeted_filters.append({"source": "DDI_data_clean.csv"})
+    targeted_k = max(4, retrieve_k // 2)
+    for rq in retrieval_queries[:2]:
+        for where in targeted_filters:
+            raw = _similarity_search_with_optional_filter(vectorstore, rq, k=targeted_k, where=where)
+            if raw:
+                all_results.append((rq, raw, True))
+
     merged = {}
 
     # 3. Process the results we already fetched
-    for rq, raw in all_results: # <--- Iterating through the pre-fetched results
+    for rq, raw, is_targeted in all_results: # <--- Iterating through the pre-fetched results
         if not raw:
             continue
 
@@ -868,7 +962,7 @@ def get_relevant_context(
         # 4. Lexical Filter and Merging
         for doc, semantic in docs_with_semantic:
             lex = _lexical_overlap_ratio(rq, doc.page_content)
-            if lex < min_lexical_overlap:
+            if not is_targeted and lex < min_lexical_overlap:
                 continue
 
             source = doc.metadata.get("source", "unknown")
@@ -904,20 +998,160 @@ def get_relevant_context(
         reverse=True,
     )
 
+    def _rank_score(item: dict) -> float:
+        return (
+            0.65 * (item["semantic_sum"] / item["hits"])
+            + 0.25 * item["lex_max"]
+            + 0.10 * (item["hits"] / max_hits)
+        )
+
     snippets = []
     seen_text = set()
+    selected_records: list[dict] = []
+    max_drug_monographs = max(2, final_k // 2) if medication_focused else 1
+    max_lab_references = 2 if _transcript_mentions_labs(query) else 1
 
+    # Prefer one high-quality snippet per available category first, then fill by score.
+    category_top: dict[str, dict] = {}
     for item in ranked:
+        cat = _doc_category(item["doc"])
+        if cat not in category_top:
+            category_top[cat] = item
+
+    category_order = sorted(
+        category_top.keys(),
+        key=lambda cat: _rank_score(category_top[cat]),
+        reverse=True,
+    )
+
+    selected_categories = []
+    for cat in category_order:
+        item = category_top[cat]
+        if cat == "drug_monograph":
+            # For symptom-focused queries, prevent drug warnings from dominating.
+            existing_drug = sum(1 for rec in selected_records if rec["cat"] == "drug_monograph")
+            if existing_drug >= max_drug_monographs:
+                continue
+        if cat == "lab_reference":
+            existing_lab = sum(1 for rec in selected_records if rec["cat"] == "lab_reference")
+            if existing_lab >= max_lab_references:
+                continue
+        if cat == "drug_interactions" and not allow_ddi:
+            continue
+
         snippet = _truncate_snippet(item["doc"].page_content, max_chars_per_snippet)
         key = snippet.lower()
         if not snippet or key in seen_text:
             continue
         seen_text.add(key)
         snippets.append(snippet)
+        selected_records.append({"item": item, "cat": cat, "snippet": snippet, "score": _rank_score(item)})
+        selected_categories.append(cat)
         if len(snippets) >= final_k:
             break
 
-    return "\n\n".join(snippets)
+    # Fill remaining slots by global score while keeping each category from dominating.
+    if len(snippets) < final_k:
+        max_per_category = max(2, (final_k + 1) // 2)
+        selected_doc_ids = {id(category_top[cat]["doc"]) for cat in selected_categories}
+
+        category_selected = {}
+        for cat in selected_categories:
+            category_selected[cat] = category_selected.get(cat, 0) + 1
+
+        for item in ranked:
+            if len(snippets) >= final_k:
+                break
+
+            doc = item["doc"]
+            if id(doc) in selected_doc_ids:
+                continue
+
+            cat = _doc_category(doc)
+            if cat == "drug_monograph":
+                if category_selected.get(cat, 0) >= max_drug_monographs:
+                    continue
+            if cat == "lab_reference":
+                if category_selected.get(cat, 0) >= max_lab_references:
+                    continue
+            if cat == "drug_interactions" and not allow_ddi:
+                continue
+            if category_selected.get(cat, 0) >= max_per_category:
+                continue
+
+            snippet = _truncate_snippet(doc.page_content, max_chars_per_snippet)
+            key = snippet.lower()
+            if not snippet or key in seen_text:
+                continue
+
+            seen_text.add(key)
+            snippets.append(snippet)
+            selected_doc_ids.add(id(doc))
+            category_selected[cat] = category_selected.get(cat, 0) + 1
+            selected_records.append({"item": item, "cat": cat, "snippet": snippet, "score": _rank_score(item)})
+
+    # Reserve at least one DDI snippet when available and final_k allows diversity.
+    if final_k >= 3 and allow_ddi:
+        best_ddi = None
+        for item in ranked:
+            if _doc_category(item["doc"]) != "drug_interactions":
+                continue
+            if query_med_terms:
+                pair_terms = _extract_ddi_pair_terms(item["doc"])
+                if pair_terms and not (pair_terms.intersection(query_med_terms)):
+                    continue
+            best_ddi = item
+            break
+        has_ddi = any(rec["cat"] == "drug_interactions" for rec in selected_records)
+
+        if best_ddi is not None and not has_ddi:
+            ddi_snippet = _truncate_snippet(best_ddi["doc"].page_content, max_chars_per_snippet)
+            ddi_key = ddi_snippet.lower()
+            if ddi_snippet and ddi_key not in seen_text:
+                ddi_record = {
+                    "item": best_ddi,
+                    "cat": "drug_interactions",
+                    "snippet": ddi_snippet,
+                    "score": _rank_score(best_ddi),
+                }
+
+                if len(selected_records) < final_k:
+                    selected_records.append(ddi_record)
+                    seen_text.add(ddi_key)
+                else:
+                    replace_candidates = [
+                        rec for rec in selected_records if rec["cat"] != "drug_interactions"
+                    ]
+                    if replace_candidates:
+                        # Replace the weakest non-DDI entry, preferring drug monograph replacement.
+                        monograph_candidates = [rec for rec in replace_candidates if rec["cat"] == "drug_monograph"]
+                        target_pool = monograph_candidates if monograph_candidates else replace_candidates
+                        to_replace = min(target_pool, key=lambda rec: rec["score"])
+                        selected_records.remove(to_replace)
+                        selected_records.append(ddi_record)
+                        seen_text.discard(to_replace["snippet"].lower())
+                        seen_text.add(ddi_key)
+
+    selected_records.sort(key=lambda rec: rec["score"], reverse=True)
+    snippets = [rec["snippet"] for rec in selected_records[:final_k]]
+
+    context = "\n\n".join(snippets)
+
+    if include_icd_suggestions:
+        codes = suggest_icd_codes_local(query, icd_path=icd_path, top_k=icd_top_k)
+        if codes:
+            lines = ["Suggested ICD-10 codes (local lookup):"]
+            for item in codes:
+                code = item.get("code", "")
+                desc = item.get("description", "")
+                symptom = item.get("matched_symptom", "")
+                score = item.get("score", "")
+                if code and desc:
+                    lines.append(f"- {code}: {desc} (matched symptom: {symptom}, score={score})")
+            if len(lines) > 1:
+                context = f"{context}\n\n" + "\n".join(lines) if context else "\n".join(lines)
+
+    return context
 
 
 def build_context_block(

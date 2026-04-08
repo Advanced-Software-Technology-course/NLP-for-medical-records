@@ -1,0 +1,19 @@
+**SPEAKER_0:** Good afternoon. What can I do for you today?
+**SPEAKER_1:** Hi, Doctor. I’ve had this cough that just won’t go away. It’s been about three weeks now, ever since I had that cold at the start of the month.
+**SPEAKER_0:** I see. Is it a productive cough, or is it dry?
+**SPEAKER_1:** Mostly dry and hacking. Sometimes, if I cough really hard, a little bit of clear phlegm comes up, but usually nothing.
+**SPEAKER_0:** Does it get worse at any specific time of day?
+**SPEAKER_1:** Definitely at night. As soon as I lie down, I start hacking. It’s keeping me and my wife awake. Also, I’ve noticed some chest tightness when I’m at the gym.
+**SPEAKER_0:** Any shortness of breath or wheezing?
+**SPEAKER_1:** A little bit of wheezing when I’m running on the treadmill, yeah. I thought I was just out of shape from being sick, but it feels... tighter than usual.
+**SPEAKER_0:** Any fever, chills, or night sweats?
+**SPEAKER_1:** No, nothing like that.
+**SPEAKER_0:** Do you have a history of asthma or allergies?
+**SPEAKER_1:** I had "exercise-induced" something as a kid, but I haven't used an inhaler in probably fifteen years. I do get hay fever in the spring, though.
+**SPEAKER_0:** Okay. Let’s take a look. I'm going to listen to your lungs. ... Take a deep breath in. And out. Again. ... Okay, I can hear some faint expiratory wheezing in the lower lobes. Your oxygen saturation is good at 98%, and your temperature is normal at 36.8°C. Your heart rate is a bit high at 92 beats per minute.
+**SPEAKER_1:** Is it pneumonia?
+**SPEAKER_0:** Unlikely, given the lack of fever and the clear phlegm. It sounds more like post-viral bronchial hyper-reactivity, or perhaps your childhood asthma is flaring up after the infection.
+**SPEAKER_1:** What's the plan then?
+**SPEAKER_0:** I’m going to prescribe a Ventolin inhaler—that's Albuterol—to use as needed for the tightness, and a five-day course of Prednisolone to bring down the inflammation in your airways. I also want you to get a chest X-ray just to be 100% sure we aren't missing a lingering infection.
+**SPEAKER_1:** Okay, sounds good.
+**SPEAKER_0:** If the cough isn't significantly better in a week, or if you start running a fever, call the office immediately.
