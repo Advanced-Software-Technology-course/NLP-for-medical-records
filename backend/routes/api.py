@@ -2,7 +2,8 @@ import os
 import sys
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
-from models import Consultation, db
+from models import db
+import models as md
 
 # Add project root to sys.path so we can import 'pipeline'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -57,7 +58,7 @@ def process_audio():
             soap_notes = summarize_soap_notes(transcript, groq_token)
 
             # 4. Save to DB
-            consultation = Consultation(
+            consultation = md.Consultation(
                 transcript=transcript,
                 summary=summary,
                 soap_notes=soap_notes
@@ -77,7 +78,33 @@ def process_audio():
 
     return jsonify({'error': 'Invalid file type'}), 400
 
+@api_bp.route('/add-doctor', methods=['POST'])
+def add_doctor():
+    doctor = md.Doctor(
+        title=request.json.get('title'),
+        first_name=request.json.get('first_name'),
+        last_name=request.json.get('last_name')
+    )
+    db.session.add(doctor)
+    db.session.commit()
+
+    return jsonify({'message': 'Doctor added'}), 200
+
+@api_bp.route('/add-patient', methods=['POST'])
+def add_patient():
+    patient = md.Patient(
+        title=request.json.get('title'),
+        first_name=request.json.get('first_name'),
+        last_name=request.json.get('last_name'),
+        date_of_birth=request.json.get('date_of_birth'),
+        taj_number=request.json.get('taj_number')
+    )
+    db.session.add(patient)
+    db.session.commit()
+
+    return jsonify({'message': 'Patient added'}), 200
+
 @api_bp.route('/history', methods=['GET'])
 def get_history():
-    consultations = Consultation.query.order_by(Consultation.created_at.desc()).all()
+    consultations = md.Consultation.query.order_by(md.Consultation.created_at.desc()).all()
     return jsonify([c.to_dict() for c in consultations]), 200
