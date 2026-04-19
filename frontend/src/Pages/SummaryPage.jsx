@@ -15,12 +15,28 @@ export default function SummaryPage({ onNavigate, doctorName, patientName, durat
   const [aiSummary, setAiSummary] = useState(MOCK_SUMMARY.aiSummary);
   const [soap, setSoap] = useState(MOCK_SUMMARY.soap);
 
-  useEffect(() => {
-    if (data) {
-      if (data.aiSummary) setAiSummary(data.aiSummary);
-      if (data.soap) setSoap(data.soap);
+useEffect(() => {
+  if (data) {
+    console.log("REAL DATA:", data);
+
+
+    if (data.summary) setAiSummary(data.summary);
+
+
+    if (data.soap_notes) {
+      const soapText = data.soap_notes;
+
+      const parsed = {
+        subjective: soapText.split("**O**")[0]?.replace("**S** - Subjective:", "").trim(),
+        objective: soapText.split("**O** - Objective:")[1]?.split("**A**")[0]?.trim(),
+        assessment: soapText.split("**A** - Assessment:")[1]?.split("**P**")[0]?.trim(),
+        plan: soapText.split("**P** - Plan:")[1]?.trim(),
+      };
+
+      setSoap(parsed);
     }
-  }, [data]);
+  }
+}, [data]);
 
   const cols = ["Subjective", "Objective", "Assessment", "Plan"];
   const keys = ["subjective", "objective", "assessment", "plan"];

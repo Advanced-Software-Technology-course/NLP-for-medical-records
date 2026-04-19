@@ -4,6 +4,7 @@ import HomePage from './Pages/HomePage';
 import TranscriptPage from './Pages/TranscriptPage';
 import SummaryPage from './Pages/SummaryPage';
 import SettingsPage from './Pages/SettingPage';
+import HistoryPage from './Pages/HistoryPage';
 
 const DOCTOR_NAME = 'Dr. Smith';
 const PATIENT_NAME = 'John Doe';
@@ -12,6 +13,12 @@ export default function App() {
   const [active, setActive] = useState('Home');
   const [duration, setDuration] = useState('00:00');
   const [consultationData, setConsultationData] = useState(null);
+
+  const handleLoadConsultation = (c) => {
+    setConsultationData(c);
+    setDuration(c.duration ?? '—');
+    setActive('Summary');
+  };
 
   const renderPage = () => {
     switch (active) {
@@ -41,6 +48,13 @@ export default function App() {
             patientName={PATIENT_NAME}
             duration={duration}
             data={consultationData}
+          />
+        );
+      case 'History':
+        return (
+          <HistoryPage
+            onNavigate={setActive}
+            onLoadConsultation={handleLoadConsultation}
           />
         );
       default:

@@ -1,25 +1,44 @@
-export default function Waveform({ active }) {
-  const bars = Array.from({ length: 48 });
+import { useEffect, useState } from "react";
+
+export default function Waveform({ active, duration = 30, currentTime = 0 }) {
+ 
+  const totalBars = 48;
+  const [heights, setHeights] = useState(Array.from({ length: totalBars }).map(() => 4));
+
+  useEffect(() => {
+    if (!active) return;
+
+    const interval = setInterval(() => {
+      setHeights(prev =>
+        prev.map((h, i) => {
+        
+          return Math.sin(i * 0.6 + Date.now() / 300) * 10 +
+                 Math.sin(i * 1.3 + Date.now() / 500) * 6 + 14;
+        })
+      );
+    }, 50); // update 20 times per second
+
+    return () => clearInterval(interval);
+  }, [active]);
+
+
+  const activeBars = Math.floor((currentTime / duration) * totalBars);
+
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 2, height: 36 }}>
-      {bars.map((_, i) => {
-        const h = active
-          ? Math.sin(i * 0.6) * 10 + Math.sin(i * 1.3) * 6 + 14
-          : 4 + Math.abs(Math.sin(i * 0.5)) * 10;
-        return (
-          <div
-            key={i}
-            style={{
-              width: 3,
-              borderRadius: 2,
-              height: h,
-              background: active ? "#2563eb" : "#94a3b8",
-              opacity: active ? 0.7 + Math.sin(i) * 0.3 : 0.5,
-              transition: "height 0.4s ease",
-            }}
-          />
-        );
-      })}
+      {heights.map((h, i) => (
+        <div
+          key={i}
+          style={{
+            width: 3,
+            borderRadius: 2,
+            height: h,
+            background: i <= activeBars ? "#2563eb" : "#94a3b8",
+            opacity: i <= activeBars ? 0.7 : 0.4,
+            transition: "height 0.05s linear, background 0.2s",
+          }}
+        />
+      ))}
     </div>
   );
 }

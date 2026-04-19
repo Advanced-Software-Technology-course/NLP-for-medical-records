@@ -26,6 +26,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @api_bp.route('/process', methods=['POST'])
+@api_bp.route('/process', methods=['POST'])
 def process_audio():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
@@ -44,16 +45,25 @@ def process_audio():
         try:
             gladia_token = current_app.config.get('GLADIA_TOKEN')
             groq_token = current_app.config.get('GROQ_TOKEN')
-
+ 
             if not gladia_token or not groq_token:
-               print("Warning: Missing API tokens.")
-
+                print("Warning: Missing API tokens.")
+ 
             # 1. Transcribe
-            transcript = transcribe_audio(filepath, gladia_token)
+            transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(filepath, gladia_token)
 
+            # Debug prints
+            print("SENTENCE CONFIDENCES:", sentence_confidences)
+            print("TRANSCRIPTION CONFIDENCE AVG:", transcription_confidence_avg)
+
+            if not transcript:
+                transcript = ""
+ 
+            print("TRANSCRIPT:", transcript)  # debug log
+ 
             # 2. Summarize
             summary = summarize_transcript(transcript, groq_token)
-
+ 
             # 3. SOAP Notes
             soap_notes = summarize_soap_notes(transcript, groq_token)
 
@@ -66,9 +76,16 @@ def process_audio():
             db.session.add(consultation)
             db.session.commit()
 
+            # 5. Return response including confidence scores
             return jsonify({
                 'message': 'Processing complete',
-                'data': consultation.to_dict()
+                'data': {
+                    'transcript': transcript,
+                    'summary': summary,
+                    'soap_notes': soap_notes,
+                    'sentence_confidences': sentence_confidences,
+                    'transcription_confidence_avg': transcription_confidence_avg
+                }
             }), 200
 
         except Exception as e:
@@ -77,32 +94,6 @@ def process_audio():
             return jsonify({'error': str(e)}), 500
 
     return jsonify({'error': 'Invalid file type'}), 400
-
-@api_bp.route('/add-doctor', methods=['POST'])
-def add_doctor():
-    doctor = md.Doctor(
-        title=request.json.get('title'),
-        first_name=request.json.get('first_name'),
-        last_name=request.json.get('last_name')
-    )
-    db.session.add(doctor)
-    db.session.commit()
-
-    return jsonify({'message': 'Doctor added'}), 200
-
-@api_bp.route('/add-patient', methods=['POST'])
-def add_patient():
-    patient = md.Patient(
-        title=request.json.get('title'),
-        first_name=request.json.get('first_name'),
-        last_name=request.json.get('last_name'),
-        date_of_birth=request.json.get('date_of_birth'),
-        taj_number=request.json.get('taj_number')
-    )
-    db.session.add(patient)
-    db.session.commit()
-
-    return jsonify({'message': 'Patient added'}), 200
 
 @api_bp.route('/history', methods=['GET'])
 def get_history():

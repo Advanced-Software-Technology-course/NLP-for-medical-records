@@ -1,4 +1,4 @@
-const NAV_ITEMS = ["Home", "Transcript", "Summary", "Settings"];
+const NAV_ITEMS = ["Home", "Transcript", "Summary", "Settings", "History"];
 
 export default function Navbar({ active, onNavigate }) {
   return (
