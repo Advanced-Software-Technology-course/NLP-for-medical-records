@@ -26,7 +26,6 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @api_bp.route('/process', methods=['POST'])
-@api_bp.route('/process', methods=['POST'])
 def process_audio():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
