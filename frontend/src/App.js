@@ -6,26 +6,37 @@ import SummaryPage from './Pages/SummaryPage';
 import SettingsPage from './Pages/SettingPage';
 import HistoryPage from './Pages/HistoryPage';
 
-const DOCTOR_NAME = 'Dr. Smith';
-const PATIENT_NAME = 'John Doe';
-
 export default function App() {
   const [active, setActive] = useState('Home');
   const [duration, setDuration] = useState('00:00');
   const [consultationData, setConsultationData] = useState(null);
+  const [sessionData, setSessionData] = useState({ doctorName: '', patientName: '' });
+
+  const handleNavigate = (page, props) => {
+    if (props?.doctorName || props?.patientName) {
+      setSessionData({ doctorName: props.doctorName, patientName: props.patientName });
+    }
+    if (props?.data) setConsultationData(props.data);
+    if (props?.duration) setDuration(props.duration);
+    setActive(page);
+  };
 
   const handleLoadConsultation = (c) => {
-    setConsultationData(c);
-    setDuration(c.duration ?? '—');
-    setActive('Summary');
-  };
+  setConsultationData(c);
+  setDuration(c.duration ?? '—');
+  setSessionData({
+    doctorName:  c.doctorName  ?? c.doctor_name  ?? '',
+    patientName: c.patientName ?? c.patient_name ?? '',
+  });
+  setActive('Summary');
+};
 
   const renderPage = () => {
     switch (active) {
       case 'Home':
         return (
           <HomePage
-            onNavigate={setActive}
+            onNavigate={handleNavigate}
             onDurationSave={setDuration}
             onDataReceived={setConsultationData}
           />
@@ -33,9 +44,9 @@ export default function App() {
       case 'Transcript':
         return (
           <TranscriptPage
-            onNavigate={setActive}
-            doctorName={DOCTOR_NAME}
-            patientName={PATIENT_NAME}
+            onNavigate={handleNavigate}
+            doctorName={sessionData.doctorName}
+            patientName={sessionData.patientName}
             duration={duration}
             data={consultationData}
           />
@@ -43,9 +54,9 @@ export default function App() {
       case 'Summary':
         return (
           <SummaryPage
-            onNavigate={setActive}
-            doctorName={DOCTOR_NAME}
-            patientName={PATIENT_NAME}
+            onNavigate={handleNavigate}
+            doctorName={sessionData.doctorName}
+            patientName={sessionData.patientName}
             duration={duration}
             data={consultationData}
           />
@@ -63,14 +74,7 @@ export default function App() {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        fontFamily: "'Google Sans', sans-serif",
-      }}
-    >
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', fontFamily: "'Google Sans', sans-serif" }}>
       <Navbar active={active} onNavigate={setActive} />
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {renderPage()}

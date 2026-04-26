@@ -280,7 +280,7 @@ function SessionModal({ onConfirm, onCancel }) {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function HomePage({ onNavigate, onDurationSave, onDataReceived }) {
+export default function HomePage({ onNavigate, onDurationSave, onDataReceived, onSessionData }) {
   const [recording, setRecording]   = useState(false);
   const [seconds, setSeconds]       = useState(0);
   const [showHelp, setShowHelp]     = useState(false);
@@ -343,7 +343,7 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
 
     const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
     const formData  = new FormData();
-    formData.append("file", audioBlob, "recording.wav");
+    formData.append("file", audioBlob, "recording.webm");  // must match ALLOWED_EXTENSIONS on backend
 
     if (sessionDataRef.current) {
       formData.append("sessionData", JSON.stringify(sessionDataRef.current));
@@ -364,8 +364,14 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
         onDurationSave(`${mm}:${ss}`);
 
         if (onDataReceived) onDataReceived(data.data);
+        if (onSessionData && data.data?.session) onSessionData(data.data.session);
 
-        onNavigate("Transcript");
+        onNavigate("Transcript", {
+  data: data.data,
+  doctorName: sessionDataRef.current?.doctorName,
+  patientName: sessionDataRef.current?.patientName,
+  duration: `${mm}:${ss}`
+});
       } else {
         alert(`Error: ${data.error || "Failed to process audio"}`);
       }

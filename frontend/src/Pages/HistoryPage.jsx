@@ -52,17 +52,18 @@ export default function HistoryPage({ onNavigate, onLoadConsultation }) {
         if (!response.ok) throw new Error("API_ERROR");
         const data = await response.json();
         const mapped = data.map((c) => ({
-            id: c.id,
-            summary: c.aiSummary || "No summary available.",
-            transcript: c.transcript,
-            soap: c.soap,
-            date: c.created_at ? c.created_at.split("T")[0] : "—",
-            time: c.created_at ? c.created_at.split("T")[1]?.slice(0, 5) : "—",
-            patientName: c.patient_name || "Unknown Patient",
-            doctorName:  c.doctor_name  || "Unknown Doctor",
-            duration:    c.duration     || "—",
-        }));
+  id: c.id,
+  summary:     c.ai_summary   || c.aiSummary   || c.summary   || "No summary available.",
+  transcript:  c.transcript,
+  soap:        c.soap,
+  date:        c.created_at ? c.created_at.split("T")[0] : "—",
+  time:        c.created_at ? c.created_at.split("T")[1]?.slice(0, 5) : "—",
+  patientName: c.patient_name || c.patientName || "Unknown Patient",
+  doctorName:  c.doctor_name  || c.doctorName  || "Unknown Doctor",
+  duration:    c.duration     || "—",
+}));
         setConsultations(mapped);
+        console.log("First record from backend:", data[0]);
       } catch (err) {
         console.warn("Could not load history from backend:", err);
         setConsultations(MOCK_HISTORY);
