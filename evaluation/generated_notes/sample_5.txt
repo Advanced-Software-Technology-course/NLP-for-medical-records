@@ -1,0 +1,23 @@
+'''
+**Chief Complaint:** Right finger pain.
+
+**History of Present Illness:**
+The patient reports pain in her right finger after a skiing accident, where her finger got bent backward while attempting moguls. The pain is exacerbated by movement and has not improved with ice and ibuprofen.
+- **Pertinent Negatives:** No fever or other systemic symptoms mentioned.
+
+**Relevant Medical History:**
+- Constipation: Managed with Miralax.
+- Past Surgery: Appendectomy at age 18.
+
+**Physical Examination & Vitals:**
+- **Key Symptoms:** Tenderness over the distal phalanx of the right index finger, pain on flexion, but no tenderness over the proximal joint or metacarpophalangeal joint.
+- Vitals: [UNCERTAIN - no specific vitals mentioned in the transcript].
+
+**Assessment & Rationale:**
+1. Right index finger contusion: Suggested by the mechanism of injury, tenderness over the distal phalanx, and pain on flexion, with normal X-ray findings.
+
+**Treatment Plan & Next Steps:**
+- Medication: Motrin 600mg every 6 hours for about a week.
+- Supportive Care: Aluminum foam splint for the affected finger.
+- Follow-up: Return in a week if symptoms do not improve.
+'''

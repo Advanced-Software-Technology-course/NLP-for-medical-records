@@ -1,0 +1,28 @@
+'''
+**Chief Complaint:** Feeling "out of sorts," lack of energy, fatigue, and occasional lightheadedness.
+
+**History of Present Illness:**
+The patient reports feeling tired and fatigued over the past five weeks, which he attributes to either the change in seasons or increased physical activity due to home renovations. He also experiences bloating and shortness of breath when exerting energy, but not at rest. He denies fever, chills, and vomiting.
+- **Pertinent Negatives:** No chest pain at rest, but slight cramps that resolve within an hour. No nausea or diarrhea.
+
+**Relevant Medical History:**
+- Congestive Heart Failure (CHF): Managed with medications.
+- Hypertension: Managed with lisinopril 20 mg a day.
+
+**Physical Examination & Vitals:**
+- Vitals: Blood pressure, heart rate, and oxygenation are within normal limits.
+- Cardiovascular: Jugular venous distention to about 8 centimeters, 3/6 systolic ejection murmur, and fine crackles at the bases bilaterally.
+- Extremities: 1+ pitting edema in the lower extremities.
+
+**Assessment & Rationale:**
+1. Congestive Heart Failure: Exacerbation suggested by symptoms of fatigue, shortness of breath, and physical examination findings of jugular venous distention and pitting edema.
+2. Hypertension: Well-managed with current medication.
+
+**Treatment Plan & Next Steps:**
+- Medication: Increase lasix to 80 mg once a day for CHF.
+- Lifestyle: Weigh himself daily and report any significant weight gain or increase in symptoms.
+- Diagnostics: Order an echocardiogram to assess heart function.
+- Medication: Continue lisinopril 20 mg a day for hypertension.
+- Lifestyle: Continue to monitor blood pressure at home and report any elevations.
+- Follow-up: The doctor will be in touch after receiving test results to adjust the plan as necessary.
+'''

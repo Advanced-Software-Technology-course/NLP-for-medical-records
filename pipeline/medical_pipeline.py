@@ -28,14 +28,22 @@ import mimetypes
 import importlib.util
 import re
 from openai import OpenAI
+from pathlib import Path
 
-from rag_pipeline import (
-    setup_knowledge_base,
-    load_existing_vectorstore,
-    get_relevant_context,
-    build_context_block,
-    suggest_icd_codes_local,
-)
+RAG_IMPORT_ERROR = None
+try:
+    from rag_pipeline import (
+        setup_knowledge_base,
+        load_existing_vectorstore,
+        get_relevant_context,
+        suggest_icd_codes_local,
+    )
+except Exception as ex:
+    setup_knowledge_base = None
+    load_existing_vectorstore = None
+    get_relevant_context = None
+    suggest_icd_codes_local = None
+    RAG_IMPORT_ERROR = ex
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 
@@ -92,54 +100,60 @@ def _chroma_dir_missing_or_empty() -> bool:
 
 # ── PROMPT TEMPLATES ──────────────────────────────────────────────────────────
 
-SUMMARY_PROMPT_TEMPLATE = """You are a clinical documentation assistant.
-Given the following doctor-patient consultation transcript, generate a concise medical summary.
-Skip pleasantries and small talk, and focus on the medically relevant information.
+SUMMARY_PROMPT_TEMPLATE = """You are an expert clinical documentation assistant.
+Given the following doctor-patient consultation transcript, generate a medical summary.
+Skip pleasantries and small talk, and focus on the medically relevant information, the 'why' behind medical decisions, and the distinction between subjective and objective data.
 Output language must be strictly: {output_language}.
 Do not mix languages.
 Do not add parenthetical translations like "X (Y)" unless that parenthetical translation already exists in the transcript.
-Always include physical examination results in Key Symptoms.
+Always include physical examination results in Key Symptoms. If there isn't have a immediate action item mentioned, include the details anyway. Include lifestyle changes and states.
+Always use the clinical variant of medical terms (e.g. "hypertension" instead of "high blood pressure", "dyspnea" instead of "shortness of breath", etc.) unless only the layman's term is used in the transcript and the clinical term is not mentioned at all.
 
 Retrieved context from medical knowledge base (if any):
 {context_block}
 
 Include:
-- Chief complaint
-- Key symptoms mentioned
-- Relevant medical history (if mentioned)
-- Diagnosis or working diagnosis (if mentioned)
-- Treatment plan or next steps (if mentioned)
+- Chief complaint: The primary reason for the visit.
+- Key symptoms mentioned: A narrative summary of the current issue, including relevant 'pertinent negatives' (symptoms the patient denies, like fevers or chest pain).
+- Relevant medical history (if mentioned): Past diagnoses and their current status/control.
+- Physical Examination & Vitals: Include vitals (especially if abnormal) and objective findings (heart sounds, lung sounds, musculoskeletal tests, etc.).
+- Diagnosis or working diagnosis (if mentioned): The working diagnosis and the evidence supporting it.
+- Treatment plan or next steps (if mentioned): Medications (with dosages), lifestyle advice, and follow-up timeline. Match each action to a specific diagnosis.
 
-Flag any parts you are uncertain about with '[UNCERTAIN]'. Use it liberally for anything that is not explicitly stated or is ambiguous in the transcript.
+Always flag any parts you are uncertain about with '[UNCERTAIN]', even if only a little bit. Use it liberally for anything that is not explicitly stated or is ambiguous in the transcript.
 
 Transcript:
 {transcript}
 
 Example format of summary (but adapt to content, and keep it concise):
 '''
-**Chief Complaint:** The patient presents with complaints of headache/migraine, abdominal pain, and fatigue/weakness.
+**Chief Complaint:** Headache, abdominal pain, and fatigue.
 
-**Key Symptoms:**
-- Headache: intermittent, intense, mostly in the temples and behind the eyes, worsened by bright light, more frequent in the afternoon and evening.
-- Abdominal pain: crampy, mid and lower abdomen, worsened after eating, especially fatty foods and coffee.
-- Fatigue/weakness: persistent, waking up tired, poor sleep quality.
-- Nausea: occasional, no vomiting, described as an unsettled feeling in the stomach.
+**History of Present Illness:**
+The patient reports intermittent, intense retro-orbital headaches exacerbated by bright light. These are accompanied by occasional nausea. Also notes crampy post-prandial abdominal pain.
+- **Pertinent Negatives:** Denies vomiting, fever, or unintentional weight loss.
 
 **Relevant Medical History:**
-- Known medical condition: hypothyroidism, managed with Euthyrox 75 micrograms.
-- Last thyroid level check: approximately last spring.
-- Family history: mother had migraines.
+- Hypothyroidism: Managed with Euthyrox 75 mcg. Last labs >12 months ago.
+- Family History: Maternal migraines.
+- Social: High caffeine intake (5+ cups/day) and high work stress.
 
-**Diagnosis or Working Diagnosis:**
-- Migraine: suggested by unilateral temple pain, light sensitivity, nausea, and family history.
-- [UNCERTAIN] Irritable bowel syndrome or functional dyspepsia: probable causes for abdominal pain, related to high coffee intake and stress.
-- [UNCERTAIN] Thyroid dysfunction: potential contributor to fatigue and headaches, given the lack of recent thyroid level checks.
+**Physical Examination & Vitals:**
+- Vitals: [UNCERTAIN - check transcript for BP].
+- Abdomen: Soft, non-distended, mild tenderness to palpation in the epigastric region. No guarding.
+- Neuro: Normal gait, no cranial nerve deficits.
+- Cardiovascular: [UNCERTAIN - mention if heart sounds were heard].
 
-**Treatment Plan or Next Steps:**
-- Laboratory tests: full panel including TSH, full blood count, liver and kidney function, iron, and ferritin.
-- Lifestyle modifications: reduce coffee intake to one or two cups a day, short walks after meals.
-- Medication: Ibuprofen for headaches, with consideration for migraine-specific treatment if headaches continue.
-- Follow-up: scheduled for two weeks to review lab results and assess symptom progression.
+**Assessment & Rationale:**
+1. Migraine: Suggested by unilateral location, photophobia, and family history.
+2. Dyspepsia: Likely related to high caffeine and fatty food intake.
+3. Fatigue: Etiology uncertain; consider poorly controlled hypothyroidism or iron deficiency.
+
+**Treatment Plan & Next Steps:**
+- Diagnostics: Order TSH, CBC, and Ferritin to investigate fatigue.
+- Medication: Ibuprofen 400mg PRN for acute headache.
+- Lifestyle: Reduce coffee to <2 cups/day; maintain a food and symptom diary.
+- Follow-up: Return in 2 weeks for lab review.
 '''
 
 Summary:"""
@@ -201,6 +215,224 @@ def _prompt_language_name(transcript: str) -> str:
 
 # ── TRANSCRIPTION ─────────────────────────────────────────────────────────────
 
+
+def validate_audio_format(audio_path: str) -> str:
+    """Check audio format; convert if needed. Returns path to valid audio."""
+    valid_formats = {'.mp3', '.wav', '.m4a', '.flac', '.ogg'}
+    path = Path(audio_path)
+    
+    if path.suffix.lower() not in valid_formats:
+        print(f"⚠ Warning: {path.suffix} may not be supported by Gladia.")
+        # Could auto-convert here using pydub if needed
+    
+    return str(path)
+
+
+def _load_preprocess_dependencies():
+    """Load optional audio preprocessing dependencies on demand."""
+    try:
+        import librosa  # type: ignore
+        import numpy as np  # type: ignore
+        import soundfile as sf  # type: ignore
+        return librosa, np, sf
+    except ModuleNotFoundError as ex:
+        print(
+            "[Preprocess] Optional dependency missing "
+            f"({ex.name}). Install preprocessing extras or use --skip-preprocess."
+        )
+        return None
+
+def check_audio_quality(audio_path: str) -> dict:
+    """Analyze audio for potential issues."""
+    deps = _load_preprocess_dependencies()
+    if deps is None:
+        return None
+    librosa, np, _ = deps
+
+    try:
+        y, sr = librosa.load(audio_path, sr=None)
+        
+        # Calculate metrics
+        duration = librosa.get_duration(y=y, sr=sr)
+        rms_energy = np.sqrt(np.mean(y**2))
+        peak_amplitude = np.max(np.abs(y))
+        
+        issues = []
+        if duration < 5:
+            issues.append("Audio too short (<5 sec)")
+        if rms_energy < 0.01:
+            issues.append("Audio is very quiet (low RMS energy)")
+        if peak_amplitude > 0.95:
+            issues.append("Audio may be clipped/distorted (peak near 1.0)")
+        
+        return {
+            "duration_sec": round(duration, 2),
+            "rms_energy": round(float(rms_energy), 4),
+            "peak_amplitude": round(float(peak_amplitude), 4),
+            "issues": issues
+        }
+    except Exception as e:
+        print(f"⚠ Could not analyze audio: {e}")
+        return None
+
+def preprocess_audio(
+    audio_path: str,
+    output_path: str = None,
+    target_sr: int = 16000,
+    normalize: bool = True,
+    reduce_noise: bool = True,
+) -> str:
+    """
+    Preprocess audio: resample, normalize, optionally denoise.
+    
+    Returns:
+        Path to preprocessed audio (original path if no changes needed)
+    """
+    print("── Pre-Audio Processing ──")
+
+    deps = _load_preprocess_dependencies()
+    if deps is None:
+        print("[Preprocess] Skipping audio preprocessing due to missing dependencies.\n")
+        return audio_path
+    librosa, np, sf = deps
+    
+    # Load audio
+    y, sr = librosa.load(audio_path, sr=None)
+    modified = False
+    
+    # 1. Resample to target SR
+    if sr != target_sr:
+        print(f"Resampling: {sr}Hz → {target_sr}Hz")
+        y = librosa.resample(y, orig_sr=sr, target_sr=target_sr)
+        sr = target_sr
+        modified = True
+    
+    # 2. Normalize volume (peak normalization)
+    if normalize:
+        peak = np.max(np.abs(y))
+        if peak > 0:
+            print(f"Normalizing audio (peak {peak:.3f} → 0.95)")
+            y = y / peak * 0.95  # Leave headroom
+            modified = True
+    
+    # 3. Reduce noise (spectral gating - simple approach)
+    if reduce_noise:
+        # Simple noise gate: zero out very quiet frames
+        frame_energy = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=1)
+        threshold = np.median(frame_energy) * 0.1
+        
+        # Convert back to time domain
+        S = librosa.stft(y)
+        mag = np.abs(S)
+        noise_gate = mag > threshold
+        S_gated = S * noise_gate
+        y_gated = librosa.istft(S_gated)
+        
+        # Only use if it helps
+        if np.mean(np.abs(y_gated)) > np.mean(np.abs(y)) * 0.5:
+            y = y_gated
+            print("Applied noise gate")
+            modified = True
+    
+    # Save if modified
+    if modified:
+        if output_path is None:
+            output_path = audio_path.replace(Path(audio_path).suffix, "_processed.wav")
+        
+        sf.write(output_path, y, sr)
+        print(f"Saved preprocessed audio to: {output_path}\n")
+        return output_path
+    
+    print("No preprocessing needed\n")
+    return audio_path
+
+
+def _merge_segments(sentence_confidences: list, low_confidence_threshold: float = 0.75, high_confidence_threshold: float = 0.85, max_words: int = 2, max_gap: float = 0.35) -> list:
+    """
+    Merge segments in two passes:
+    1. Merge low-confidence short segments (< max_words, confidence < low_confidence_threshold) with previous higher-confidence segment
+    2. Merge high-confidence adjacent segments (both > high_confidence_threshold) from same speaker with small time gap
+    
+    Args:
+        sentence_confidences: List of segment dicts with text, confidence, speaker, start, end
+        low_confidence_threshold: Threshold for low-conf merging (default 0.75)
+        high_confidence_threshold: Threshold for high-conf merging (default 0.85)
+        max_words: Max words to consider "short" for low-conf merging
+        max_gap: Max time gap in seconds for high-conf merging
+    
+    Returns: Merged sentence_confidences list
+    """
+    if not sentence_confidences or len(sentence_confidences) < 2:
+        return sentence_confidences
+    
+    # Pass 1: Merge low-confidence short segments with previous higher-confidence
+    merged = []
+    skip_indices = set()
+    
+    for i, seg in enumerate(sentence_confidences):
+        if i in skip_indices:
+            continue
+        
+        is_short = len((seg.get("text") or "").split()) <= max_words
+        is_low_conf = seg.get("confidence") is not None and seg["confidence"] < low_confidence_threshold
+        
+        if is_short and is_low_conf and i > 0 and i - 1 not in skip_indices:
+            prev_seg = merged[-1] if merged else None
+            if prev_seg and prev_seg.get("speaker") == seg.get("speaker"):
+                prev_conf = prev_seg.get("confidence")
+                curr_conf = seg.get("confidence")
+                
+                if prev_conf is not None and curr_conf is not None and prev_conf >= curr_conf:
+                    prev_seg["text"] = f"{prev_seg['text']} {seg['text']}"
+                    prev_seg["confidence"] = (prev_conf + curr_conf) / 2
+                    prev_seg["confidence_percent"] = round(prev_seg["confidence"] * 100, 1)
+                    if seg.get("end"):
+                        prev_seg["end"] = seg["end"]  # Extend end time
+                    skip_indices.add(i)
+                    continue
+        
+        merged.append(seg)
+    
+    # Pass 2: Merge high-confidence adjacent segments from same speaker with small gap
+    result = []
+    skip_indices = set()
+    
+    for i, seg in enumerate(merged):
+        if i in skip_indices:
+            continue
+        
+        seg_conf = seg.get("confidence")
+        is_high_conf = seg_conf is not None and seg_conf > high_confidence_threshold
+        
+        if is_high_conf and i + 1 < len(merged):
+            next_seg = merged[i + 1]
+            next_conf = next_seg.get("confidence")
+            is_next_high_conf = next_conf is not None and next_conf > high_confidence_threshold
+            
+            # Check if next segment is also high-conf, same speaker, and close in time
+            if is_next_high_conf and next_seg.get("speaker") == seg.get("speaker"):
+                seg_end = seg.get("end")
+                next_start = next_seg.get("start")
+                
+                # Calculate gap if both timestamps exist
+                gap = None
+                if seg_end is not None and next_start is not None:
+                    gap = next_start - seg_end
+                
+                # Merge if gap is small enough (or no timestamps to check)
+                if gap is None or gap <= max_gap:
+                    seg["text"] = f"{seg['text']} {next_seg['text']}"
+                    seg["confidence"] = (seg_conf + next_conf) / 2
+                    seg["confidence_percent"] = round(seg["confidence"] * 100, 1)
+                    if next_seg.get("end"):
+                        seg["end"] = next_seg["end"]
+                    skip_indices.add(i + 1)
+        
+        result.append(seg)
+    
+    return result
+
+
 def transcribe_audio(audio_path: str, gladia_token: str):
     """Transcribe audio with diarization using Gladia API.
 
@@ -235,7 +467,7 @@ def transcribe_audio(audio_path: str, gladia_token: str):
     audio_url = upload_response.json()["audio_url"]
 
     transcribe_response = requests.post(
-        "https://api.gladia.io/v2/transcription/",
+        "https://api.gladia.io/v2/pre-recorded",
         headers=headers,
         json={
             "audio_url": audio_url,
@@ -245,7 +477,13 @@ def transcribe_audio(audio_path: str, gladia_token: str):
                 "min_speakers": 1,
                 "max_speakers": 3,
             },
+            "sentences": True,
+            "language_config": {
+                "languages": ["en", "hu"],
+                "code_switching": False,
+            },
         },
+
     )
 
     if transcribe_response.status_code not in (200, 201):
@@ -297,6 +535,11 @@ def transcribe_audio(audio_path: str, gladia_token: str):
                 }
             )
 
+        # Merge low-confidence short segments before building final transcript
+        sentence_confidences = _merge_segments(sentence_confidences, low_confidence_threshold=0.75, high_confidence_threshold=0.85, max_words=2, max_gap=0.35)
+
+        # Rebuild transcript from merged segments
+        lines = [f"SPEAKER_{s['speaker']}: {s['text']}" for s in sentence_confidences]
         transcript = "\n".join(lines)
 
         confidences = [s["confidence"] for s in sentence_confidences if s["confidence"] is not None]
@@ -317,6 +560,32 @@ def load_transcript(transcript_path: str) -> str:
         transcript = f.read()
     print(f"Loaded ({len(transcript)} characters)\n")
     return transcript
+
+# ── CONTEXT BUILDING ──────────────────────────────────────────────────────────
+
+def build_context_block(
+    rag_context: str = "",
+    extra_context: str = "",
+    suggested_codes: list | None = None,
+) -> str:
+    """Build a formatted context block for prompt injection."""
+    parts = []
+    
+    if rag_context:
+        parts.append("## Medical Knowledge Base Context")
+        parts.append(rag_context)
+    
+    if suggested_codes:
+        parts.append("\n## Suggested ICD-10 Codes")
+        for item in suggested_codes:
+            code = item.get("code", "")
+            desc = item.get("description", "")
+            parts.append(f"- {code}: {desc}")
+    
+    if extra_context:
+        parts.append(extra_context)
+    
+    return "\n".join(parts) if parts else ""
 
 # ── SUMMARIZATION ─────────────────────────────────────────────────────────────
 
@@ -340,7 +609,7 @@ def summarize_transcript(
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
-        max_tokens=900,
+        max_tokens=2000,
         temperature=0.2
     )
 
@@ -423,6 +692,10 @@ def main():
         action="store_true",
         help="Download/load precompiled Chroma index instead of local rebuild/indexing",
     )
+    parser.add_argument("--skip-preprocess", action="store_true", 
+                       help="Skip pre-audio processing")
+    parser.add_argument("--denoise", action="store_true", 
+                       help="Enable noise reduction")
     args = parser.parse_args()
 
     # Load API tokens
@@ -441,6 +714,25 @@ def main():
     run_time_start = time.time()
     print(f"Pipeline started at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(run_time_start))}\n")
 
+    # ── Step 0: Pre-Audio Processing ──────────────────────────────────────────
+    if not args.transcript and not args.skip_preprocess:
+        quality = check_audio_quality(args.audio)
+        if quality:
+            print("Audio Quality Report:")
+            print(f"  Duration: {quality['duration_sec']}s")
+            print(f"  RMS Energy: {quality['rms_energy']}")
+            if quality['issues']:
+                for issue in quality['issues']:
+                    print(f"  ⚠ {issue}")
+            print()
+        
+        args.audio = preprocess_audio(
+            args.audio,
+            target_sr=16000,
+            normalize=True,
+            reduce_noise=args.denoise,
+        )
+
     # ── Step 1: Transcript ────────────────────────────────────────────────────
     sentence_confidences = []
     transcription_confidence_avg = None
@@ -451,22 +743,32 @@ def main():
         transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(
             args.audio, gladia_token=gladia_token
         )
+
     # ── Step 2: ChromaDB RAG ──────────────────────────────────────────────────
-    suggested_codes = suggest_icd_codes_local(transcript, icd_path=ICD_CODES_PATH, top_k=3)
-    if suggested_codes:
-        print("[ICD] Local lookup suggested codes:")
-        for item in suggested_codes:
-            print(
-                f"[ICD]   {item['code']}: {item['description']} "
-                f"(matched symptom: {item['matched_symptom']}, score={item['score']})"
-            )
-        print()
+    if callable(suggest_icd_codes_local):
+        suggested_codes = suggest_icd_codes_local(transcript, icd_path=ICD_CODES_PATH, top_k=3)
+        if suggested_codes:
+            print("[ICD] Local lookup suggested codes:")
+            for item in suggested_codes:
+                print(
+                    f"[ICD]   {item['code']}: {item['description']} "
+                    f"(matched symptom: {item['matched_symptom']}, score={item['score']})"
+                )
+            print()
+        else:
+            print("[ICD] No local suggested ICD codes found.\n")
     else:
-        print("[ICD] No local suggested ICD codes found.\n")
+        suggested_codes = []
+        print("[ICD] Skipped (optional RAG dependencies not installed).\n")
 
     rag_context = ""
     if not args.no_rag:
-        if args.use_precompiled_rag:
+        if RAG_IMPORT_ERROR is not None or not all(
+            [callable(load_existing_vectorstore), callable(get_relevant_context), callable(setup_knowledge_base)]
+        ):
+            print(f"[RAG] Skipped: optional dependencies unavailable ({RAG_IMPORT_ERROR})\n")
+            rag_context = ""
+        elif args.use_precompiled_rag:
             try:
                 _download_precompiled_rag(force_download=args.rebuild_rag)
                 vectorstore = load_existing_vectorstore(chroma_path=CHROMA_PATH)
@@ -500,11 +802,11 @@ def main():
                     chroma_path=CHROMA_PATH,
                 )
 
-        rag_context = get_relevant_context(transcript, vectorstore, final_k=5, retrieve_k=12, max_queries=8)
-        if rag_context:
-            print(f"[RAG] Retrieved {len(rag_context)} chars of context.\n")
-        else:
-            print("[RAG] No relevant context found.\n")
+            rag_context = get_relevant_context(transcript, vectorstore, final_k=5, retrieve_k=12, max_queries=8)
+            if rag_context:
+                print(f"[RAG] Retrieved {len(rag_context)} chars of context.\n")
+            else:
+                print("[RAG] No relevant context found.\n")
     else:
         print("[RAG] Skipped (--no-rag)\n")
 

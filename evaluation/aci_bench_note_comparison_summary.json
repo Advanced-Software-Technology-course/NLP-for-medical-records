@@ -1,0 +1,7 @@
+{
+    "samples_evaluated": 5,
+    "rouge1_mean": 0.5033409958412565,
+    "rouge2_mean": 0.19956143966526968,
+    "rougeL_mean": 0.26610453751967444,
+    "section_coverage_mean": 0.8678571428571429
+}

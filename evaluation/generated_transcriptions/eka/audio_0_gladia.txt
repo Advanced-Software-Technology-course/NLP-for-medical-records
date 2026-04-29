@@ -1,0 +1,2 @@
+SPEAKER_0: Not having adequate rest.
+SPEAKER_0: That continues for better part of the day.
