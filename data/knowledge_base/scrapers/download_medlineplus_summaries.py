@@ -13,12 +13,15 @@ Usage:
     --terms-file ../medlineplus_terms.txt
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import os
 import re
 import sys
 import zipfile
+from typing import Optional
 from html import unescape
 from urllib.request import urlopen
 import xml.etree.ElementTree as ET
@@ -108,7 +111,7 @@ def _topic_matches(term_list: list[str], title: str, summary: str, alt_titles: l
 def _parse_topics(
     xml_bytes: bytes,
     term_list: list[str],
-    max_topics: int | None,
+    max_topics: Optional[int],
     debug: bool = False,
 ) -> list[dict]:
     topics = []

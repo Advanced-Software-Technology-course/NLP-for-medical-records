@@ -1,9 +1,16 @@
+from __future__ import annotations
+
 import os
 import re
+from typing import List, Optional
 
-DEFAULT_KB_PATH = "../data/knowledge_base"
-DEFAULT_ICD_CODES_PATH = "../data/icd10_codes.txt"
-DEFAULT_CHROMA_PATH = "../data/chroma_db"
+_RAG_CORE_DIR = os.path.dirname(os.path.abspath(__file__))
+_PIPELINE_DIR = os.path.abspath(os.path.join(_RAG_CORE_DIR, ".."))
+_PROJECT_ROOT = os.path.abspath(os.path.join(_PIPELINE_DIR, ".."))
+
+DEFAULT_KB_PATH = os.path.join(_PROJECT_ROOT, "data", "knowledge_base")
+DEFAULT_ICD_CODES_PATH = os.path.join(_PROJECT_ROOT, "data", "icd10_codes.txt")
+DEFAULT_CHROMA_PATH = os.path.join(_PROJECT_ROOT, "data", "chroma_db")
 DEFAULT_EMBED_MODEL = "all-MiniLM-L6-v2"
 DEFAULT_CHUNK_SIZE = 1000
 DEFAULT_CHUNK_OVERLAP = 200
@@ -46,7 +53,7 @@ PREFER_BIOMED_EMBEDDINGS = os.getenv("RAG_PREFER_BIOMED_EMBEDDINGS", "0").strip(
     "1", "true", "yes", "on"
 }
 
-def _compile_word_regex(terms: list[str], extra_fragments: list[str] | None = None) -> re.Pattern:
+def _compile_word_regex(terms: List[str], extra_fragments: Optional[List[str]] = None) -> re.Pattern:
     escaped = [re.escape(term) for term in terms]
     fragments = extra_fragments or []
     body = "|".join(escaped + fragments)

@@ -16,7 +16,12 @@ Usage:
     python medical_pipeline.py --transcript ... --rebuild-rag  # force rebuild of ChromaDB vectorstore
     python medical_pipeline.py --transcript ...  # auto-downloads precompiled Chroma on first run if missing
     python medical_pipeline.py --transcript ... --use-precompiled-rag  # download/load precompiled Chroma index instead of rebuilding
+    e.g.: python medical_pipeline.py --transcript ../data/test_transcripts/test_transcript_en.txt
+    or
+    python medical_pipeline.py --audio ../data/test_audio/test_audio.mp3
 """
+
+from __future__ import annotations
 
 import sys
 import requests
@@ -27,6 +32,7 @@ import time
 import mimetypes
 import importlib.util
 import re
+from typing import List, Optional
 from openai import OpenAI
 from pathlib import Path
 
@@ -47,9 +53,14 @@ except Exception as ex:
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 
-KB_PATH     = "../data/knowledge_base"
-ICD_CODES_PATH = "../data/icd10_codes.txt"
-CHROMA_PATH = "../data/chroma_db"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+
+KB_PATH = os.path.join(PROJECT_ROOT, "data", "knowledge_base")
+ICD_CODES_PATH = os.path.join(PROJECT_ROOT, "data", "icd10_codes.txt")
+CHROMA_PATH = os.path.join(PROJECT_ROOT, "data", "chroma_db")
+DEFAULT_AUDIO_PATH = os.path.join(PROJECT_ROOT, "data", "test_audio", "test_audio.mp3")
+DEFAULT_OUTPUT_PATH = os.path.join(PROJECT_ROOT, "output.json")
 RAG_LIMIT    = None   # set via --rag-limit; None = load everything
 CSV_WHITELIST = [     # filenames to include in RAG; empty list = load all
     "clinical_lab_facts.csv",
@@ -439,7 +450,7 @@ def transcribe_audio(audio_path: str, gladia_token: str):
     Returns:
       transcript: str
       sentence_confidences: list[dict]
-      transcription_confidence_avg: float | None
+            transcription_confidence_avg: Optional[float]
     """
     print("── Step 1/4: Transcription ──")
     print(f"Transcribing: {audio_path}")
@@ -566,7 +577,7 @@ def load_transcript(transcript_path: str) -> str:
 def build_context_block(
     rag_context: str = "",
     extra_context: str = "",
-    suggested_codes: list | None = None,
+    suggested_codes: Optional[List[dict]] = None,
 ) -> str:
     """Build a formatted context block for prompt injection."""
     parts = []
@@ -593,7 +604,7 @@ def summarize_transcript(
     transcript: str,
     groq_token: str,
     rag_context: str = "",
-    suggested_codes: list | None = None,
+    suggested_codes: Optional[List[dict]] = None,
 ) -> str:
     print("── Step 3/4: Summary ──")
     client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
@@ -623,7 +634,7 @@ def summarize_soap_notes(
     transcript: str,
     groq_token: str,
     rag_context: str = "",
-    suggested_codes: list | None = None,
+    suggested_codes: Optional[List[dict]] = None,
 ) -> str:
     print("── Step 4/4: SOAP Notes ──")
     client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
@@ -654,9 +665,9 @@ def save_output(
     transcript: str,
     summary: str,
     soap_notes: str,
-    output_path: str = "../output.json",
-    sentence_confidences: list | None = None,
-    transcription_confidence_avg: float | None = None,
+    output_path: str = DEFAULT_OUTPUT_PATH,
+    sentence_confidences: Optional[List[dict]] = None,
+    transcription_confidence_avg: Optional[float] = None,
 ):
     output = {
         "transcript": transcript,
@@ -679,10 +690,10 @@ def main():
     parser = argparse.ArgumentParser(
         description="Medical consultation transcription & summarization pipeline."
     )
-    parser.add_argument("--audio",      type=str, default="../data/test_audio/test_audio.mp3")
+    parser.add_argument("--audio",      type=str, default=DEFAULT_AUDIO_PATH)
     parser.add_argument("--transcript", type=str, default=None,
                         help="Path to existing transcript — skips transcription")
-    parser.add_argument("--output",     type=str, default="../output.json")
+    parser.add_argument("--output",     type=str, default=DEFAULT_OUTPUT_PATH)
     parser.add_argument("--no-rag",     action="store_true", help="Disable ChromaDB RAG")
     parser.add_argument("--rag-limit",   type=int, default=None,
                         help="Cap CSV rows per file for RAG (e.g. 500 for quick testing)")
@@ -699,7 +710,7 @@ def main():
     args = parser.parse_args()
 
     # Load API tokens
-    with open("../.api_token.json", "r") as f:
+    with open(os.path.join(PROJECT_ROOT, ".api_token.json"), "r") as f:
         api_tokens  = json.load(f)
         groq_token  = api_tokens.get("groq-token")
         gladia_token = api_tokens.get("gladia-token")

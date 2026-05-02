@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import re
 import unicodedata
+from typing import Optional, Tuple
 
 from langchain_core.documents import Document
 
@@ -249,7 +252,7 @@ def symptom_keyword_matches_text(keyword: str, normalized_text: str, normalized_
     return False
 
 
-def _find_keyword_token_span(tokens: list[str], keyword: str) -> tuple[int, int] | None:
+def _find_keyword_token_span(tokens: list[str], keyword: str) -> Optional[Tuple[int, int]]:
     """Find the first token span matching a keyword, if any."""
     for alias in _alias_variants(keyword):
         alias_parts = [p for p in alias.split() if p]
