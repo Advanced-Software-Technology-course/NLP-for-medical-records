@@ -12,3 +12,7 @@ data/chroma_db/
 *.sqlite3
 .venv/
 .vscode/
+backend/medical.db
+*.db
+/backend/uploads
+backend/medical.db
