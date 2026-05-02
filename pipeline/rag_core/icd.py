@@ -2,7 +2,8 @@ import difflib
 import os
 
 from .config import DEFAULT_ICD_CODES_PATH, HU_TO_EN_MEDICAL_TERMS
-from .text_processing import detect_language, extract_symptom_terms, norm_for_match
+from .config import ICD_INFECTION_PREFIXES, INFECTION_COMPATIBLE_SYMPTOMS, INFECTION_MARKERS, NON_INFECTION_SYMPTOMS
+from .text_processing import detect_language, extract_patient_symptoms, extract_symptom_terms, norm_for_match, normalize_symptom_key
 
 try:
     from rapidfuzz import fuzz, process
@@ -39,7 +40,7 @@ def suggest_icd_codes_local(
 ) -> list[dict]:
     """Suggest top ICD codes using local symptom extraction + fuzzy lookup."""
     language = detect_language(transcript)
-    symptom_terms = extract_symptom_terms(transcript)
+    symptom_terms = extract_patient_symptoms(transcript)
     if not symptom_terms:
         return []
 
@@ -49,6 +50,10 @@ def suggest_icd_codes_local(
             mapped_term = HU_TO_EN_MEDICAL_TERMS.get(norm_for_match(term), term)
             mapped.append(mapped_term)
         symptom_terms = mapped
+
+    transcript_context = normalize_symptom_key(transcript)
+    has_infection_context = any(marker in transcript_context for marker in INFECTION_MARKERS)
+    has_hemoglobin_context = any(marker in transcript_context for marker in ("sickle", "hb", "hemoglobin", "haemoglobin", "thalassemia", "anemia", "anaemia"))
 
     icd_entries = parse_icd_code_lines(icd_path)
     if not icd_entries:
@@ -66,13 +71,9 @@ def suggest_icd_codes_local(
         "abdominal pain": ("R10",),
     }
 
-    infection_markers = {
-        "infection", "infectious", "viral", "bacterial", "sepsis", "pneumonia",
-        "influenza", "covid", "typhoid", "paratyphoid",
-    }
-
     scored: dict[str, dict] = {}
     for symptom in symptom_terms:
+        symptom_key = normalize_symptom_key(symptom)
         if process is not None and fuzz is not None:
             best = process.extract(
                 symptom,
@@ -98,16 +99,32 @@ def suggest_icd_codes_local(
                 continue
 
             score_adj = float(score)
-            symptom_key = symptom.lower().strip()
             preferred = symptom_preferred_prefix.get(symptom_key, ())
-            if preferred and any(code.startswith(pref) for pref in preferred):
-                score_adj += 8.0
+            if preferred:
+                if any(code.startswith(pref) for pref in preferred):
+                    score_adj += 15.0
+                else:
+                    score_adj -= 5.0
 
-            if symptom_key in {"fever", "cough", "shortness of breath", "chest pain"}:
-                desc_low = desc.lower()
-                code_upper = code.upper()
-                if code_upper.startswith(("A", "B")) and any(m in desc_low for m in infection_markers):
+            code_upper = code.upper()
+            code_is_infectious = code_upper.startswith(tuple(ICD_INFECTION_PREFIXES))
+            desc_low = desc.lower()
+
+            if any(marker in desc_low for marker in ("sickle", "hb-", "hemoglobin", "haemoglobin", "thalassemia")) and not has_hemoglobin_context:
+                score_adj -= 12.0
+
+            if symptom_key in INFECTION_COMPATIBLE_SYMPTOMS:
+                if code_is_infectious and not has_infection_context:
+                    score_adj -= 15.0
+                if code_is_infectious and has_infection_context:
+                    score_adj += 3.0
+                if any(marker in desc_low for marker in INFECTION_MARKERS) and has_infection_context:
+                    score_adj += 1.0
+            elif symptom_key in NON_INFECTION_SYMPTOMS:
+                if code_is_infectious:
                     score_adj -= 6.0
+                if any(marker in desc_low for marker in INFECTION_MARKERS):
+                    score_adj -= 1.0
 
             key = f"{code}|{desc}"
             existing = scored.get(key)

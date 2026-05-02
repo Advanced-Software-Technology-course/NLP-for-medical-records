@@ -1,8 +1,8 @@
 {
-  "fingerprint": "432fd7655826a00395d33e60a6912beb2c85789dadb2f8a35f82ebe9d1ebdf30",
-  "indexed_at_epoch": 1775675723,
-  "kb_path": "c:\\Users\\Weebmachine\\Desktop\\NLP-for-medical-records\\pipeline\\..\\data\\knowledge_base",
-  "chroma_path": "c:\\Users\\Weebmachine\\Desktop\\NLP-for-medical-records\\pipeline\\..\\data\\chroma_db",
+  "fingerprint": "aec68945326e89fd925bd206ef2138353012420d5e4d6a7715e290c02c847fa1",
+  "indexed_at_epoch": 1777720566,
+  "kb_path": "../knowledge_base",
+  "chroma_path": ".",
   "embedding_model": "all-MiniLM-L6-v2",
   "chunk_size": 1000,
   "chunk_overlap": 200,

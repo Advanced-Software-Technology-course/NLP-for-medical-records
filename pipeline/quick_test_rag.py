@@ -5,9 +5,90 @@ print("Starting imports at timestamp:", time.strftime("%Y-%m-%d %H:%M:%S", time.
 from rag_pipeline import setup_knowledge_base, get_relevant_context
 import os
 transcript =  """
-SPEAKER_0: Tegnap óta mellkasi fájdalmam és légszomjam van.
-SPEAKER_1: Volt láza, köhögése vagy korábbi szívbetegsége?
-SPEAKER_0: Enyhe láz, korábbi szívbetegsége nem volt.
+
+Orvos-beteg konzultáció – Teszt transzkript (Magyar)
+Időtartam: ~10 perc
+Panaszok: fejfájás/migrén, hasfájás, legyengülés/fáradság
+--------------------------------------------------------------
+
+ORVOS: Jó napot kívánok! Tessék helyet foglalni. Mi hozta be ma?
+
+BETEG: Jó napot. Hát, már egy ideje nem érzem jól magam, de az elmúlt héten annyira rosszul lettem, hogy úgy gondoltam, mégiscsak eljövök.
+
+ORVOS: Értem. Mondja el részletesebben, mik a panaszai.
+
+BETEG: Szóval, van ez a fejfájásom, ami már... nem tudom, talán két hete tart? Nem folyamatosan, hanem jön-megy. De amikor jön, nagyon erős. Főleg itt, a halántékomnál érzem, és néha a szemem mögött is.
+
+ORVOS: Mikor szokott jelentkezni ez a fejfájás? Napközben, reggel, este?
+
+BETEG: Inkább délután, meg este. Reggel általában még jól vagyok, de ahogy telik a nap... Meg hát a képernyő előtt dolgozom egész nap, az sem segít biztos.
+
+ORVOS: Fényre vagy zajra érzékenyebb ilyenkor?
+
+BETEG: Igen! A fényre igen, ezt nem is mondtam. Ha erős fény van, sokkal rosszabb. A zaj kevésbé zavar, de a fény igen.
+
+ORVOS: Hányingere is szokott lenni hozzá?
+
+BETEG: Párszor igen, de hányni nem hánytam. Inkább csak olyan rossz érzés a gyomromban.
+
+ORVOS: Rendben. És a hasfájásról meséljen. Mióta van, és hol pontosan?
+
+BETEG: Az is kb. ugyanennyi ideje van, talán kicsit régebben. Inkább itt, a has közepén, meg néha lejjebb. Nem állandó, inkább görcsös. Evés után általában rosszabb.
+
+ORVOS: Evés előtt vagy evés után?
+
+BETEG: Evés után, igen. Főleg ha valami zsírosabbat eszem, vagy kávét iszom. Kávéból sokat iszom sajnos, mert annyira fáradt vagyok.
+
+ORVOS: Igen, erről is kérdezni akartam – a fáradságról. Mióta érzi magát ennyire kimerültnek?
+
+BETEG: Hát... őszintén? Talán egy hónapja, másfele. Reggel felkelek és már fáradt vagyok. Korán fekszem, de nem alszom jól. Éjszaka felébredek, aztán nem tudok visszaaludni.
+
+ORVOS: Mennyit alszik nagyjából éjszaka?
+
+BETEG: Ágyban vagyok talán 7-8 órát, de ténylegesen alszom belőle... nem tudom, 5-öt? Lehet hogy kevesebbet is.
+
+ORVOS: Van valami, ami szerinte megzavarja az alvását? Stressz, munka?
+
+BETEG: Igen, elég stresszes az utóbbi időszak. Váltottunk rendszert a munkahelyen, sok a túlóra. Meg hát a férjem is beteg volt, azzal is volt gond.
+
+ORVOS: Sajnálom. Van valamilyen ismert betegsége, amit kezelnek? Szed valamilyen gyógyszert rendszeresen?
+
+BETEG: Pajzsmirigyre szedem a Eutiroxot, 75 mikrogrammot. Az már régóta megvan. Más rendszeres gyógyszer nincs.
+
+ORVOS: Mikor volt legutóbb pajzsmirigy laborvizsgálata?
+
+BETEG: Jaj, régen. Talán... tavaly tavasszal? Nem voltam azóta ellenőrzésen.
+
+ORVOS: Rendben, azt mindenképpen meg kell néznünk. A TSH szint befolyásolhatja a fáradságot és a fejfájást is. Van a családjában valaki, akinek migrén volt?
+
+BETEG: Az édesanyámnak igen, ő sokat szenvedett tőle fiatalabb korában.
+
+ORVOS: Értem. Dohányzik?
+
+BETEG: Nem, soha nem dohányoztam.
+
+ORVOS: Alkohol?
+
+BETEG: Alkalmanként egy pohár bor, de nem rendszeresen.
+
+ORVOS: Rendben. Most megvizsgálom, aztán megbeszéljük a további lépéseket.
+
+[Fizikális vizsgálat – szünet]
+
+ORVOS: Szóval, a vizsgálat alapján a has nyomásérzékeny a középső és jobb alsó részen, de kóros eltérést nem találtam. A vérnyomása kicsit magas, 145/90, ezt figyelni kell. A fejfájás leírása alapján migrénre utal, különösen a fényérzékenységgel és a hányingerrel együtt, meg a családi háttérrel.
+
+BETEG: Igen, én is arra gondoltam, de nem voltam biztos.
+
+ORVOS: A hasfájás valószínűleg összefügg a sok kávéval és a stresszel – irritábilis bél szindróma vagy funkcionális diszpepszia lehet a háttérben, de ezt pontosítani kell. A fáradság és az alvászavar részben a stresszre vezethető vissza, de a pajzsmirigy is közrejátszhat, ezért labort kérek.
+
+BETEG: Rendben, mi legyen a teendő?
+
+ORVOS: Először is labort kérek – TSH, vérkép, máj- és vesefunkció, vas és ferritin. A kávéfogyasztást csökkentse le lehetőleg napi egy-kettőre, és próbáljon étkezés utáni sétát beiktatni. A fejfájásra egyelőre Ibuprofent javaslok, de ha visszatér, migrénellenes kezelést is megbeszélünk. Két héten belül jöjjön vissza a laboreredményekkel.
+
+BETEG: Köszönöm szépen, doktor úr.
+
+ORVOS: Szívesen. Vigyázzon magára!
+
 """
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -32,3 +113,18 @@ print(f"RAG retrieval took {end_time - start_time:.2f} seconds")
 
 print("Retrieved context:")
 print(ctx)  
+
+symptom_query = (
+    "Severe headaches with light sensitivity and nausea, abdominal cramps after meals, "
+    "fatigue and possible thyroid issues. Possible migraine, IBS, or functional dyspepsia."
+)
+symptom_ctx = get_relevant_context(
+    symptom_query,
+    vs,
+    final_k=5,
+    retrieve_k=8,
+    max_queries=4,
+    include_icd_suggestions=False,
+)
+print("\nSymptom-focused query context:")
+print(symptom_ctx)

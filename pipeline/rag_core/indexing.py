@@ -4,12 +4,9 @@ import json
 import os
 import re
 import shutil
-from typing import List, Optional
+from typing import Any, List, Optional
 
-from langchain_community.document_loaders import DirectoryLoader, TextLoader
-from langchain_community.vectorstores import Chroma
 from langchain_core.documents import Document
-from langchain_huggingface import HuggingFaceEmbeddings
 
 from .config import (
     DEFAULT_BATCH_SIZE,
@@ -24,28 +21,142 @@ from .config import (
     PREFER_BIOMED_EMBEDDINGS,
 )
 
-try:
-    from langchain_text_splitters import RecursiveCharacterTextSplitter
-except ImportError:
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+def _load_chroma():
+    from langchain_community.vectorstores import Chroma
+
+    return Chroma
+
+
+def _load_directory_loader():
+    from langchain_community.document_loaders import DirectoryLoader, TextLoader
+
+    return DirectoryLoader, TextLoader
+
+
+def _load_txt_documents_simple(kb_path: str) -> List[Document]:
+    docs: List[Document] = []
+    for root, _, fnames in os.walk(kb_path):
+        for fname in fnames:
+            if not fname.lower().endswith(".txt"):
+                continue
+            path = os.path.join(root, fname)
+            try:
+                with open(path, "r", encoding="utf-8") as handle:
+                    content = handle.read()
+            except Exception:
+                continue
+
+            docs.append(Document(page_content=content, metadata={"source": path}))
+    return docs
+
+
+def _load_huggingface_embeddings():
+    from langchain_huggingface import HuggingFaceEmbeddings
+
+    return HuggingFaceEmbeddings
+
+
+class _HashEmbeddingFunction:
+    """Deterministic fallback embedding function for environments that cannot load HF models."""
+
+    def __init__(self, dimensions: int = 384):
+        self.dimensions = dimensions
+
+    def _tokenize(self, text: str) -> list[str]:
+        return re.findall(r"[a-z0-9]+", (text or "").lower())
+
+    def _vectorize(self, text: str) -> list[float]:
+        vector = [0.0] * self.dimensions
+        tokens = self._tokenize(text)
+        if not tokens:
+            return vector
+
+        for token in tokens:
+            digest = hashlib.sha1(token.encode("utf-8")).digest()
+            index = int.from_bytes(digest[:4], "little") % self.dimensions
+            weight = 1.0 + (len(token) % 3) * 0.1
+            vector[index] += weight
+
+        norm = sum(value * value for value in vector) ** 0.5
+        if norm > 0:
+            vector = [value / norm for value in vector]
+        return vector
+
+    def embed_documents(self, texts):
+        return [self._vectorize(text) for text in texts]
+
+    def embed_query(self, text):
+        return self._vectorize(text)
 
 
 def build_embedding_function(embedding_model: str = DEFAULT_EMBED_MODEL):
     """Create embedding function and return (embedding_fn, effective_model_name)."""
-    encode_kwargs = {"normalize_embeddings": True}
-    if embedding_model == DEFAULT_EMBED_MODEL and PREFER_BIOMED_EMBEDDINGS:
-        preferred_model = "NeuML/pubmedbert-base-embeddings"
+    # Prefer lightweight local Sentence-Transformers (no API tokens)
+    try:
+        from sentence_transformers import SentenceTransformer
+
+        class _STWrapper:
+            def __init__(self, model_name: str):
+                self.model_name = model_name
+                # convert_to_numpy returns numpy arrays
+                self.model = SentenceTransformer(model_name)
+
+            def _normalize(self, vectors):
+                try:
+                    import numpy as np
+
+                    arr = np.array(vectors, dtype=float)
+                    norms = (arr * arr).sum(axis=1) ** 0.5
+                    norms[norms == 0] = 1.0
+                    arr = arr / norms[:, None]
+                    return arr.tolist()
+                except Exception:
+                    return vectors
+
+            def embed_documents(self, texts):
+                if not texts:
+                    return []
+                vecs = self.model.encode(texts, convert_to_numpy=True, show_progress_bar=False)
+                return self._normalize(vecs)
+
+            def embed_query(self, text):
+                vec = self.model.encode([text], convert_to_numpy=True, show_progress_bar=False)
+                return self._normalize(vec)[0]
+
         try:
-            embedding_fn = HuggingFaceEmbeddings(model_name=preferred_model, encode_kwargs=encode_kwargs)
-            return embedding_fn, preferred_model
-        except Exception:
-            pass
+            embedding_fn = _STWrapper(embedding_model)
+            return embedding_fn, embedding_model
+        except Exception as ex:
+            print(f"[RAG] sentence-transformers failed: {ex}")
+    except Exception:
+        # sentence-transformers not available; try HuggingFace embeddings next
+        pass
 
-    embedding_fn = HuggingFaceEmbeddings(model_name=embedding_model, encode_kwargs=encode_kwargs)
-    return embedding_fn, embedding_model
+    # Fallback: try LangChain HuggingFaceEmbeddings (may require torchcodec/ffmpeg)
+    try:
+        HuggingFaceEmbeddings = _load_huggingface_embeddings()
+        if embedding_model == DEFAULT_EMBED_MODEL and PREFER_BIOMED_EMBEDDINGS:
+            preferred_model = "NeuML/pubmedbert-base-embeddings"
+            try:
+                embedding_fn = HuggingFaceEmbeddings(model_name=preferred_model, encode_kwargs={"normalize_embeddings": True})
+                return embedding_fn, preferred_model
+            except Exception:
+                pass
+
+        try:
+            embedding_fn = HuggingFaceEmbeddings(model_name=embedding_model, encode_kwargs={"normalize_embeddings": True})
+            return embedding_fn, embedding_model
+        except Exception as ex:
+            print(f"[RAG] HuggingFace embeddings failed: {ex}")
+    except Exception:
+        pass
+
+    print("[RAG] Falling back to hash embeddings (no local embedding models available).")
+    return _HashEmbeddingFunction(), embedding_model
 
 
-def vectorstore_count(vectorstore: Chroma) -> int:
+def vectorstore_count(vectorstore: Any) -> int:
     try:
         if hasattr(vectorstore, "_collection") and vectorstore._collection is not None:
             return int(vectorstore._collection.count())
@@ -65,6 +176,7 @@ def load_existing_vectorstore(
 
     try:
         embedding_fn, effective_embedding_model = build_embedding_function(embedding_model)
+        Chroma = _load_chroma()
         vectorstore = Chroma(
             persist_directory=chroma_path,
             embedding_function=embedding_fn,
@@ -371,6 +483,7 @@ def setup_knowledge_base(
         return None
 
     embedding_fn, effective_embedding_model = build_embedding_function(embedding_model)
+    Chroma = _load_chroma()
 
     current_fingerprint = build_fingerprint(
         kb_path=kb_path,
@@ -409,13 +522,48 @@ def setup_knowledge_base(
         else:
             print("[RAG] Knowledge base changed. Rebuilding index...")
 
-    txt_loader = DirectoryLoader(
-        kb_path,
-        glob="**/*.txt",
-        loader_cls=TextLoader,
-        loader_kwargs={"encoding": "utf-8"},
-    )
-    txt_docs_raw = txt_loader.load()
+    try:
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+    except Exception as ex:
+        print(f"[RAG] Falling back to simple splitter because text splitters failed: {ex}")
+
+        class RecursiveCharacterTextSplitter:  # type: ignore[no-redef]
+            """Minimal splitter fallback to avoid heavy dependencies."""
+
+            def __init__(self, chunk_size: int, chunk_overlap: int):
+                self.chunk_size = max(1, int(chunk_size))
+                self.chunk_overlap = max(0, int(chunk_overlap))
+
+            def split_documents(self, docs: List[Document]) -> List[Document]:
+                out: List[Document] = []
+                for doc in docs:
+                    text = doc.page_content or ""
+                    if not text:
+                        continue
+
+                    start = 0
+                    length = len(text)
+                    while start < length:
+                        end = min(length, start + self.chunk_size)
+                        chunk = text[start:end]
+                        out.append(Document(page_content=chunk, metadata=dict(doc.metadata)))
+                        if end >= length:
+                            break
+                        start = max(0, end - self.chunk_overlap)
+                return out
+
+    try:
+        DirectoryLoader, TextLoader = _load_directory_loader()
+        txt_loader = DirectoryLoader(
+            kb_path,
+            glob="**/*.txt",
+            loader_cls=TextLoader,
+            loader_kwargs={"encoding": "utf-8"},
+        )
+        txt_docs_raw = txt_loader.load()
+    except Exception as ex:
+        print(f"[RAG] Falling back to simple TXT loader because loader import failed: {ex}")
+        txt_docs_raw = _load_txt_documents_simple(kb_path)
     txt_docs = prepare_txt_documents(txt_docs_raw)
 
     if txt_docs:

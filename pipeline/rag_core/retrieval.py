@@ -1,21 +1,255 @@
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional
+from typing import Any, Optional
+import math
+import re
 
-from .config import DEFAULT_ICD_CODES_PATH
+from langchain_core.documents import Document
+
+from .config import (
+    CATEGORY_ADJUST_MED_MONOGRAPH,
+    CATEGORY_ADJUST_SYMPTOM_CLINICAL,
+    CATEGORY_ADJUST_SYMPTOM_DDI,
+    CATEGORY_ADJUST_SYMPTOM_LAB,
+    CATEGORY_ADJUST_SYMPTOM_MONOGRAPH,
+    CATEGORY_PRIORITY_MED_MONOGRAPH,
+    CATEGORY_PRIORITY_SYMPTOM_CLINICAL,
+    CATEGORY_PRIORITY_SYMPTOM_DDI,
+    CATEGORY_PRIORITY_SYMPTOM_LAB,
+    DEFAULT_ICD_CODES_PATH,
+    RETRIEVAL_HITS_WEIGHT,
+    RETRIEVAL_LEXICAL_WEIGHT,
+    RETRIEVAL_MAX_MERGED_DOCS,
+    RETRIEVAL_MAX_PER_CATEGORY_MIN,
+    RETRIEVAL_BM25_WEIGHT,
+    RETRIEVAL_POOL_K_MIN,
+    RETRIEVAL_POOL_K_MULTIPLIER,
+    RETRIEVAL_RRF_K,
+    RETRIEVAL_RRF_WEIGHT,
+    RETRIEVAL_SCORE_NORM_WEIGHT,
+    RETRIEVAL_SEMANTIC_WEIGHT,
+    RETRIEVAL_TARGETED_K_MIN,
+    SECTION_PENALTY,
+    SOURCE_BONUS_GENERAL,
+    SOURCE_BONUS_SYMPTOM,
+    SYMPTOM_BONUS_MAX,
+    SYMPTOM_BONUS_PER_HIT,
+)
 from .icd import suggest_icd_codes_local
 from .text_processing import (
     build_retrieval_queries,
+    classify_retrieval_intent,
     doc_category,
     extract_ddi_pair_terms,
     extract_query_medication_terms,
+    extract_symptom_terms_from_text,
     lexical_overlap_ratio,
-    query_likely_medication_focused,
-    transcript_mentions_labs,
+    normalize_symptom_key,
     truncate_snippet,
 )
 
 
-def similarity_search_with_optional_filter(vectorstore, query: str, k: int, where: Optional[dict] = None):
+_LEXICAL_INDEX_CACHE: dict[int, dict[str, Any]] = {}
+
+_BM25_STOPWORDS = {
+    "the", "and", "for", "that", "this", "with", "from", "have", "has", "had", "were", "was",
+    "are", "you", "your", "they", "them", "their", "what", "when", "where", "which", "while",
+    "been", "into", "about", "after", "before", "more", "most", "some", "just", "very", "does",
+    "did", "doing", "would", "could", "should", "can", "will", "also", "there", "here", "than",
+    "then", "over", "under", "between", "doctor", "patient", "today", "please", "thank", "thanks",
+}
+
+_NON_CLINICAL_MARKERS = {
+    "flood", "wildfire", "sexual assault", "consent", "parking", "cell phone", "earthquake",
+    "hurricane", "tsunami", "firefighters", "prairie", "disaster preparedness",
+}
+
+_MEDICAL_MARKERS = {
+    "pain", "headache", "migraine", "nausea", "vomit", "fatigue", "sleep", "insomnia", "abdomen",
+    "abdominal", "cramp", "thyroid", "tsh", "blood", "ferritin", "ibuprofen", "drug", "dose",
+    "diagnosis", "treatment", "symptom", "clinical", "icd", "dyspepsia", "irritable", "bowel",
+}
+
+
+def _looks_english(text: str) -> bool:
+    """Heuristic: return True when text appears to be primarily English.
+
+    Lightweight check suitable for filtering noisy multilingual KB entries.
+    """
+    if not text:
+        return False
+    # proportion of ASCII characters
+    total = len(text)
+    ascii_count = sum(1 for c in text if ord(c) < 128)
+    if ascii_count / max(1, total) < 0.8:
+        return False
+    lower = text.lower()
+    # quick negative check for common Spanish function words that indicate non-English
+    spanish_markers = [" el ", " la ", " que ", " y ", " para ", " los ", " las ", " con ", " por "]
+    if any(m in lower for m in spanish_markers):
+        # allow short strings that may contain these sequences incidentally
+        if total > 120:
+            return False
+    return True
+
+
+def _tokenize_bm25(text: str) -> list[str]:
+    if not text:
+        return []
+    toks = re.findall(r"[a-z0-9]+", text.lower())
+    return [t for t in toks if len(t) >= 3 and t not in _BM25_STOPWORDS]
+
+
+def _looks_clinical_enough(text: str, metadata: dict[str, Any]) -> bool:
+    lower = (text or "").lower()
+    for marker in _NON_CLINICAL_MARKERS:
+        if marker in lower:
+            return False
+
+    source = str(metadata.get("source", "")).lower()
+    if any(k in source for k in ("ddi", "clinical", "drug", "medline", "icd", "lab")):
+        return True
+
+    return any(marker in lower for marker in _MEDICAL_MARKERS)
+
+
+def _build_vectorstore_lexical_index(vectorstore: Any) -> Optional[dict[str, Any]]:
+    cache_key = id(vectorstore)
+    cached = _LEXICAL_INDEX_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        collection = getattr(vectorstore, "_collection", None)
+        if collection is None:
+            return None
+        payload = collection.get(include=["documents", "metadatas"])
+        raw_docs = payload.get("documents") or []
+        raw_meta = payload.get("metadatas") or []
+    except Exception:
+        return None
+
+    docs: list[Document] = []
+    term_freqs: list[dict[str, int]] = []
+    doc_lens: list[int] = []
+    doc_freq: dict[str, int] = {}
+
+    for idx, content in enumerate(raw_docs):
+        text = str(content or "").strip()
+        if not text:
+            continue
+
+        tokens = _tokenize_bm25(text)
+        if not tokens:
+            continue
+
+        tf: dict[str, int] = {}
+        for tok in tokens:
+            tf[tok] = tf.get(tok, 0) + 1
+        for tok in tf:
+            doc_freq[tok] = doc_freq.get(tok, 0) + 1
+
+        meta = raw_meta[idx] if idx < len(raw_meta) and isinstance(raw_meta[idx], dict) else {}
+        docs.append(Document(page_content=text, metadata=meta))
+        term_freqs.append(tf)
+        doc_lens.append(len(tokens))
+
+    doc_count = len(docs)
+    if doc_count == 0:
+        return None
+
+    idf = {
+        tok: math.log((doc_count - df + 0.5) / (df + 0.5) + 1.0)
+        for tok, df in doc_freq.items()
+    }
+    avg_doc_len = sum(doc_lens) / doc_count
+
+    index = {
+        "docs": docs,
+        "term_freqs": term_freqs,
+        "doc_lens": doc_lens,
+        "idf": idf,
+        "avg_doc_len": avg_doc_len,
+    }
+    _LEXICAL_INDEX_CACHE[cache_key] = index
+    return index
+
+
+def _bm25_score_from_tf(
+    query_tokens: list[str],
+    tf: dict[str, int],
+    idf: dict[str, float],
+    doc_len: int,
+    avg_doc_len: float,
+    k1: float = 1.5,
+    b: float = 0.75,
+) -> float:
+    if not query_tokens or not tf:
+        return 0.0
+
+    score = 0.0
+    norm = 1 - b + b * (doc_len / max(1.0, avg_doc_len))
+    for q in query_tokens:
+        if q not in idf:
+            continue
+        f = tf.get(q, 0)
+        if f <= 0:
+            continue
+        denom = f + k1 * norm
+        score += idf[q] * ((f * (k1 + 1)) / (denom if denom else 1.0))
+    return score
+
+
+def _lexical_search_from_vectorstore(
+    query: str,
+    vectorstore: Any,
+    k: int,
+    query_is_english: bool,
+) -> list[tuple[Document, float]]:
+    index = _build_vectorstore_lexical_index(vectorstore)
+    if index is None:
+        return []
+
+    query_tokens = _tokenize_bm25(query)
+    if not query_tokens:
+        return []
+
+    docs = index["docs"]
+    term_freqs = index["term_freqs"]
+    doc_lens = index["doc_lens"]
+    idf = index["idf"]
+    avg_doc_len = index["avg_doc_len"]
+
+    salient_query_tokens = [tok for tok in query_tokens if idf.get(tok, 0.0) >= 2.0 and len(tok) >= 4]
+
+    scored: list[tuple[Document, float]] = []
+    for i, doc in enumerate(docs):
+        if query_is_english and not _looks_english(doc.page_content):
+            continue
+        if not _looks_clinical_enough(doc.page_content, doc.metadata):
+            continue
+
+        if salient_query_tokens:
+            tf = term_freqs[i]
+            if not any(tok in tf for tok in salient_query_tokens):
+                continue
+
+        s = _bm25_score_from_tf(query_tokens, term_freqs[i], idf, doc_lens[i], avg_doc_len)
+        if s > 0:
+            scored.append((doc, float(s)))
+
+    if not scored:
+        return []
+
+    scored.sort(key=lambda item: item[1], reverse=True)
+    return scored[:k]
+
+
+def similarity_search_with_optional_filter(
+    vectorstore: Any,
+    query: str,
+    k: int,
+    where: Optional[dict] = None,
+) -> list:
     """Run similarity search, using metadata filter only when supported by the backend."""
     try:
         if where:
@@ -29,7 +263,7 @@ def similarity_search_with_optional_filter(vectorstore, query: str, k: int, wher
 
 def get_relevant_context(
     query: str,
-    vectorstore,
+    vectorstore: Any,
     final_k: int = 5,
     retrieve_k: int = 8,
     max_queries: int = 4,
@@ -43,12 +277,23 @@ def get_relevant_context(
         return ""
 
     retrieval_queries = build_retrieval_queries(query, max_queries=max_queries)
-    pool_k = max(retrieve_k * 2, 12)
-    medication_focused = query_likely_medication_focused(query)
+    pool_k = max(retrieve_k * RETRIEVAL_POOL_K_MULTIPLIER, RETRIEVAL_POOL_K_MIN)
+    intent = classify_retrieval_intent(query)
+    medication_focused = intent["medication_focused"]
+    lab_focused = intent["lab_focused"]
+    symptom_focused = intent["symptom_focused"]
+    ddi_focused = intent["ddi_focused"]
+    clinical_query = symptom_focused or medication_focused or lab_focused
+    lab_only = lab_focused and not symptom_focused and not medication_focused
     query_med_terms = extract_query_medication_terms(query)
-    allow_ddi = medication_focused or bool(query_med_terms)
+    allow_ddi = ddi_focused
+    symptom_terms = extract_symptom_terms_from_text(query)
+    query_norm = normalize_symptom_key(query)
+    query_is_english = _looks_english(query)
+    symptom_terms_norm = {normalize_symptom_key(term) for term in symptom_terms if term}
+    query_med_terms_norm = {normalize_symptom_key(term) for term in query_med_terms if term}
 
-    def _threaded_search(rq):
+    def _threaded_search(rq: str) -> tuple[str, list, bool]:
         try:
             return rq, similarity_search_with_optional_filter(vectorstore, rq, k=pool_k), False
         except Exception:
@@ -57,18 +302,61 @@ def get_relevant_context(
     with ThreadPoolExecutor(max_workers=max_queries) as executor:
         all_results = list(executor.map(_threaded_search, retrieval_queries))
 
-    targeted_filters = [{"source": "clinical_lab_facts.csv"}]
+    lexical_raw = _lexical_search_from_vectorstore(
+        query=query,
+        vectorstore=vectorstore,
+        k=max(pool_k * 2, 24),
+        query_is_english=query_is_english,
+    )
+    if lexical_raw:
+        all_results.append((query, lexical_raw, True))
+
+    targeted_filters = [{"source": "clinical_lab_facts.csv"}] if lab_only else []
+    if symptom_focused:
+        targeted_filters.append({"doc_type": "drug_monograph"})
     if allow_ddi:
         targeted_filters.append({"source": "DDI_data_clean.csv"})
 
-    targeted_k = max(4, retrieve_k // 2)
+    allowed_monograph_sections = {
+        "indications", "indications & usage", "indications and usage", "clinical",
+        "usage", "uses", "therapeutic", "overview", "summary",
+    }
+
+    def _monograph_allowed(doc) -> bool:
+        if doc_category(doc) != "drug_monograph":
+            return True
+
+        section = normalize_symptom_key(str(doc.metadata.get("section", "")))
+        if section in allowed_monograph_sections:
+            return True
+
+        drug_name = normalize_symptom_key(str(doc.metadata.get("drug", "")))
+        return bool(drug_name and drug_name in query_norm)
+
+    def _matches_query_focus(doc) -> bool:
+        if not symptom_focused:
+            return True
+
+        text_norm = normalize_symptom_key(doc.page_content or "")
+        if any(term and term in text_norm for term in symptom_terms_norm):
+            return True
+        if any(term and term in text_norm for term in query_med_terms_norm):
+            return True
+
+        drug_name = normalize_symptom_key(str(doc.metadata.get("drug", "")))
+        if drug_name and drug_name in query_norm:
+            return True
+
+        return False
+
+    targeted_k = max(RETRIEVAL_TARGETED_K_MIN, retrieve_k // 2)
     for rq in retrieval_queries[:2]:
         for where in targeted_filters:
             raw = similarity_search_with_optional_filter(vectorstore, rq, k=targeted_k, where=where)
             if raw:
                 all_results.append((rq, raw, True))
 
-    merged = {}
+    merged: dict[str, dict[str, Any]] = {}
 
     for rq, raw, is_targeted in all_results:
         if not raw:
@@ -91,15 +379,43 @@ def get_relevant_context(
                 else:
                     score_norm = (score - s_min) / s_span
 
-                rank_rrf = 1.0 / (rank + 1.0)
-                semantic = 0.70 * score_norm + 0.30 * rank_rrf
+                rank_rrf = 1.0 / (rank + RETRIEVAL_RRF_K)
+                semantic = RETRIEVAL_SCORE_NORM_WEIGHT * score_norm + RETRIEVAL_RRF_WEIGHT * rank_rrf
                 docs_with_semantic.append((doc, semantic))
         except Exception:
             docs_with_semantic = [(doc, 1.0 / (rank + 1.0)) for rank, (doc, _) in enumerate(raw)]
 
         for doc, semantic in docs_with_semantic:
+            # Filter out clearly non-English KB entries when the query is English
+            if query_is_english and not _looks_english(doc.page_content):
+                continue
+            if clinical_query and not _looks_clinical_enough(doc.page_content, doc.metadata):
+                continue
+            if not _matches_query_focus(doc):
+                continue
+
+            # Boost documents that explicitly mention medications present in the query
+            try:
+                drug_meta = normalize_symptom_key(str(doc.metadata.get("drug", "")))
+            except Exception:
+                drug_meta = ""
+            if drug_meta and drug_meta in query_norm:
+                semantic += 0.9
+            else:
+                # also check page content for medication mentions
+                if query_med_terms:
+                    content_norm = normalize_symptom_key(doc.page_content or "")
+                    for qmt in query_med_terms:
+                        qn = normalize_symptom_key(str(qmt))
+                        if qn and qn in content_norm:
+                            semantic += 0.6
+                            break
             lex = lexical_overlap_ratio(rq, doc.page_content)
             if not is_targeted and lex < min_lexical_overlap:
+                if not (symptom_focused and doc_category(doc) in {"drug_monograph", "clinical_text"}):
+                    continue
+
+            if symptom_focused and not _monograph_allowed(doc):
                 continue
 
             source = doc.metadata.get("source", "unknown")
@@ -119,34 +435,153 @@ def get_relevant_context(
                 item["hits"] += 1
                 item["semantic_sum"] += semantic
                 item["lex_max"] = max(item["lex_max"], lex)
+    # Compute BM25 scores across merged docs to compensate for weak embeddings
+    if merged:
+        docs_list = list(merged.values())
+        corpus_tokens = [_tokenize_bm25(d["doc"].page_content or "") for d in docs_list]
+        # local candidate-level BM25 reranker (kept even with corpus-level lexical search)
+        N = len(corpus_tokens)
+        df: dict[str, int] = {}
+        lens = [len(d) for d in corpus_tokens]
+        for doc_tokens in corpus_tokens:
+            seen = set(doc_tokens)
+            for tok in seen:
+                df[tok] = df.get(tok, 0) + 1
+        idf = {tok: math.log((N - dfi + 0.5) / (dfi + 0.5) + 1.0) for tok, dfi in df.items()}
+        avgdl = (sum(lens) / N) if N > 0 else 0.0
+        query_tokens = _tokenize_bm25(query)
+        bm25_vals = []
+        for doc_tokens in corpus_tokens:
+            tf_local: dict[str, int] = {}
+            for tok in doc_tokens:
+                tf_local[tok] = tf_local.get(tok, 0) + 1
+            bm25_vals.append(float(_bm25_score_from_tf(query_tokens, tf_local, idf, len(doc_tokens), avgdl)))
+        max_bm = max(bm25_vals) if bm25_vals else 0.0
+        for item, bm in zip(docs_list, bm25_vals):
+            # normalized into 0..1
+            item["bm25"] = (bm / max_bm) if max_bm > 0 else 0.0
 
+        # detect weak semantic signal (low variance) and adjust weights later
+        sem_vals = [d["semantic_sum"] / d["hits"] if d["hits"] else 0.0 for d in docs_list]
+        try:
+            import statistics
+
+            sem_std = statistics.pstdev(sem_vals) if sem_vals else 0.0
+            sem_mean = statistics.mean(sem_vals) if sem_vals else 0.0
+        except Exception:
+            sem_std = 0.0
+            sem_mean = 0.0
+        merged_sem_stats = {"std": sem_std, "mean": sem_mean}
+    else:
+        merged_sem_stats = {"std": 0.0, "mean": 0.0}
+    
     if not merged:
-        return ""
+        fallback_merged: dict[str, dict[str, Any]] = {}
+
+        def _allow_fallback_category(cat: str) -> bool:
+            if cat == "lab_reference" and not lab_only:
+                return False
+            if cat == "drug_interactions" and not allow_ddi:
+                return False
+            return True
+
+        for rq, raw, _is_targeted in all_results:
+            if not raw:
+                continue
+
+            for rank, (doc, _score) in enumerate(raw):
+                if clinical_query and not _looks_clinical_enough(doc.page_content, doc.metadata):
+                    continue
+                if not _matches_query_focus(doc):
+                    continue
+                if not _allow_fallback_category(doc_category(doc)):
+                    continue
+                key = f"{doc.metadata.get('source', 'unknown')}|{doc.metadata.get('row', -1)}|{doc.metadata.get('line_index', -1)}|{hash(doc.page_content)}"
+                if key in fallback_merged:
+                    continue
+
+                fallback_merged[key] = {
+                    "doc": doc,
+                    "hits": 1,
+                    "semantic_sum": 1.0 / (rank + 1.0),
+                    "lex_max": lexical_overlap_ratio(rq, doc.page_content),
+                }
+
+        if not fallback_merged:
+            for rq, raw, _is_targeted in all_results:
+                if not raw:
+                    continue
+
+                for rank, (doc, _score) in enumerate(raw):
+                    if clinical_query and not _looks_clinical_enough(doc.page_content, doc.metadata):
+                        continue
+                    if not _matches_query_focus(doc):
+                        continue
+                    if not _allow_fallback_category(doc_category(doc)):
+                        continue
+                    key = f"{doc.metadata.get('source', 'unknown')}|{doc.metadata.get('row', -1)}|{doc.metadata.get('line_index', -1)}|{hash(doc.page_content)}"
+                    if key in fallback_merged:
+                        continue
+
+                    fallback_merged[key] = {
+                        "doc": doc,
+                        "hits": 1,
+                        "semantic_sum": 1.0 / (rank + 1.0),
+                        "lex_max": lexical_overlap_ratio(rq, doc.page_content),
+                    }
+
+        if not fallback_merged:
+            return ""
+        merged = fallback_merged
+
+    # adjust weights when query is clearly English (helps when embeddings are weak)
+    sem_w = RETRIEVAL_SEMANTIC_WEIGHT * (0.5 if query_is_english else 1.0)
+    bm25_w = RETRIEVAL_BM25_WEIGHT
+    if query_is_english:
+        bm25_w = max(bm25_w, 0.6)
+
+    # If semantic scores show very low variance (hash embeddings), strongly prefer BM25
+    if merged_sem_stats.get("std", 0.0) < 0.01:
+        sem_w = RETRIEVAL_SEMANTIC_WEIGHT * 0.05
+        bm25_w = max(bm25_w, 0.9)
+
+    def _pre_score(item: dict) -> float:
+        return (
+            sem_w * (item["semantic_sum"] / item["hits"])
+            + RETRIEVAL_LEXICAL_WEIGHT * item["lex_max"]
+            + bm25_w * item.get("bm25", 0.0)
+        )
+
+    if len(merged) > RETRIEVAL_MAX_MERGED_DOCS:
+        trimmed = sorted(merged.values(), key=_pre_score, reverse=True)[:RETRIEVAL_MAX_MERGED_DOCS]
+        merged = {id(item["doc"]): item for item in trimmed}
 
     max_hits = max(item["hits"] for item in merged.values())
 
     ranked = sorted(
         merged.values(),
         key=lambda item: (
-            0.65 * (item["semantic_sum"] / item["hits"])
-            + 0.25 * item["lex_max"]
-            + 0.10 * (item["hits"] / max_hits)
+            sem_w * (item["semantic_sum"] / item["hits"])
+            + RETRIEVAL_LEXICAL_WEIGHT * item["lex_max"]
+            + bm25_w * item.get("bm25", 0.0)
+            + RETRIEVAL_HITS_WEIGHT * (item["hits"] / max_hits)
         ),
         reverse=True,
     )
 
-    def _rank_score(item: dict) -> float:
+    def _rank_score(item: dict[str, Any]) -> float:
         return (
-            0.65 * (item["semantic_sum"] / item["hits"])
-            + 0.25 * item["lex_max"]
-            + 0.10 * (item["hits"] / max_hits)
+            sem_w * (item["semantic_sum"] / item["hits"])
+            + RETRIEVAL_LEXICAL_WEIGHT * item["lex_max"]
+            + bm25_w * item.get("bm25", 0.0)
+            + RETRIEVAL_HITS_WEIGHT * (item["hits"] / max_hits)
         )
 
-    snippets = []
-    seen_text = set()
-    selected_records: list[dict] = []
+    snippets: list[str] = []
+    seen_text: set[str] = set()
+    selected_records: list[dict[str, Any]] = []
     max_drug_monographs = max(2, final_k // 2) if medication_focused else 1
-    max_lab_references = 2 if transcript_mentions_labs(query) else 1
+    max_lab_references = 1 if (lab_focused and symptom_focused) else (2 if lab_focused else 0)
 
     category_top: dict[str, dict] = {}
     for item in ranked:
@@ -154,9 +589,21 @@ def get_relevant_context(
         if cat not in category_top:
             category_top[cat] = item
 
+    def _category_priority(cat: str) -> float:
+        if symptom_focused:
+            if cat == "clinical_text":
+                return CATEGORY_PRIORITY_SYMPTOM_CLINICAL
+            if cat == "lab_reference":
+                return CATEGORY_PRIORITY_SYMPTOM_LAB
+            if cat == "drug_interactions":
+                return CATEGORY_PRIORITY_SYMPTOM_DDI
+        if medication_focused and cat == "drug_monograph":
+            return CATEGORY_PRIORITY_MED_MONOGRAPH
+        return 0.0
+
     category_order = sorted(
         category_top.keys(),
-        key=lambda cat: _rank_score(category_top[cat]),
+        key=lambda cat: _rank_score(category_top[cat]) + _category_priority(cat),
         reverse=True,
     )
 
@@ -168,6 +615,8 @@ def get_relevant_context(
             if existing_drug >= max_drug_monographs:
                 continue
         if cat == "lab_reference":
+            if not lab_focused:
+                continue
             existing_lab = sum(1 for rec in selected_records if rec["cat"] == "lab_reference")
             if existing_lab >= max_lab_references:
                 continue
@@ -187,7 +636,7 @@ def get_relevant_context(
             break
 
     if len(snippets) < final_k:
-        max_per_category = max(2, (final_k + 1) // 2)
+        max_per_category = max(RETRIEVAL_MAX_PER_CATEGORY_MIN, (final_k + 1) // 2)
         selected_doc_ids = {id(category_top[cat]["doc"]) for cat in selected_categories}
 
         category_selected = {}
@@ -207,6 +656,8 @@ def get_relevant_context(
                 if category_selected.get(cat, 0) >= max_drug_monographs:
                     continue
             if cat == "lab_reference":
+                if not lab_focused:
+                    continue
                 if category_selected.get(cat, 0) >= max_lab_references:
                     continue
             if cat == "drug_interactions" and not allow_ddi:
@@ -224,6 +675,20 @@ def get_relevant_context(
             selected_doc_ids.add(id(doc))
             category_selected[cat] = category_selected.get(cat, 0) + 1
             selected_records.append({"item": item, "cat": cat, "snippet": snippet, "score": _rank_score(item)})
+
+    if not selected_records:
+        for item in ranked:
+            cat = doc_category(item["doc"])
+            if cat == "drug_interactions" and not allow_ddi:
+                continue
+            snippet = truncate_snippet(item["doc"].page_content, max_chars_per_snippet)
+            key = snippet.lower()
+            if not snippet or key in seen_text:
+                continue
+            selected_records.append({"item": item, "cat": cat, "snippet": snippet, "score": _rank_score(item)})
+            seen_text.add(key)
+            if len(selected_records) >= max(1, final_k // 2):
+                break
 
     if final_k >= 3 and allow_ddi:
         best_ddi = None
@@ -266,7 +731,90 @@ def get_relevant_context(
                         seen_text.discard(to_replace["snippet"].lower())
                         seen_text.add(ddi_key)
 
+    if not selected_records and lab_only:
+        for rq in retrieval_queries[:2]:
+            raw = similarity_search_with_optional_filter(vectorstore, rq, k=max(4, retrieve_k // 2), where={"source": "clinical_lab_facts.csv"})
+            if not raw:
+                continue
+            for rank, (doc, score) in enumerate(raw):
+                if doc_category(doc) != "lab_reference":
+                    continue
+                snippet = truncate_snippet(doc.page_content, max_chars_per_snippet)
+                key = snippet.lower()
+                if not snippet or key in seen_text:
+                    continue
+                selected_records.append({"item": {"doc": doc}, "cat": "lab_reference", "snippet": snippet, "score": float(score) if isinstance(score, (int, float)) else 0.0})
+                seen_text.add(key)
+                if len(selected_records) >= max(1, final_k // 2):
+                    break
+            if selected_records:
+                break
+
+    if not selected_records:
+        for item in ranked:
+            snippet = truncate_snippet(item["doc"].page_content, max_chars_per_snippet)
+            key = snippet.lower()
+            if not snippet or key in seen_text:
+                continue
+            selected_records.append({"item": item, "cat": doc_category(item["doc"]), "snippet": snippet, "score": _rank_score(item)})
+            seen_text.add(key)
+            if len(selected_records) >= 1:
+                break
+
     selected_records.sort(key=lambda rec: rec["score"], reverse=True)
+
+    def _symptom_bonus(text: str) -> float:
+        if not symptom_terms:
+            return 0.0
+        norm = normalize_symptom_key(text)
+        hits = sum(1 for term in symptom_terms if normalize_symptom_key(term) in norm)
+        return min(SYMPTOM_BONUS_MAX, SYMPTOM_BONUS_PER_HIT * hits)
+
+    def _section_penalty(rec: dict[str, Any]) -> float:
+        if not symptom_focused or rec.get("cat") != "drug_monograph":
+            return 0.0
+        doc = rec.get("item", {}).get("doc")
+        if not doc:
+            return 0.0
+        section = normalize_symptom_key(str(doc.metadata.get("section", "")))
+        if section in {"warnings", "dosage", "dosage and administration", "adverse reactions"}:
+            return SECTION_PENALTY
+        return 0.0
+
+    def _category_adjustment(rec: dict[str, Any]) -> float:
+        cat = rec.get("cat")
+        if symptom_focused:
+            if cat == "clinical_text":
+                return CATEGORY_ADJUST_SYMPTOM_CLINICAL
+            if cat == "drug_monograph":
+                return CATEGORY_ADJUST_SYMPTOM_MONOGRAPH
+            if cat == "lab_reference":
+                return CATEGORY_ADJUST_SYMPTOM_LAB
+            if cat == "drug_interactions":
+                return CATEGORY_ADJUST_SYMPTOM_DDI
+        if medication_focused and cat == "drug_monograph":
+            return CATEGORY_ADJUST_MED_MONOGRAPH
+        return 0.0
+
+    def _source_bonus(rec: dict[str, Any]) -> float:
+        doc = rec.get("item", {}).get("doc")
+        if not doc:
+            return 0.0
+        source = normalize_symptom_key(str(doc.metadata.get("source", "")))
+        if "symptom" in source or "summary" in source:
+            return SOURCE_BONUS_SYMPTOM if symptom_focused else SOURCE_BONUS_GENERAL
+        return 0.0
+
+    selected_records.sort(
+        key=lambda rec: (
+            rec["score"]
+            + _symptom_bonus(rec["snippet"])
+            + _category_adjustment(rec)
+            + _source_bonus(rec)
+            - _section_penalty(rec)
+        ),
+        reverse=True,
+    )
     snippets = [rec["snippet"] for rec in selected_records[:final_k]]
 
     context = "\n\n".join(snippets)
@@ -284,5 +832,33 @@ def get_relevant_context(
                     lines.append(f"- {code}: {desc} (matched symptom: {symptom}, score={score})")
             if len(lines) > 1:
                 context = f"{context}\n\n" + "\n".join(lines) if context else "\n".join(lines)
+
+    if not context and ranked:
+        if medication_focused:
+            preferred_categories = ["drug_monograph", "drug_interactions", "clinical_text", "csv_reference", "lab_reference"]
+        elif symptom_focused:
+            preferred_categories = ["clinical_text", "csv_reference", "drug_monograph", "lab_reference", "drug_interactions"]
+        elif lab_only:
+            preferred_categories = ["lab_reference", "csv_reference", "clinical_text", "drug_monograph", "drug_interactions"]
+        else:
+            preferred_categories = ["clinical_text", "csv_reference", "drug_monograph", "lab_reference", "drug_interactions"]
+        chosen_item = None
+
+        for preferred_category in preferred_categories:
+            for item in ranked:
+                if doc_category(item["doc"]) == preferred_category:
+                    chosen_item = item
+                    break
+            if chosen_item is not None:
+                break
+
+        if chosen_item is None:
+            chosen_item = ranked[0]
+
+        chosen_cat = doc_category(chosen_item["doc"])
+        if (chosen_cat == "lab_reference" and not lab_only) or (chosen_cat == "drug_interactions" and not allow_ddi):
+            return ""
+
+        context = truncate_snippet(chosen_item["doc"].page_content, max_chars_per_snippet)
 
     return context
