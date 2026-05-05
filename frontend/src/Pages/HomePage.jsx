@@ -125,44 +125,82 @@ function HelpPopup({ onClose }) {
 const CONSULTATION_TYPES = ["General", "Follow-up", "Specialist", "Emergency"];
 const LANGUAGES = ["English", "Hungarian", "German", "French", "Spanish"];
 
-function SessionModal({ onConfirm, onCancel }) {
+function SessionModal({ onConfirm, onCancel, onNavigate }) {
+  const [doctors, setDoctors] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
-    doctorName: "",
-    patientName: "",
-    dob: "",
+    doctorId: "",
+    patientId: "",
     consultationType: "",
     language: "English",
   });
   const [errors, setErrors] = useState({});
 
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+  useEffect(() => {
+    Promise.all([
+      fetch("http://localhost:5000/api/doctors").then(r => r.json()),
+      fetch("http://localhost:5000/api/patients").then(r => r.json()),
+    ]).then(([docs, pats]) => {
+      setDoctors(Array.isArray(docs) ? docs : []);
+      setPatients(Array.isArray(pats) ? pats : []);
+    }).catch(() => {
+      setDoctors([]);
+      setPatients([]);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const set = (key) => (e) => {
+    setForm((f) => ({ ...f, [key]: e.target.value }));
+    setErrors((e2) => ({ ...e2, [key]: false }));
+  };
 
   const validate = () => {
     const e = {};
-    if (!form.doctorName.trim()) e.doctorName = true;
-    if (!form.patientName.trim()) e.patientName = true;
-    if (!form.dob) e.dob = true;
+    if (!form.doctorId) e.doctorId = true;
+    if (!form.patientId) e.patientId = true;
     return e;
   };
 
   const handleSubmit = () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    onConfirm(form);
+    const doctor = doctors.find(d => String(d.id) === String(form.doctorId));
+    const patient = patients.find(p => String(p.id) === String(form.patientId));
+    const doctorName = doctor
+      ? [doctor.title, doctor.first_name, doctor.last_name].filter(Boolean).join(" ")
+      : "";
+    const patientName = patient
+      ? [patient.title, patient.first_name, patient.last_name].filter(Boolean).join(" ")
+      : "";
+    onConfirm({ ...form, doctorName, patientName });
   };
 
-  const inputStyle = (key) => ({
-    width: "100%", height: 36, padding: "0 10px",
+  const selectStyle = (key) => ({
+    width: "100%", height: 38, padding: "0 10px",
     border: `0.5px solid ${errors[key] ? "#ef4444" : "rgba(0,0,0,0.2)"}`,
     borderRadius: 8, fontSize: 14, fontFamily: "inherit",
-    background: "transparent", color: "inherit", outline: "none",
+    background: "#fff", color: "#0f172a", outline: "none",
     boxShadow: errors[key] ? "0 0 0 2px rgba(239,68,68,0.15)" : "none",
+    cursor: "pointer",
   });
 
   const labelStyle = {
     display: "block", fontSize: 12, fontWeight: 500,
     color: "#64748b", marginBottom: 5, letterSpacing: "0.02em",
   };
+
+  const emptyHint = (entity, page) => (
+    <p style={{ margin: "4px 0 0", fontSize: 12, color: "#94a3b8" }}>
+      No {entity}s yet.{" "}
+      <button
+        onClick={() => { onCancel(); onNavigate(page); }}
+        style={{ background: "none", border: "none", color: "#2563eb", fontSize: 12, fontWeight: 600, cursor: "pointer", padding: 0 }}
+      >
+        Add one →
+      </button>
+    </p>
+  );
 
   return (
     <div style={{
@@ -181,74 +219,71 @@ function SessionModal({ onConfirm, onCancel }) {
             Session details
           </h3>
           <p style={{ margin: "4px 0 0", fontSize: 13, color: "#64748b", lineHeight: 1.5 }}>
-            Fill in the required fields before the recording begins.
+            Select a doctor and patient before the recording begins.
           </p>
         </div>
 
-        {/* Doctor name */}
-        <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>
-            Doctor name <span style={{ color: "#ef4444" }}>*</span>
-          </label>
-          <input
-            style={inputStyle("doctorName")}
-            placeholder="Dr. Jane Smith"
-            value={form.doctorName}
-            onChange={set("doctorName")}
-            onFocus={() => setErrors((e) => ({ ...e, doctorName: false }))}
-          />
-        </div>
+        {loading ? (
+          <p style={{ color: "#94a3b8", fontSize: 14, textAlign: "center", padding: "20px 0" }}>Loading…</p>
+        ) : (
+          <>
+            {/* Doctor select */}
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>
+                Doctor <span style={{ color: "#ef4444" }}>*</span>
+              </label>
+              <select style={selectStyle("doctorId")} value={form.doctorId} onChange={set("doctorId")}>
+                <option value="">Select doctor…</option>
+                {doctors.map(d => (
+                  <option key={d.id} value={d.id}>
+                    {[d.title, d.first_name, d.last_name].filter(Boolean).join(" ")}
+                  </option>
+                ))}
+              </select>
+              {doctors.length === 0 && emptyHint("doctor", "Doctors")}
+            </div>
 
-        {/* Patient name */}
-        <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>
-            Patient full name <span style={{ color: "#ef4444" }}>*</span>
-          </label>
-          <input
-            style={inputStyle("patientName")}
-            placeholder="John Doe"
-            value={form.patientName}
-            onChange={set("patientName")}
-            onFocus={() => setErrors((e) => ({ ...e, patientName: false }))}
-          />
-        </div>
+            {/* Patient select */}
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>
+                Patient <span style={{ color: "#ef4444" }}>*</span>
+              </label>
+              <select style={selectStyle("patientId")} value={form.patientId} onChange={set("patientId")}>
+                <option value="">Select patient…</option>
+                {patients.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {[p.title, p.first_name, p.last_name].filter(Boolean).join(" ")}
+                    {p.date_of_birth ? ` (${p.date_of_birth})` : ""}
+                  </option>
+                ))}
+              </select>
+              {patients.length === 0 && emptyHint("patient", "Patients")}
+            </div>
 
-        {/* DOB */}
-        <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>
-            Date of birth <span style={{ color: "#ef4444" }}>*</span>
-          </label>
-          <input
-            type="date"
-            style={inputStyle("dob")}
-            value={form.dob}
-            onChange={set("dob")}
-            onFocus={() => setErrors((e) => ({ ...e, dob: false }))}
-          />
-        </div>
+            {/* Divider + optional section */}
+            <hr style={{ border: "none", borderTop: "0.5px solid rgba(0,0,0,0.1)", margin: "16px 0 12px" }} />
+            <p style={{ fontSize: 11, fontWeight: 600, color: "#94a3b8", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 12 }}>
+              Optional
+            </p>
 
-        {/* Divider + optional section */}
-        <hr style={{ border: "none", borderTop: "0.5px solid rgba(0,0,0,0.1)", margin: "16px 0 12px" }} />
-        <p style={{ fontSize: 11, fontWeight: 600, color: "#94a3b8", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 12 }}>
-          Optional
-        </p>
-
-        {/* Consultation type + Language row */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
-          <div>
-            <label style={labelStyle}>Consultation type</label>
-            <select style={{ ...inputStyle(), padding: "0 8px" }} value={form.consultationType} onChange={set("consultationType")}>
-              <option value="">Select…</option>
-              {CONSULTATION_TYPES.map((t) => <option key={t}>{t}</option>)}
-            </select>
-          </div>
-          <div>
-            <label style={labelStyle}>Language</label>
-            <select style={{ ...inputStyle(), padding: "0 8px" }} value={form.language} onChange={set("language")}>
-              {LANGUAGES.map((l) => <option key={l}>{l}</option>)}
-            </select>
-          </div>
-        </div>
+            {/* Consultation type + Language row */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+              <div>
+                <label style={labelStyle}>Consultation type</label>
+                <select style={{ ...selectStyle(), padding: "0 8px" }} value={form.consultationType} onChange={set("consultationType")}>
+                  <option value="">Select…</option>
+                  {CONSULTATION_TYPES.map((t) => <option key={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Language</label>
+                <select style={{ ...selectStyle(), padding: "0 8px" }} value={form.language} onChange={set("language")}>
+                  {LANGUAGES.map((l) => <option key={l}>{l}</option>)}
+                </select>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Actions */}
         <div style={{ display: "flex", gap: 10 }}>
@@ -265,10 +300,12 @@ function SessionModal({ onConfirm, onCancel }) {
           </button>
           <button
             onClick={handleSubmit}
+            disabled={loading}
             style={{
               flex: 2, height: 38, borderRadius: 40, border: "none",
               background: "#2563eb", color: "#fff",
               fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit",
+              opacity: loading ? 0.5 : 1,
             }}
           >
             Start recording →
@@ -280,7 +317,7 @@ function SessionModal({ onConfirm, onCancel }) {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function HomePage({ onNavigate, onDurationSave, onDataReceived, onSessionData }) {
+export default function HomePage({ onNavigate, onDurationSave, onDataReceived }) {
   const [recording, setRecording]   = useState(false);
   const [seconds, setSeconds]       = useState(0);
   const [showHelp, setShowHelp]     = useState(false);
@@ -343,10 +380,11 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived, o
 
     const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
     const formData  = new FormData();
-    formData.append("file", audioBlob, "recording.webm");  // must match ALLOWED_EXTENSIONS on backend
+    formData.append("file", audioBlob, "recording.webm");
 
     if (sessionDataRef.current) {
-      formData.append("sessionData", JSON.stringify(sessionDataRef.current));
+      formData.append("doctor_id", sessionDataRef.current.doctorId);
+      formData.append("patient_id", sessionDataRef.current.patientId);
     }
 
     try {
@@ -364,7 +402,6 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived, o
         onDurationSave(`${mm}:${ss}`);
 
         if (onDataReceived) onDataReceived(data.data);
-        if (onSessionData && data.data?.session) onSessionData(data.data.session);
 
         onNavigate("Transcript", {
   data: data.data,
@@ -446,6 +483,7 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived, o
         <SessionModal
           onConfirm={handleModalConfirm}
           onCancel={() => setShowModal(false)}
+          onNavigate={onNavigate}
         />
       )}
 

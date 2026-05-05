@@ -5,6 +5,8 @@ import TranscriptPage from './Pages/TranscriptPage';
 import SummaryPage from './Pages/SummaryPage';
 import SettingsPage from './Pages/SettingPage';
 import HistoryPage from './Pages/HistoryPage';
+import CreateDoctorPage from './Pages/CreateDoctorPage';
+import CreatePatientPage from './Pages/CreatePatientPage';
 
 export default function App() {
   const [active, setActive] = useState('Home');
@@ -22,14 +24,14 @@ export default function App() {
   };
 
   const handleLoadConsultation = (c) => {
-  setConsultationData(c);
-  setDuration(c.duration ?? '—');
-  setSessionData({
-    doctorName:  c.doctorName  ?? c.doctor_name  ?? '',
-    patientName: c.patientName ?? c.patient_name ?? '',
-  });
-  setActive('Summary');
-};
+    setConsultationData(c);
+    setDuration(c.duration ?? '—');
+    setSessionData({
+      doctorName:  c.doctorName  ?? c.doctor_name  ?? '',
+      patientName: c.patientName ?? c.patient_name ?? '',
+    });
+    setActive('Summary');
+  };
 
   const renderPage = () => {
     switch (active) {
@@ -68,6 +70,10 @@ export default function App() {
             onLoadConsultation={handleLoadConsultation}
           />
         );
+      case 'Doctors':
+        return <CreateDoctorPage onNavigate={setActive} />;
+      case 'Patients':
+        return <CreatePatientPage onNavigate={setActive} />;
       default:
         return <SettingsPage />;
     }
