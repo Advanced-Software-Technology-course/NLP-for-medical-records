@@ -9,3 +9,5 @@ backend/medical.db
 *.db
 /backend/uploads
 backend/medical.db
+node_modules/
+dist/
