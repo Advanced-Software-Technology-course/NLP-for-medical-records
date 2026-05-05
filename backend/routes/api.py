@@ -13,17 +13,84 @@ try:
 except ImportError as e:
     print(f"Error importing pipeline modules: {e}")
     # Placeholder functions if import fails (for testing backend structure without pipeline deps)
-    def transcribe_audio(*args): return "Mock Transcript"
+    def transcribe_audio(*args): return "Mock Transcript", [], 0.0
     def summarize_transcript(*args): return "Mock Summary"
     def summarize_soap_notes(*args): return "Subjective: ... Objective: ... Assessment: ... Plan: ..."
 
 api_bp = Blueprint('api', __name__)
 
-ALLOWED_EXTENSIONS = {'mp3', 'wav', 'm4a', 'flac'}
+ALLOWED_EXTENSIONS = {'mp3', 'wav', 'm4a', 'flac', 'webm'}
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+# ── Doctors ───────────────────────────────────────────────────────────────────
+
+@api_bp.route('/doctors', methods=['GET'])
+def get_doctors():
+    doctors = md.Doctor.query.order_by(md.Doctor.last_name).all()
+    return jsonify([d.to_dict() for d in doctors]), 200
+
+@api_bp.route('/doctors', methods=['POST'])
+def create_doctor():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    if not data.get('first_name') or not data.get('last_name'):
+        return jsonify({'error': 'first_name and last_name are required'}), 400
+
+    doctor = md.Doctor(
+        title=data.get('title') or None,
+        first_name=data['first_name'].strip(),
+        last_name=data['last_name'].strip(),
+    )
+    db.session.add(doctor)
+    db.session.commit()
+    return jsonify(doctor.to_dict()), 201
+
+
+# ── Patients ──────────────────────────────────────────────────────────────────
+
+@api_bp.route('/patients', methods=['GET'])
+def get_patients():
+    patients = md.Patient.query.order_by(md.Patient.last_name).all()
+    return jsonify([p.to_dict() for p in patients]), 200
+
+@api_bp.route('/patients', methods=['POST'])
+def create_patient():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    if not data.get('first_name') or not data.get('last_name'):
+        return jsonify({'error': 'first_name and last_name are required'}), 400
+
+    from datetime import date
+    dob = None
+    if data.get('date_of_birth'):
+        try:
+            dob = date.fromisoformat(data['date_of_birth'])
+        except ValueError:
+            return jsonify({'error': 'Invalid date_of_birth format, use YYYY-MM-DD'}), 400
+
+    patient = md.Patient(
+        title=data.get('title') or None,
+        first_name=data['first_name'].strip(),
+        last_name=data['last_name'].strip(),
+        date_of_birth=dob,
+        taj_number=data.get('taj_number') or None,
+    )
+    db.session.add(patient)
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'TAJ number already exists'}), 409
+    return jsonify(patient.to_dict()), 201
+
+
+# ── Consultations ─────────────────────────────────────────────────────────────
 
 @api_bp.route('/process', methods=['POST'])
 def process_audio():
@@ -32,67 +99,67 @@ def process_audio():
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        # Ensure upload folder exists
-        if not os.path.exists(current_app.config['UPLOAD_FOLDER']):
-            os.makedirs(current_app.config['UPLOAD_FOLDER'])
-            
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
+    if not (file and allowed_file(file.filename)):
+        return jsonify({'error': 'Invalid file type'}), 400
 
-        try:
-            gladia_token = current_app.config.get('GLADIA_TOKEN')
-            groq_token = current_app.config.get('GROQ_TOKEN')
- 
-            if not gladia_token or not groq_token:
-                print("Warning: Missing API tokens.")
- 
-            # 1. Transcribe
-            transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(filepath, gladia_token)
+    doctor_id = request.form.get('doctor_id')
+    patient_id = request.form.get('patient_id')
+    if not doctor_id or not patient_id:
+        return jsonify({'error': 'doctor_id and patient_id are required'}), 400
 
-            # Debug prints
-            print("SENTENCE CONFIDENCES:", sentence_confidences)
-            print("TRANSCRIPTION CONFIDENCE AVG:", transcription_confidence_avg)
+    filename = secure_filename(file.filename)
+    if not os.path.exists(current_app.config['UPLOAD_FOLDER']):
+        os.makedirs(current_app.config['UPLOAD_FOLDER'])
 
-            if not transcript:
-                transcript = ""
- 
-            print("TRANSCRIPT:", transcript)  # debug log
- 
-            # 2. Summarize
-            summary = summarize_transcript(transcript, groq_token)
- 
-            # 3. SOAP Notes
-            soap_notes = summarize_soap_notes(transcript, groq_token)
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
 
-            # 4. Save to DB
-            consultation = md.Consultation(
-                transcript=transcript,
-                summary=summary,
-                soap_notes=soap_notes
-            )
-            db.session.add(consultation)
-            db.session.commit()
+    try:
+        gladia_token = current_app.config.get('GLADIA_TOKEN')
+        groq_token = current_app.config.get('GROQ_TOKEN')
 
-            # 5. Return response including confidence scores
-            return jsonify({
-                'message': 'Processing complete',
-                'data': {
-                    'transcript': transcript,
-                    'summary': summary,
-                    'soap_notes': soap_notes,
-                    'sentence_confidences': sentence_confidences,
-                    'transcription_confidence_avg': transcription_confidence_avg
-                }
-            }), 200
+        if not gladia_token or not groq_token:
+            print("Warning: Missing API tokens.")
 
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return jsonify({'error': str(e)}), 500
+        transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(filepath, gladia_token)
 
-    return jsonify({'error': 'Invalid file type'}), 400
+        print("SENTENCE CONFIDENCES:", sentence_confidences)
+        print("TRANSCRIPTION CONFIDENCE AVG:", transcription_confidence_avg)
+
+        if not transcript:
+            transcript = ""
+
+        print("TRANSCRIPT:", transcript)
+
+        summary = summarize_transcript(transcript, groq_token)
+        soap_notes = summarize_soap_notes(transcript, groq_token)
+
+        consultation = md.Consultation(
+            doctor_id=int(doctor_id),
+            patient_id=int(patient_id),
+            transcript=transcript,
+            summary=summary,
+            soap_notes=soap_notes
+        )
+        db.session.add(consultation)
+        db.session.commit()
+
+        return jsonify({
+            'message': 'Processing complete',
+            'data': {
+                'transcript': transcript,
+                'summary': summary,
+                'soap_notes': soap_notes,
+                'sentence_confidences': sentence_confidences,
+                'transcription_confidence_avg': transcription_confidence_avg
+            }
+        }), 200
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 
 @api_bp.route('/history', methods=['GET'])
 def get_history():

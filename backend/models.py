@@ -90,10 +90,18 @@ class Consultation(db.Model):
         return sections
 
     def to_dict(self):
+        def full_name(person):
+            if not person:
+                return ''
+            parts = [person.title or '', person.first_name, person.last_name]
+            return ' '.join(p for p in parts if p).strip()
+
         return {
             "id": self.id,
             "doctor_id": self.doctor_id,
             "patient_id": self.patient_id,
+            "doctorName": full_name(self.doctor),
+            "patientName": full_name(self.patient),
             "transcript": self.transcript,
             "aiSummary": self.summary,
             "soap": self.parse_soap_notes(),
