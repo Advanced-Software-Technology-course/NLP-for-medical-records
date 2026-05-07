@@ -380,6 +380,50 @@ def save_manifest(chroma_path: str, manifest: dict) -> None:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
 
 
+def _download_precompiled_index(chroma_path: str) -> bool:
+    """Download pre-compiled index from GitHub release. Returns True if successful."""
+    RELEASE_URL = "https://github.com/saxovia/kb_for_medical_nlp/releases/download/DB/chroma_db.zip"
+    
+    try:
+        import requests
+        import zipfile
+        
+        os.makedirs(chroma_path, exist_ok=True)
+        zip_path = os.path.join(os.path.dirname(chroma_path), "chroma_db_download.zip")
+        
+        print("[RAG] Attempting to download pre-compiled index...")
+        with requests.get(RELEASE_URL, stream=True, timeout=30) as r:
+            r.raise_for_status()
+            total = int(r.headers.get("content-length", 0))
+            downloaded = 0
+            
+            with open(zip_path, "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        if total:
+                            pct = min(100, int(downloaded / total * 100))
+                            print(f"[RAG]   Download progress: {pct}%", end="\r")
+        
+        print("\n[RAG] Download complete. Extracting...")
+        
+        # Extract to parent dir, then move chroma_db to target location
+        parent_dir = os.path.dirname(chroma_path)
+        with zipfile.ZipFile(zip_path, "r") as z:
+            z.extractall(parent_dir)
+        
+        # Clean up zip
+        os.remove(zip_path)
+        
+        print(f"[RAG] Pre-compiled index extracted to {chroma_path}")
+        return True
+        
+    except Exception as ex:
+        print(f"[RAG] Download failed: {ex}")
+        return False
+
+
 def load_csv_documents(kb_path: str, limit: Optional[int] = None, only: Optional[List[str]] = None) -> List[Document]:
     docs: List[Document] = []
 
@@ -520,9 +564,28 @@ def setup_knowledge_base(
         if force_rebuild:
             print("[RAG] Force rebuild requested.")
         elif existing_manifest is None:
-            print("[RAG] No manifest found. Building index...")
+            print("[RAG] No manifest found. Attempting to download pre-compiled index...")
         else:
-            print("[RAG] Knowledge base changed. Rebuilding index...")
+            print("[RAG] Knowledge base changed. Attempting to download pre-compiled index...")
+        
+        # Try to download before rebuilding
+        if not force_rebuild and _download_precompiled_index(chroma_path):
+            try:
+                vectorstore = Chroma(
+                    persist_directory=chroma_path,
+                    embedding_function=embedding_fn,
+                )
+                doc_count = vectorstore_count(vectorstore)
+                if doc_count > 0:
+                    print(f"[RAG] Successfully loaded downloaded index ({doc_count} vectors).")
+                    return vectorstore
+            except Exception as ex:
+                print(f"[RAG] Could not load downloaded index: {ex}. Proceeding to rebuild...")
+        
+        if not force_rebuild and existing_manifest is None:
+            print("[RAG] Building from scratch (no pre-compiled index available)...")
+        elif not force_rebuild:
+            print("[RAG] Building from scratch (download failed or skipped)...")
 
     try:
         from langchain_text_splitters import RecursiveCharacterTextSplitter
