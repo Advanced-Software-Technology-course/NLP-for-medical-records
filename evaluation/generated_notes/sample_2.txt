@@ -1,0 +1,25 @@
+'''
+**Chief Complaint:** Right knee pain after a fall.
+
+**History of Present Illness:**
+The patient reports twisting her right knee while falling from a ladder, resulting in pain on the inside of the knee. The pain is exacerbated by bending and twisting the knee. She has been using ice and taking ibuprofen without significant relief.
+- **Pertinent Negatives:** Denies injury to other areas, fever, or other systemic symptoms.
+
+**Relevant Medical History:**
+- Atrial Fibrillation (AFib): Managed with digoxin.
+- Past Surgery: Nose job.
+
+**Physical Examination & Vitals:**
+- **Key Symptoms:** Tender to palpation over the medial portion of the knee, pain with flexion and valgus stress, normal sensation.
+- Vitals: [UNCERTAIN - no specific vitals mentioned].
+- Musculoskeletal: Tenderness over the medial meniscus area, no other significant findings.
+
+**Assessment & Rationale:**
+1. Acute Medial Meniscus Sprain/Strain: Suggested by the mechanism of injury, location of pain, and physical examination findings.
+
+**Treatment Plan & Next Steps:**
+- **Medication:** Motrin 800mg every 6 hours with food for pain management.
+- **Lifestyle:** Use of a knee brace and crutches for the next couple of days to reduce stress on the knee.
+- **Diagnostics:** X-rays were taken, showing no fracture or dislocation but some fluid; an MRI is planned if symptoms do not improve within a week.
+- **Follow-up:** Return in about a week to assess improvement and consider further diagnostic steps if necessary.
+'''

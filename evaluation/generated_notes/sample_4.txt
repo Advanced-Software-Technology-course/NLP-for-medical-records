@@ -1,0 +1,28 @@
+'''
+**Chief Complaint:** Annual exam, with concerns about managing depression, hypertension, and prior lobectomy.
+
+**History of Present Illness:**
+The patient reports doing relatively well, despite a tough spring with allergies and stress from dropping off his daughter at college. He has been managing his depression with Prozac and has not had any incidents recently. He is still working on managing his hypertension, with some difficulty in remembering to take his medication on weekends.
+
+**Relevant Medical History:**
+- Depression: Managed with Prozac 20mg daily.
+- Hypertension: Managed with Norvasc, with some difficulty in adherence on weekends.
+- Prior Lobectomy: No current issues, but patient experiences shortness of breath with exertion, especially in humid conditions.
+
+**Physical Examination & Vitals:**
+- Vitals: Blood pressure 120/80, which is an improvement from previous readings.
+- Cardiovascular: Slight 2/6 systolic ejection murmur, but otherwise normal heart sounds.
+- Respiratory: Lungs sound clear, with some pain to palpation of the sinuses.
+- Musculoskeletal: No lower extremity edema.
+
+**Assessment & Rationale:**
+1. Depression: Well-managed on current medication.
+2. Hypertension: Blood pressure is well-controlled, but patient needs to improve adherence to medication regimen.
+3. Prior Lobectomy: No current issues, but patient experiences shortness of breath with exertion.
+
+**Treatment Plan & Next Steps:**
+- Medication: Continue Prozac 20mg daily, with a refill ordered.
+- Lifestyle: Improve adherence to Norvasc medication regimen, especially on weekends.
+- Diagnostics: Order an echocardiogram to investigate the systolic ejection murmur, and routine blood work.
+- Follow-up: Patient will be contacted through the patient portal with results, and will follow up as needed.
+'''
