@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import csv
+import gc
 import hashlib
 import json
 import os
 import re
 import shutil
+import time
 from typing import Any, List, Optional
 
 from langchain_core.documents import Document
@@ -165,6 +167,52 @@ def vectorstore_count(vectorstore: Any) -> int:
     except Exception:
         pass
     return 0
+
+
+def _safe_rmtree(path: str, max_retries: int = 3, retry_delay: float = 0.5) -> bool:
+    """Safely remove a directory tree with retries and proper cleanup.
+    
+    On Windows, SQLite database files can be locked. This function attempts
+    to release locks by deleting file handles and retrying.
+    """
+    if not os.path.exists(path):
+        return True
+    
+    for attempt in range(max_retries):
+        try:
+            # Force garbage collection to release file handles
+            gc.collect()
+            time.sleep(0.1)
+            
+            shutil.rmtree(path)
+            return True
+        except PermissionError as ex:
+            if attempt < max_retries - 1:
+                print(f"[RAG] Directory locked, retrying... ({attempt + 1}/{max_retries})")
+                time.sleep(retry_delay)
+            else:
+                print(f"[RAG] Warning: Could not fully delete {path} after retries: {ex}")
+                # Try removing individual files at least
+                try:
+                    for root, dirs, files in os.walk(path, topdown=False):
+                        for file in files:
+                            try:
+                                os.remove(os.path.join(root, file))
+                            except Exception:
+                                pass
+                        for dir_name in dirs:
+                            try:
+                                os.rmdir(os.path.join(root, dir_name))
+                            except Exception:
+                                pass
+                except Exception:
+                    pass
+                return False
+        except Exception as ex:
+            print(f"[RAG] Error removing directory: {ex}")
+            return False
+    
+    return False
 
 
 def load_existing_vectorstore(
@@ -560,6 +608,14 @@ def setup_knowledge_base(
             print("[RAG] Existing index is empty. Rebuilding...")
         except Exception as ex:
             print(f"[RAG] Could not load existing index: {ex}. Rebuilding...")
+        finally:
+            # Ensure vectorstore connection is closed before proceeding
+            try:
+                if 'vectorstore' in locals():
+                    del vectorstore
+                    gc.collect()
+            except Exception:
+                pass
     else:
         if force_rebuild:
             print("[RAG] Force rebuild requested.")
@@ -581,6 +637,14 @@ def setup_knowledge_base(
                     return vectorstore
             except Exception as ex:
                 print(f"[RAG] Could not load downloaded index: {ex}. Proceeding to rebuild...")
+            finally:
+                # Ensure vectorstore connection is closed before proceeding
+                try:
+                    if 'vectorstore' in locals():
+                        del vectorstore
+                        gc.collect()
+                except Exception:
+                    pass
         
         if not force_rebuild and existing_manifest is None:
             print("[RAG] Building from scratch (no pre-compiled index available)...")
@@ -653,7 +717,7 @@ def setup_knowledge_base(
     txt_splits.extend(drug_docs)
 
     if os.path.exists(chroma_path):
-        shutil.rmtree(chroma_path)
+        _safe_rmtree(chroma_path)
 
     os.makedirs(chroma_path, exist_ok=True)
 
