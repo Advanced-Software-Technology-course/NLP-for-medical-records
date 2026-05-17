@@ -25,6 +25,9 @@ from .config import (
     PREFER_BIOMED_EMBEDDINGS,
 )
 
+# Files that must never be indexed by RAG (relative basenames, lower-case)
+EXCLUDE_FILENAMES = {"utterance_words.txt", "custom_vocabulary.json"}
+
 
 def _load_chroma():
     from langchain_community.vectorstores import Chroma
@@ -42,7 +45,11 @@ def _load_txt_documents_simple(kb_path: str) -> List[Document]:
     docs: List[Document] = []
     for root, _, fnames in os.walk(kb_path):
         for fname in fnames:
-            if not fname.lower().endswith(".txt"):
+            lower = fname.lower()
+            if lower in EXCLUDE_FILENAMES:
+                continue
+
+            if not lower.endswith(".txt"):
                 continue
             path = os.path.join(root, fname)
             try:
@@ -325,6 +332,9 @@ def prepare_txt_documents(txt_docs: List[Document]) -> List[Document]:
 
         source = str(doc.metadata.get("source", ""))
         source_name = os.path.basename(source).lower()
+        if source_name in EXCLUDE_FILENAMES:
+            # Explicitly skip files that must not be indexed
+            continue
         is_drug_doc = "drug" in source_name
 
         if "icd" in source_name or source_name.endswith("icd10_codes.txt"):
@@ -351,6 +361,8 @@ def collect_processed_files(kb_path: str, csv_whitelist: Optional[List[str]]) ->
     for root, _, fnames in os.walk(kb_path):
         for fname in fnames:
             lower = fname.lower()
+            if lower in EXCLUDE_FILENAMES:
+                continue
             include = False
 
             if lower.endswith(".txt"):
