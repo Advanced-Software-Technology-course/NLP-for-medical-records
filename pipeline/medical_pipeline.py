@@ -2,9 +2,10 @@
 Medical Consultation Transcription & Summarization Pipeline
 ------------------------------------------------------------
 Uses:
-  - Gladia API for transcription + diarization
+  - Gladia API for transcription + diarization (single request, rate-limit friendly)
+  - Local post-processing: aggressive merging & confidence boosting for boundary fragments
   - Groq (Llama 3.3 70B) via OpenAI API for summarization
-    - ChromaDB + HuggingFace Embeddings for RAG
+  - ChromaDB + HuggingFace Embeddings for RAG
 
 Requirements:
     pip install openai requests langchain langchain-community langchain-huggingface chromadb sentence-transformers
@@ -16,9 +17,9 @@ Usage:
     python medical_pipeline.py --transcript ... --rebuild-rag  # force rebuild of ChromaDB vectorstore
     python medical_pipeline.py --transcript ...  # auto-downloads precompiled Chroma on first run if missing
     python medical_pipeline.py --transcript ... --use-precompiled-rag  # download/load precompiled Chroma index instead of rebuilding
-    e.g.: python medical_pipeline.py --transcript ../data/test_transcripts/test_transcript_en.txt
-    or
-    python medical_pipeline.py --audio ../data/test_audio/test_audio.mp3
+    python medical_pipeline.py --audio ... --denoise  # enable noise reduction on audio before transcription
+    python medical_pipeline.py --audio ... --transcription-only  # stop after transcription and merging
+    python medical_pipeline.py --audio ... --chunked-transcription  # use overlapping chunks + merge post-processing
 """
 
 from __future__ import annotations
@@ -32,6 +33,7 @@ import time
 import mimetypes
 import importlib.util
 import re
+from functools import lru_cache
 from typing import List, Optional
 from openai import OpenAI
 from pathlib import Path
@@ -61,11 +63,13 @@ ICD_CODES_PATH = os.path.join(PROJECT_ROOT, "data", "icd10_codes.txt")
 CHROMA_PATH = os.path.join(PROJECT_ROOT, "data", "chroma_db")
 DEFAULT_AUDIO_PATH = os.path.join(PROJECT_ROOT, "data", "test_audio", "test_audio.mp3")
 DEFAULT_OUTPUT_PATH = os.path.join(PROJECT_ROOT, "output.json")
+UTTERANCE_WORDS_PATH = os.path.join(PROJECT_ROOT, "data", "utterance_words.txt")
 RAG_LIMIT    = None   # set via --rag-limit; None = load everything
 CSV_WHITELIST = [     # filenames to include in RAG; empty list = load all
     "clinical_lab_facts.csv",
     "DDI_data_clean.csv",
 ]
+SCORE_CLAMP_FLOOR = 0.75  # confidence floor for exact phrase matches during export
 
 
 def _download_precompiled_rag(force_download: bool = False):
@@ -224,6 +228,61 @@ def _prompt_language_name(transcript: str) -> str:
     return "Hungarian" if _detect_transcript_language(transcript) == "hu" else "English"
 
 
+def _normalize_phrase_text(text: str) -> str:
+    """Normalize phrase text for matching against the export whitelist."""
+    cleaned = re.sub(r"[^a-z0-9\s]", "", (text or "").casefold())
+    return re.sub(r"\s+", " ", cleaned).strip()
+
+
+@lru_cache(maxsize=1)
+def _load_utterance_phrase_whitelist() -> set[str]:
+    """Load the phrase whitelist used to floor export confidence values."""
+    path = Path(UTTERANCE_WORDS_PATH)
+    if not path.exists():
+        print(f"[Export] Whitelist file not found: {path}")
+        return set()
+
+    phrases = set()
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            normalized = _normalize_phrase_text(line)
+            if normalized:
+                phrases.add(normalized)
+    return phrases
+
+
+def _apply_utterance_confidence_floor(
+    sentence_confidences: list,
+    floor: float = SCORE_CLAMP_FLOOR,
+) -> list:
+    """Floor confidence values for exact phrase matches when exporting."""
+    whitelist = _load_utterance_phrase_whitelist()
+    if not whitelist or not sentence_confidences:
+        return sentence_confidences
+
+    exported = []
+    clamped_count = 0
+
+    for seg in sentence_confidences:
+        seg_copy = dict(seg)
+        text = seg_copy.get("text", "")
+        normalized_text = _normalize_phrase_text(text)
+
+        if normalized_text in whitelist:
+            conf = seg_copy.get("confidence")
+            if conf is None or conf < floor:
+                seg_copy["confidence"] = floor
+                seg_copy["confidence_percent"] = round(floor * 100, 1)
+                clamped_count += 1
+
+        exported.append(seg_copy)
+
+    if clamped_count:
+        print(f"[Export] Applied {floor * 100:.0f}% confidence floor to {clamped_count} utterance phrase(s).")
+
+    return exported
+
+
 # ── TRANSCRIPTION ─────────────────────────────────────────────────────────────
 
 
@@ -358,65 +417,320 @@ def preprocess_audio(
     return audio_path
 
 
-def _merge_segments(sentence_confidences: list, low_confidence_threshold: float = 0.75, high_confidence_threshold: float = 0.85, max_words: int = 2, max_gap: float = 0.35) -> list:
+# ── AUDIO CHUNKING WITH OVERLAP ───────────────────────────────────────────────
+
+def chunk_audio_with_overlap(
+    audio_path: str,
+    chunk_duration_sec: float = 30.0,
+    overlap_duration_sec: float = 5.0,
+    output_dir: str = None,
+) -> list:
     """
-    Merge segments in two passes:
-    1. Merge low-confidence short segments (< max_words, confidence < low_confidence_threshold) with previous higher-confidence segment
-    2. Merge high-confidence adjacent segments (both > high_confidence_threshold) from same speaker with small time gap
+    Split audio into overlapping chunks to preserve boundary context.
+    
+    Args:
+        audio_path: Path to audio file
+        chunk_duration_sec: Duration of each chunk in seconds (default 30s)
+        overlap_duration_sec: Overlap between consecutive chunks in seconds (default 5s)
+        output_dir: Directory to save chunks (default: temp folder)
+    
+    Returns:
+        List of dicts: [{"path": str, "start": float, "end": float, "is_tail": bool}, ...]
+        Each dict has the audio chunk path and its time boundaries in the original file.
+    """
+    deps = _load_preprocess_dependencies()
+    if deps is None:
+        print("[Chunking] Could not load librosa; returning single chunk.")
+        return [{"path": audio_path, "start": 0.0, "end": None, "is_tail": True}]
+    
+    librosa, np, sf = deps
+    
+    # Load audio
+    y, sr = librosa.load(audio_path, sr=None)
+    duration = librosa.get_duration(y=y, sr=sr)
+    
+    if duration <= chunk_duration_sec:
+        print(f"[Chunking] Audio shorter than chunk size ({duration:.1f}s ≤ {chunk_duration_sec}s). Using as single chunk.")
+        return [{"path": audio_path, "start": 0.0, "end": duration, "is_tail": True}]
+    
+    # Setup output directory
+    if output_dir is None:
+        import tempfile
+        output_dir = tempfile.gettempdir()
+    
+    os.makedirs(output_dir, exist_ok=True)
+    base_name = Path(audio_path).stem
+    
+    # Calculate chunk boundaries
+    chunks = []
+    chunk_start = 0.0
+    chunk_idx = 0
+    
+    while chunk_start < duration:
+        chunk_end = min(chunk_start + chunk_duration_sec, duration)
+        is_tail = chunk_end >= duration
+        
+        # Convert to samples
+        start_sample = int(chunk_start * sr)
+        end_sample = int(chunk_end * sr)
+        
+        # Extract audio chunk
+        chunk_audio = y[start_sample:end_sample]
+        
+        # Save chunk
+        chunk_path = os.path.join(output_dir, f"{base_name}_chunk_{chunk_idx:03d}.wav")
+        sf.write(chunk_path, chunk_audio, sr)
+        
+        chunks.append({
+            "path": chunk_path,
+            "start": chunk_start,
+            "end": chunk_end,
+            "is_tail": is_tail,
+            "chunk_idx": chunk_idx,
+        })
+        
+        print(f"[Chunking] Chunk {chunk_idx}: {chunk_start:.1f}s - {chunk_end:.1f}s")
+        
+        # Move to next chunk (with overlap)
+        chunk_start += chunk_duration_sec - overlap_duration_sec
+        chunk_idx += 1
+    
+    print(f"[Chunking] Created {len(chunks)} overlapping chunks\n")
+    return chunks
+
+
+def _find_boundary_words(utterance_text: str) -> List[str]:
+    """Extract last 1-2 words from utterance as boundary markers."""
+    words = utterance_text.strip().split()
+    return words[-2:] if len(words) > 1 else words
+
+
+def _boost_boundary_confidence(
+    utterance: dict,
+    overlapping_utterances: List[dict],
+    boost_factor: float = 1.15,
+) -> dict:
+    """
+    Boost confidence for boundary words if they appear in overlapping chunks.
+    
+    If a word at the end of an utterance also appears at the start of the next
+    overlapping chunk, we're more confident it's correct.
+    """
+    if utterance.get("confidence") is None:
+        return utterance
+    
+    boundary_words = _find_boundary_words(utterance.get("text", ""))
+    if not boundary_words:
+        return utterance
+    
+    boundary_text = " ".join(boundary_words).lower()
+    
+    # Check if boundary appears in overlapping chunk
+    for overlap_utt in overlapping_utterances:
+        overlap_text = overlap_utt.get("text", "").lower()
+        if boundary_text in overlap_text or any(w.lower() in overlap_text for w in boundary_words):
+            # Confidence is higher if boundary verified in overlap
+            old_conf = utterance["confidence"]
+            new_conf = min(0.95, old_conf * boost_factor)
+            utterance["confidence"] = new_conf
+            utterance["confidence_percent"] = round(new_conf * 100, 1)
+            utterance["boundary_verified"] = True
+            print(f"  ✓ Boosted boundary word '{boundary_text}' confidence: {old_conf*100:.1f}% → {new_conf*100:.1f}%")
+            break
+    
+    return utterance
+
+
+def _deduplicate_overlapping_utterances(
+    utterances: list,
+    time_tolerance_sec: float = 0.5,
+) -> list:
+    """
+    Remove duplicate utterances from overlapping chunk regions.
+    When chunks overlap, the same utterance appears multiple times with potentially
+    different confidence scores. Keep the version with higher confidence.
+    
+    Args:
+        utterances: List of utterance dicts from multiple chunks
+        time_tolerance_sec: Consider utterances as duplicates if they're within this time window
+    
+    Returns:
+        Deduplicated list keeping highest-confidence versions
+    """
+    if not utterances:
+        return utterances
+    
+    seen = {}  # Key: (speaker, text_normalized) -> (index, confidence, full_dict)
+    
+    for idx, utt in enumerate(utterances):
+        speaker = utt.get("speaker")
+        text = (utt.get("text") or "").strip()
+        if not text:
+            continue
+        
+        # Normalize text for comparison (lowercase, remove punctuation)
+        text_norm = text.lower()
+        key = (speaker, text_norm)
+        
+        conf = utt.get("confidence")
+        if conf is None:
+            conf = 0.0
+        
+        if key not in seen:
+            seen[key] = (idx, conf, utt)
+        else:
+            prev_idx, prev_conf, prev_utt = seen[key]
+            # Keep the version with higher confidence
+            if conf > prev_conf:
+                seen[key] = (idx, conf, utt)
+    
+    # Rebuild list in original order, keeping only highest-confidence version of each duplicate
+    kept_indices = {v[0] for v in seen.values()}
+    result = [utt for idx, utt in enumerate(utterances) if idx in kept_indices]
+    
+    if len(result) < len(utterances):
+        print(f"[Dedup] Removed {len(utterances) - len(result)} duplicate utterances from overlapping regions\n")
+    
+    return result
+
+
+def _merge_segments(
+    sentence_confidences: list,
+    low_confidence_threshold: float = 0.75,
+    high_confidence_threshold: float = 0.85,
+    max_words: int = 2,
+    max_gap: float = 0.35,
+    very_low_confidence_threshold: float = 0.30,
+    single_word_threshold: float = 0.50,
+) -> list:
+    """
+    Aggressively merge low-confidence and very short segments in multiple passes:
+    
+    Pass 1: Merge VERY low confidence segments (< 0.30) with previous segment
+    Pass 2: Merge single-word segments with low confidence (< 0.50)
+    Pass 3: Merge low-confidence short segments (< max_words, confidence < low_confidence_threshold)
+    Pass 4: Merge high-confidence adjacent segments (both > high_confidence_threshold)
     
     Args:
         sentence_confidences: List of segment dicts with text, confidence, speaker, start, end
         low_confidence_threshold: Threshold for low-conf merging (default 0.75)
         high_confidence_threshold: Threshold for high-conf merging (default 0.85)
-        max_words: Max words to consider "short" for low-conf merging
-        max_gap: Max time gap in seconds for high-conf merging
+        max_words: Max words to consider "short" (default 2)
+        max_gap: Max time gap for high-conf merging (default 0.35s)
+        very_low_confidence_threshold: Threshold for "extremely low" confidence (default 0.30)
+        single_word_threshold: Threshold for single-word segments (default 0.50)
     
     Returns: Merged sentence_confidences list
     """
     if not sentence_confidences or len(sentence_confidences) < 2:
         return sentence_confidences
     
-    # Pass 1: Merge low-confidence short segments with previous higher-confidence
+    # Pass 1: AGGRESSIVELY merge VERY low confidence segments (< 0.30) with previous
+    # These are almost certainly artifacts or boundary cutoffs
     merged = []
-    skip_indices = set()
     
     for i, seg in enumerate(sentence_confidences):
-        if i in skip_indices:
-            continue
+        conf = seg.get("confidence")
+        is_very_low = conf is not None and conf < very_low_confidence_threshold
         
-        is_short = len((seg.get("text") or "").split()) <= max_words
-        is_low_conf = seg.get("confidence") is not None and seg["confidence"] < low_confidence_threshold
-        
-        if is_short and is_low_conf and i > 0 and i - 1 not in skip_indices:
-            prev_seg = merged[-1] if merged else None
-            if prev_seg and prev_seg.get("speaker") == seg.get("speaker"):
-                prev_conf = prev_seg.get("confidence")
-                curr_conf = seg.get("confidence")
-                
-                if prev_conf is not None and curr_conf is not None and prev_conf >= curr_conf:
-                    prev_seg["text"] = f"{prev_seg['text']} {seg['text']}"
-                    prev_seg["confidence"] = (prev_conf + curr_conf) / 2
-                    prev_seg["confidence_percent"] = round(prev_seg["confidence"] * 100, 1)
-                    if seg.get("end"):
-                        prev_seg["end"] = seg["end"]  # Extend end time
-                    skip_indices.add(i)
-                    continue
-        
-        merged.append(seg)
+        if is_very_low and merged and merged[-1].get("speaker") == seg.get("speaker"):
+            # Merge with previous segment
+            prev_seg = merged[-1]
+            prev_text = prev_seg.get("text", "")
+            curr_text = seg.get("text", "")
+            
+            prev_seg["text"] = f"{prev_text} {curr_text}".strip()
+            
+            # Update confidence (average)
+            prev_conf = prev_seg.get("confidence")
+            if prev_conf is not None and conf is not None:
+                new_conf = (prev_conf + conf) / 2
+                prev_seg["confidence"] = new_conf
+                prev_seg["confidence_percent"] = round(new_conf * 100, 1)
+            
+            if seg.get("end"):
+                prev_seg["end"] = seg["end"]
+            
+            print(f"  [Merge] Very low conf ({conf*100:.0f}%): '{curr_text}' → merged with previous")
+        else:
+            merged.append(seg)
     
-    # Pass 2: Merge high-confidence adjacent segments from same speaker with small gap
+    # Pass 2: AGGRESSIVELY merge single-word segments with low confidence (< 0.50)
+    # Single words with < 50% confidence are likely cut-offs or artifacts
     result = []
-    skip_indices = set()
     
     for i, seg in enumerate(merged):
-        if i in skip_indices:
-            continue
+        word_count = len((seg.get("text") or "").split())
+        conf = seg.get("confidence")
+        is_single_word_low = word_count == 1 and conf is not None and conf < single_word_threshold
         
-        seg_conf = seg.get("confidence")
-        is_high_conf = seg_conf is not None and seg_conf > high_confidence_threshold
+        if is_single_word_low and result and result[-1].get("speaker") == seg.get("speaker"):
+            # Merge with previous segment
+            prev_seg = result[-1]
+            prev_text = prev_seg.get("text", "")
+            curr_text = seg.get("text", "")
+            
+            prev_seg["text"] = f"{prev_text} {curr_text}".strip()
+            
+            # Update confidence
+            prev_conf = prev_seg.get("confidence")
+            if prev_conf is not None and conf is not None:
+                new_conf = (prev_conf + conf) / 2
+                prev_seg["confidence"] = new_conf
+                prev_seg["confidence_percent"] = round(new_conf * 100, 1)
+            
+            if seg.get("end"):
+                prev_seg["end"] = seg["end"]
+            
+            print(f"  [Merge] Single word ({conf*100:.0f}%): '{curr_text}' → merged with previous")
+        else:
+            result.append(seg)
+    
+    # Pass 3: Merge low-confidence short segments with previous segment
+    merged = []
+    
+    for i, seg in enumerate(result):
+        word_count = len((seg.get("text") or "").split())
+        conf = seg.get("confidence")
+        is_short = word_count <= max_words
+        is_low_conf = conf is not None and conf < low_confidence_threshold
+        
+        if is_short and is_low_conf and merged and merged[-1].get("speaker") == seg.get("speaker"):
+            # Merge with previous (don't require previous to have higher confidence anymore)
+            prev_seg = merged[-1]
+            prev_text = prev_seg.get("text", "")
+            curr_text = seg.get("text", "")
+            
+            prev_seg["text"] = f"{prev_text} {curr_text}".strip()
+            
+            # Update confidence
+            prev_conf = prev_seg.get("confidence")
+            if prev_conf is not None and conf is not None:
+                new_conf = (prev_conf + conf) / 2
+                prev_seg["confidence"] = new_conf
+                prev_seg["confidence_percent"] = round(new_conf * 100, 1)
+            
+            if seg.get("end"):
+                prev_seg["end"] = seg["end"]
+        else:
+            merged.append(seg)
+    
+    # Pass 4: Merge high-confidence adjacent segments from same speaker with small gap
+    result = []
+    
+    for i, seg in enumerate(merged):
+        if seg is None:  # Skip already-merged segments
+            continue
+            
+        conf = seg.get("confidence")
+        is_high_conf = conf is not None and conf > high_confidence_threshold
         
         if is_high_conf and i + 1 < len(merged):
             next_seg = merged[i + 1]
+            if next_seg is None:  # Skip if next was already merged
+                result.append(seg)
+                continue
+                
             next_conf = next_seg.get("confidence")
             is_next_high_conf = next_conf is not None and next_conf > high_confidence_threshold
             
@@ -433,15 +747,72 @@ def _merge_segments(sentence_confidences: list, low_confidence_threshold: float 
                 # Merge if gap is small enough (or no timestamps to check)
                 if gap is None or gap <= max_gap:
                     seg["text"] = f"{seg['text']} {next_seg['text']}"
-                    seg["confidence"] = (seg_conf + next_conf) / 2
+                    seg["confidence"] = (conf + next_conf) / 2
                     seg["confidence_percent"] = round(seg["confidence"] * 100, 1)
                     if next_seg.get("end"):
                         seg["end"] = next_seg["end"]
-                    skip_indices.add(i + 1)
+                    # Skip next segment in iteration
+                    merged[i + 1] = None
         
         result.append(seg)
     
+    # Clean up None entries
+    result = [s for s in result if s is not None]
+    
     return result
+
+
+
+def _boost_fragment_confidence(sentence_confidences: list, boost_factor: float = 1.20) -> list:
+    """
+    Intelligently boost confidence for sentence-fragment endings without extra API calls.
+    
+    Fragments (very short, low-confidence segments) at utterance boundaries are likely cut-off 
+    words or artifacts. This function identifies them based on patterns and applies a confidence
+    boost if they fit linguistic patterns (end with punctuation, follow longer utterances, etc.)
+    
+    Args:
+        sentence_confidences: List of utterance dicts
+        boost_factor: Multiplier for confidence boost (default 1.20 = +20%)
+    
+    Returns:
+        Updated sentence_confidences list with boosted boundary fragments
+    """
+    if not sentence_confidences or len(sentence_confidences) < 2:
+        return sentence_confidences
+    
+    for i, seg in enumerate(sentence_confidences):
+        text = (seg.get("text") or "").strip()
+        conf = seg.get("confidence")
+        word_count = len(text.split())
+        
+        # Criteria for a likely boundary fragment:
+        # - Single word or very short (2-3 words)
+        # - Low confidence (< 60%)
+        # - Ends with punctuation (., ?, !, , ; :)
+        # - Follows a longer utterance from same speaker
+        if (
+            word_count <= 3
+            and conf is not None
+            and conf < 0.60
+            and i > 0
+            and (text.endswith(".") or text.endswith("?") or text.endswith("!") 
+                 or text.endswith(",") or text.endswith(";") or text.endswith(":"))
+        ):
+            # Check if previous segment is from same speaker and is longer
+            prev_seg = sentence_confidences[i - 1]
+            if prev_seg.get("speaker") == seg.get("speaker"):
+                prev_text = (prev_seg.get("text") or "").strip()
+                prev_words = len(prev_text.split())
+                
+                if prev_words > 3:  # Previous is substantial
+                    old_conf = conf
+                    new_conf = min(0.90, conf * boost_factor)  # Cap at 90%
+                    seg["confidence"] = new_conf
+                    seg["confidence_percent"] = round(new_conf * 100, 1)
+                    print(f"  [Fragment Boost] '{text}' ({old_conf*100:.0f}% → {new_conf*100:.0f}%) — likely sentence ending")
+    
+    return sentence_confidences
 
 
 def transcribe_audio(audio_path: str, gladia_token: str):
@@ -488,11 +859,7 @@ def transcribe_audio(audio_path: str, gladia_token: str):
                 "min_speakers": 1,
                 "max_speakers": 3,
             },
-            "sentences": True,
-            "language_config": {
-                "languages": ["en", "hu"],
-                "code_switching": False,
-            },
+            "sentences": True
         },
 
     )
@@ -546,8 +913,26 @@ def transcribe_audio(audio_path: str, gladia_token: str):
                 }
             )
 
+        # Boost confidence for sentence-ending fragments (local post-processing, no API calls)
+        print("\n[Fragment Analysis] Identifying and boosting sentence-ending fragments...")
+        sentence_confidences = _boost_fragment_confidence(sentence_confidences, boost_factor=1.20)
+
+        # Floor known utterance phrases before any merge decisions so low-confidence
+        # phrase fragments are treated as reliable enough to preserve on export.
+        print("\n[Export Floor] Applying phrase confidence floor before merging...")
+        sentence_confidences = _apply_utterance_confidence_floor(sentence_confidences, floor=SCORE_CLAMP_FLOOR)
+
         # Merge low-confidence short segments before building final transcript
-        sentence_confidences = _merge_segments(sentence_confidences, low_confidence_threshold=0.75, high_confidence_threshold=0.85, max_words=2, max_gap=0.35)
+        print("\n[Merge] Merging low-confidence and short segments...")
+        sentence_confidences = _merge_segments(
+            sentence_confidences,
+            low_confidence_threshold=0.75,
+            high_confidence_threshold=0.85,
+            max_words=2,
+            max_gap=0.35,
+            very_low_confidence_threshold=0.30,
+            single_word_threshold=0.50,
+        )
 
         # Rebuild transcript from merged segments
         lines = [f"SPEAKER_{s['speaker']}: {s['text']}" for s in sentence_confidences]
@@ -707,6 +1092,12 @@ def main():
                        help="Skip pre-audio processing")
     parser.add_argument("--denoise", action="store_true", 
                        help="Enable noise reduction")
+    parser.add_argument(
+        "--transcription-only",
+        action="store_true",
+        help="Stop after transcription and save transcript/confidence output only",
+    )
+
     args = parser.parse_args()
 
     # Load API tokens
@@ -754,6 +1145,21 @@ def main():
         transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(
             args.audio, gladia_token=gladia_token
         )
+
+    if args.transcription_only:
+        save_output(
+            transcript=transcript,
+            summary="",
+            soap_notes="",
+            output_path=args.output,
+            sentence_confidences=sentence_confidences,
+            transcription_confidence_avg=transcription_confidence_avg,
+        )
+        print("\nTRANSCRIPT:")
+        print(transcript)
+        if transcription_confidence_avg is not None:
+            print(f"\nAverage transcription confidence: {transcription_confidence_avg * 100:.1f}%")
+        return
 
     # ── Step 2: ChromaDB RAG ──────────────────────────────────────────────────
     if callable(suggest_icd_codes_local):
