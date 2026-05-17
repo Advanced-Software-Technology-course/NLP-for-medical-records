@@ -3630,6 +3630,6 @@
   "semantic_similarity_mean": 0.7783323692802858,
   "wer_std": 0.13981566980865504,
   "cer_std": 0.1231882391735838,
-  "gladia_avg_sentence_confidence_mean": null,
-  "gladia_avg_sentence_confidence_percent_mean": null
+  "gladia_avg_sentence_confidence_mean": 0.6839062499999999,
+  "gladia_avg_sentence_confidence_percent_mean": 68.4
 }

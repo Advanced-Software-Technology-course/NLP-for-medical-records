@@ -35,10 +35,24 @@ from pipeline.rag_pipeline import (
 
 KB_PATH     = "../data/knowledge_base"
 CHROMA_PATH = "../data/chroma_db"
+CUSTOM_VOCABULARY_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "custom_vocabulary.json"))
 RAG_LIMIT    = None   # set via --rag-limit; None = load everything
 CSV_WHITELIST = [     # filenames to include in RAG; empty list = load all
     "webbeteg_fogalomtar.csv",
 ]
+
+
+def _load_custom_vocabulary_config() -> dict:
+    if not os.path.exists(CUSTOM_VOCABULARY_PATH):
+        return {}
+
+    try:
+        with open(CUSTOM_VOCABULARY_PATH, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+    return payload if isinstance(payload, dict) else {}
 
 # ── PROMPT TEMPLATES ──────────────────────────────────────────────────────────
 
@@ -112,18 +126,21 @@ def transcribe_audio(audio_path: str, gladia_token: str):
 
     audio_url = upload_response.json()["audio_url"]
 
+    request_payload = {
+        "audio_url": audio_url,
+        "diarization": True,
+        "diarization_config": {
+            "number_of_speakers": 2,
+            "min_speakers": 1,
+            "max_speakers": 3,
+        },
+    }
+    request_payload.update(_load_custom_vocabulary_config())
+
     transcribe_response = requests.post(
         "https://api.gladia.io/v2/transcription/",
         headers=headers,
-        json={
-            "audio_url": audio_url,
-            "diarization": True,
-            "diarization_config": {
-                "number_of_speakers": 2,
-                "min_speakers": 1,
-                "max_speakers": 3,
-            },
-        },
+        json=request_payload,
     )
 
     if transcribe_response.status_code not in (200, 201):
