@@ -48,7 +48,7 @@ export default function HistoryPage({ onNavigate, onLoadConsultation }) {
         return;
       }
       try {
-        const response = await fetch("http://localhost:5000/api/history");
+        const response = await fetch("/api/history");
         if (!response.ok) throw new Error("API_ERROR");
         const data = await response.json();
         const mapped = data.map((c) => ({

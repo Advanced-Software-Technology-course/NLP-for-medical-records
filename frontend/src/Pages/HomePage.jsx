@@ -139,8 +139,8 @@ function SessionModal({ onConfirm, onCancel, onNavigate }) {
 
   useEffect(() => {
     Promise.all([
-      fetch("http://localhost:5000/api/doctors").then(r => r.json()),
-      fetch("http://localhost:5000/api/patients").then(r => r.json()),
+      fetch("/api/doctors").then(r => r.json()),
+      fetch("/api/patients").then(r => r.json()),
     ]).then(([docs, pats]) => {
       setDoctors(Array.isArray(docs) ? docs : []);
       setPatients(Array.isArray(pats) ? pats : []);
@@ -388,7 +388,7 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/process", {
+      const response = await fetch("/api/process", {
         method: "POST",
         body: formData,
       });

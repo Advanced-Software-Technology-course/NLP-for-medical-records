@@ -130,20 +130,34 @@ def transcribe_audio(audio_path: str, gladia_token: str) -> str:
     # ── Step 4: Format output with speaker labels ─────────────────────────────
     utterances = result["result"]["transcription"].get("utterances", [])
 
+    sentence_confidences = []
     if utterances:
         # diarization succeeded — format as "SPEAKER_X: text"
         lines = []
         for utt in utterances:
             speaker = f"SPEAKER_{utt['speaker']}"
             lines.append(f"{speaker}: {utt['text'].strip()}")
+            conf = utt.get("confidence", None)
+            sentence_confidences.append({
+                "confidence": conf,
+                "confidence_percent": round(conf * 100) if conf is not None else None,
+                "start": utt.get("start"),
+                "end": utt.get("end"),
+            })
         transcript = "\n".join(lines)
     else:
         # fallback — no diarization data, return plain transcript
         transcript = result["result"]["transcription"]["full_transcript"]
         print("[1/2] Warning: no diarization data returned, using plain transcript.")
 
+    avg_confidence = (
+        sum(s["confidence"] for s in sentence_confidences if s["confidence"] is not None)
+        / len(sentence_confidences)
+        if sentence_confidences else 0.0
+    )
+
     print(f"[2/2] Transcription complete ({len(transcript)} characters)\n")
-    return transcript
+    return transcript, sentence_confidences, avg_confidence
 
 def load_transcript(transcript_path: str) -> str:
     """Load an existing transcript from a text file."""

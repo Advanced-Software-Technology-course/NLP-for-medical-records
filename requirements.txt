@@ -11,3 +11,10 @@ openai>=2.26.0
 
 # HTTP requests (Gladia API calls)
 requests>=2.32.5
+
+# RAG pipeline
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-huggingface>=0.1.0
+chromadb>=0.6.0
+sentence-transformers>=3.0.0

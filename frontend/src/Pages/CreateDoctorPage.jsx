@@ -33,7 +33,7 @@ export default function CreateDoctorPage({ onNavigate }) {
     if (Object.keys(e).length) { setErrors(e); return; }
     setSaving(true);
     try {
-      const res = await fetch("http://localhost:5000/api/doctors", {
+      const res = await fetch("/api/doctors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
