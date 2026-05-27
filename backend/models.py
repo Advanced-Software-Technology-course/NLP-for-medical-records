@@ -57,6 +57,7 @@ class Consultation(db.Model):
     transcript = db.Column(db.Text, nullable=True)
     summary = db.Column(db.Text, nullable=True)
     soap_notes = db.Column(db.Text, nullable=True)
+    cpu_usage = db.Column(db.Float, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def parse_soap_notes(self):
@@ -97,5 +98,6 @@ class Consultation(db.Model):
             "transcript": self.transcript,
             "aiSummary": self.summary,
             "soap": self.parse_soap_notes(),
+            "cpu_usage": self.cpu_usage,
             "created_at": self.created_at.isoformat()
         }
