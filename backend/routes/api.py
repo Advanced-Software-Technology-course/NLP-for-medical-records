@@ -4,6 +4,7 @@ from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from models import db
 import models as md
+import cpu_monitor
 
 # Add project root to sys.path so we can import 'pipeline'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -19,7 +20,12 @@ except ImportError as e:
 
 api_bp = Blueprint('api', __name__)
 
-ALLOWED_EXTENSIONS = {'mp3', 'wav', 'm4a', 'flac'}
+ALLOWED_EXTENSIONS = {'mp3', 'wav', 'm4a', 'flac', 'webm'}
+
+@api_bp.route('/cpu/start', methods=['POST'])
+def cpu_start():
+    cpu_monitor.start()
+    return jsonify({'status': 'monitoring started'}), 200
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -42,6 +48,8 @@ def process_audio():
         file.save(filepath)
 
         try:
+            cpu_avg = cpu_monitor.stop()
+
             gladia_token = current_app.config.get('GLADIA_TOKEN')
             groq_token = current_app.config.get('GROQ_TOKEN')
  
@@ -70,7 +78,8 @@ def process_audio():
             consultation = md.Consultation(
                 transcript=transcript,
                 summary=summary,
-                soap_notes=soap_notes
+                soap_notes=soap_notes,
+                cpu_usage=cpu_avg,
             )
             db.session.add(consultation)
             db.session.commit()
