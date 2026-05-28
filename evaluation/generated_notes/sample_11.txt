@@ -1,0 +1,28 @@
+**Chief Complaint:** Right knee pain following a fall.
+
+**Key Symptoms:**
+The patient reports pain in the right knee, particularly when flexing and moving the knee, with a pain score of 4-5 out of 10. The patient also mentions hearing a "pop" at the time of injury and notes some swelling. 
+- **Pertinent Negatives:** Denies chest pain, belly pain, and shortness of breath.
+
+**Relevant Medical History:**
+- Hypertension: Managed with lisinopril 20mg. The patient's current blood pressure is elevated at 150/70, possibly due to white coat syndrome.
+
+**Physical Examination & Vitals:**
+- Vitals: Blood pressure 150/70.
+- Knee: Pain to palpation of the medial aspect, pain with flexion and extension, edema, and effusion.
+- Lungs: Clear bilaterally, no wheezes or crackles.
+- Heart: Grade 2 out of 6 systolic ejection murmur, previously known.
+
+**Assessment & Rationale:**
+1. Medial Collateral Ligament (MCL) strain: Suggested by the mechanism of injury, pain with flexion and extension, and medial knee pain.
+2. Hypertension: Elevated blood pressure reading, possibly exacerbated by non-adherence to a low-sodium diet.
+
+**Treatment Plan & Next Steps:**
+- For MCL strain: 
+  - Medication: Ibuprofen 800mg twice a day for pain and swelling.
+  - Lifestyle: Use a knee brace for support, ice the knee for 20 minutes, 3-4 times a day, elevate the leg, and avoid strenuous activities for a couple of weeks.
+- For Hypertension: 
+  - Continue lisinopril 20mg.
+  - Lifestyle: Reduce sodium intake to <2300mg/day.
+  - Referral to nutrition for dietary advice to help manage blood pressure.
+- Follow-up: [UNCERTAIN - no specific follow-up appointment mentioned].

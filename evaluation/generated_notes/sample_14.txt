@@ -1,0 +1,27 @@
+**Chief Complaint:** Follow-up for stage three non-small cell lung cancer during neo-adjuvant chemotherapy.
+
+**Key Symptoms:**
+The patient reports a minimal, dry cough and a sore throat. She also experiences fatigue, but no nausea or vomiting. She denies shortness of breath, fever, or chest pain. 
+
+**Relevant Medical History:**
+- Stage three non-small cell lung cancer: Diagnosed with a 4.4 cm left upper lobe nodule, biopsy positive for adenocarcinoma. Molecular testing is pending.
+- Current chemotherapy regimen: Cisplatin and Etoposide.
+
+**Physical Examination & Vitals:**
+- Vitals: Oxygen levels are good, especially considering the chemotherapy and cough.
+- Neck: No cervical lymphadenopathy or supraclavicular adenopathy.
+- Heart: Regular rate and rhythm with no murmurs.
+- Lungs: Bilateral crackles, indicating possible fluid or inflammation.
+- Skin: Erythema on the anterior side of the chest, possibly related to radiation.
+- Lower extremities: No edema.
+
+**Diagnosis or Working Diagnosis:**
+1. Stage three non-small cell lung cancer: Confirmed by biopsy and currently undergoing chemotherapy.
+2. Radiation pneumonitis: Suggested by chest X-ray showing mild inflammation of the lungs, likely due to radiation therapy.
+3. Esophageal inflammation: Contributing to the patient's sore throat and possibly painful swallowing.
+
+**Treatment Plan & Next Steps:**
+- Continue current chemotherapy regimen (Cisplatin and Etoposide) and radiation therapy at 45 Gy.
+- For radiation pneumonitis: Prescribe 40 mg of Prednisone daily for 5 days to reduce inflammation.
+- For esophageal inflammation and painful swallowing: Prescribe Lidocaine swish and swallow, 4 times a day, to help with eating and prevent dehydration.
+- Follow-up: Schedule a follow-up visit after completing the current treatment cycle to assess response and plan further management.

@@ -1,0 +1,24 @@
+'''
+**Chief Complaint:** Evaluation of kidney function in a patient with Smith-Magenis Syndrome.
+
+**Key Symptoms:**
+The patient, a 22-month-old female, has a history of feeding difficulties, temperature regulation issues, and developmental delays, including not walking or sitting by herself at one year old. She is currently crawling and attempting to take steps. She has multiple therapies, including feeding, occupational, physical, and upcoming speech therapy. 
+- **Pertinent Negatives:** No mention of fever, chest pain, or dyspnea.
+
+**Relevant Medical History:**
+- Smith-Magenis Syndrome: Diagnosed by a neurologist, with associated developmental delays and potential for congenital anomalies of the kidney and urinary tract.
+- Gastrointestinal issues: Managed by a GI doctor, with a history of reflux and dietary modifications (off cow's milk).
+- Family History: Older son with autism.
+
+**Physical Examination & Vitals:**
+- The patient is a well-nourished female, slightly fussy during examination, with small appearing eyes and mild hypotonia of the lower extremities.
+- Normal external female genitalia.
+- [UNCERTAIN - specific vitals not mentioned, such as blood pressure or heart rate].
+
+**Diagnosis or Working Diagnosis:**
+Smith-Magenis Syndrome with potential for congenital anomalies of the kidney and urinary tract.
+
+**Treatment Plan & Next Steps:**
+- Diagnostic Test: Kidney ultrasound to screen for congenital anomalies of the kidney and urinary tract.
+- Follow-up: Results will determine next steps; if abnormalities are found, further evaluation and follow-up will be planned, potentially at the Town Center location due to the family's residence in Dallas, Georgia.
+'''

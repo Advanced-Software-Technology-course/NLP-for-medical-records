@@ -1,0 +1,4 @@
+SPEAKER_0: in the morning and evening with warm water.
+SPEAKER_0: Another suggestion is to get yourself tested for complete blood count. Oh yeah, I forgot.
+SPEAKER_0: Continue your free thyroxine,
+SPEAKER_0: thyronone tablet.

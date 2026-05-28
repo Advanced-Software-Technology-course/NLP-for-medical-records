@@ -1,0 +1,28 @@
+'''
+**Chief Complaint:** Left knee pain, described as intermittent episodes where the knee "gives out" when walking, occurring less than once a day.
+
+**Key Symptoms:**
+The patient reports episodes of left knee instability, described as the knee "giving out" when walking, which happens less than once a day. The pain is internal and affects the whole kneecap. The patient denies any history of trauma, fever, or chest pain. The patient also mentions that the knee issue might prevent participation in line dancing due to concerns about the knee giving out.
+
+**Relevant Medical History:**
+- Hypertension: Managed with Farxiga, Amlodipine, Lisinopril, and Hydrochlorothiazide.
+- Diabetes Mellitus: Managed with Metformin.
+
+**Physical Examination & Vitals:**
+- Vitals: Temperature 98.2, Pulse 72, Respirations 16, Blood Pressure 122/70.
+- Heart: Regular rate and rhythm with a slight 2/6 systolic ejection murmur at the left base.
+- Lungs: Clear to auscultation bilaterally.
+- Left Knee: No ecchymosis, edema, effusion, or pain to palpation. Full range of motion, negative varus and valgus test.
+
+**Assessment & Rationale:**
+1. Left Knee Pain: Likely due to arthritis, given the absence of trauma or other red flags.
+2. Hypertension: Well-controlled on current medication regimen.
+3. Diabetes Mellitus: Blood sugars slightly elevated, with a fasting blood sugar of approximately 130.
+
+**Treatment Plan & Next Steps:**
+- Left Knee Pain: Prescribe Meloxicam 15mg daily and consider physical therapy to strengthen the muscles around the knee.
+- Hypertension: Continue current medication regimen and order an echocardiogram to evaluate the heart murmur.
+- Diabetes Mellitus: Order a Hemoglobin A1c to assess glucose control and consider adjustments to Metformin.
+- Additional Tests: Order a lipid panel.
+- Follow-up: Schedule an echocardiogram and follow up on lab results.
+'''

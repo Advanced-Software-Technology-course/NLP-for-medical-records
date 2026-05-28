@@ -1,0 +1,24 @@
+'''
+**Chief Complaint:** Wrist injury and pain after a fall.
+
+**History of Present Illness:**
+The patient reports a sudden onset of severe wrist pain after slipping on the stairs while doing laundry, attempting to catch herself, and landing on her outstretched right arm. The pain is localized to the right wrist, with a severity of 9/10, and is accompanied by swelling and bruising. The patient also reports a little numbness and tingling in the fingers, possibly due to swelling. The patient has been using ice, an ACE wrap, and ibuprofen to alleviate the pain, with some temporary relief.
+
+**Relevant Medical History:**
+- No previous injuries to the right arm or wrist.
+
+**Physical Examination & Vitals:**
+- Vitals: Blood pressure is elevated at 140/70, heart rate is slightly elevated at 80 beats per minute, and respiratory rate is normal at 20. No fever is present (97.2°F).
+- Physical examination: The patient has normal range of movement in the upper extremities, but the right wrist shows significant tenderness, swelling, and bruising. The patient experiences pain on flexion, extension, radial deviation, and lateral movement of the wrist. The patient is able to make a fist, but not tightly. Bony crepitus is noted, suggesting a potential fracture.
+
+**Assessment & Rationale:**
+1. Colles' fracture: Confirmed by X-ray, which shows a fracture of the distal radius with dorsal angulation and possible ulnar styloid fracture.
+
+**Treatment Plan & Next Steps:**
+- The patient will be given a brace to immobilize the wrist.
+- Surgery is recommended to properly align and stabilize the fracture, likely with screw fixation.
+- The patient will be prescribed 50mg of Ultram every 6 hours for pain management.
+- The patient will undergo physical therapy a few weeks after surgery to regain strength and mobility in the wrist.
+- The patient will need to wear the brace for approximately 6 weeks after surgery.
+- A follow-up appointment will be scheduled to assess the patient's progress and determine the best course of action regarding an upcoming vacation.
+'''

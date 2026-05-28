@@ -1,0 +1,30 @@
+'''
+**Chief Complaint:** Chest pain and difficulty swallowing.
+
+**History of Present Illness:**
+The patient reports a 4-day episode of sharp, central chest pain that occurred in early October 2020, which resolved on its own. The pain was exacerbated by eating and was accompanied by difficulty swallowing. The patient denies any recent episodes of chest pain or difficulty swallowing.
+- **Pertinent Negatives:** Denies fever, abdominal pain, or recent weight loss.
+
+**Relevant Medical History:**
+- Uterine fibroids
+- Anemia
+- Cholecystectomy (gallbladder removal)
+- Recent ER visit for esophagitis
+
+**Physical Examination & Vitals:**
+- Vitals: [UNCERTAIN - check transcript for BP, HR, etc.]
+- Abdomen: Mild tenderness to light palpation in the upper abdominal quadrants, but otherwise normal.
+- Cardiovascular: [UNCERTAIN - mention if heart sounds were heard]
+- Key Symptoms: Difficulty swallowing (resolved), chest pain (resolved), and mild upper abdominal tenderness.
+
+**Assessment & Rationale:**
+1. Esophagitis: Possible cause of chest pain and difficulty swallowing, but unlikely given the resolution of symptoms and lack of recent episodes.
+2. Gastroesophageal reflux disease (GERD): Possible cause of chest pain and difficulty swallowing.
+3. Anxiety: Possible contributing factor to chest pain, given the patient's recent job transition and stress.
+4. Musculoskeletal etiologies: Possible contributing factor to chest pain.
+
+**Treatment Plan & Next Steps:**
+- Diagnostics: Consider upper endoscopy (EGD) if symptoms recur.
+- Lifestyle: Continue to monitor symptoms and follow up as needed.
+- Follow-up: Patient will call the office if any additional episodes of pain or other symptoms occur, at which point an EGD can be scheduled.
+'''
