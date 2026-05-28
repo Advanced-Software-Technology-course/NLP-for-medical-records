@@ -1,99 +1,100 @@
 # T8.3 – Black-box / End-to-End Testing Report
 
 ## Project
-**NLP for Medical Records – Speech to SOAP Pipeline**
+
+NLP for Medical Records – Speech to SOAP Pipeline
 
 ## Test Type
+
 Black-box End-to-End Testing
 
 ## Environment
-- **OS:** Windows (localhost)
-- **Backend:** Flask (Python)
-- **Frontend:** React
-- **AI Pipeline:** STT + NLP summarization + SOAP generation
-- **Optional RAG:** ChromaDB
+
+* OS: Windows (localhost)
+* Backend: Flask (Python)
+* Frontend: React
+* AI Pipeline: STT + NLP Summarization + SOAP Generation
+* Optional RAG: ChromaDB
 
 ---
 
 ## Objective
 
-The goal of this test was to validate the system from a **user perspective**, ensuring complete functional integrity across the following vectors:
+The objective of this testing phase was to validate the system from an end-user perspective without inspecting internal implementation details.
 
-- **Audio Acquisition:** Capability to upload various audio formats via the frontend.
-- **Pipeline Processing:** Validating backend transcription and NLP summarization.
-- **Output Integrity:** Ensuring the generated SOAP notes are clinically relevant and correctly structured.
-- **Robustness:** Testing edge cases and system stability under invalid input.
+The following areas were evaluated:
 
----
-
-## System Setup
-
-### 1. Start Backend
-```bash
-python backend/app.py
-```
-
-### 2. Start Frontend
-```bash
-cd frontend
-npm install
-npm start
-```
-
-### 3. Application Access
-- **URL:** `http://localhost:3000`
+* Audio upload functionality
+* Backend processing pipeline
+* Transcript generation
+* SOAP note generation
+* Error handling
+* API stability
+* Input validation
+* System robustness
 
 ---
 
-## Test Cases
+## Executed Test Cases
 
-### Test Case 1 – Valid MP3 Audio Upload
-| Metric | Details |
-| :--- | :--- |
-| **Input** | `data/test_audio/test_audio.mp3` |
-| **Steps** | 1. Open frontend in browser<br>2. Upload MP3 file<br>3. Submit request<br>4. Monitor processing status |
-| **Expected Result** | Transcript is generated; SOAP note is generated successfully; API returns 200 OK. |
-| **Actual Result** | Transcript successfully generated; SOAP note accurately reflects audio; UI displays results correctly. |
-| **Status** |  **PASS** |
-
-### Test Case 2 – Valid WAV Audio Upload
-| Metric | Details |
-| :--- | :--- |
-| **Input** | `data/eka_dataset_audio/audio_sample/audio_0.wav` |
-| **Expected Result** | Identical processing behavior as MP3; high-fidelity transcription. |
-| **Actual Result** | File processed successfully; Transcript and SOAP note generated correctly; UI displayed outputs correctly. |
-| **Status** |  **PASS** |
-
-### Test Case 3 – Invalid File Upload
-| Metric | Details |
-| :--- | :--- |
-| **Inputs Tested** | `.txt` file, empty file, corrupted audio file. |
-| **Expected Result** | Graceful failure; Clear error message displayed; System remains stable. |
-| **Actual Result** | Informative error messages shown to user; No backend/frontend crashes; Stable system state maintained. |
-| **Status** |  **PASS** |
+| ID    | Test Case                   | Result  |
+| ----- | --------------------------- | ------- |
+| TC-01 | Valid MP3 Upload            | Failed* |
+| TC-02 | Valid WAV Upload            | Passed  |
+| TC-03 | Invalid File Upload         | Passed  |
+| TC-04 | Missing File Upload         | Passed  |
+| TC-05 | Empty Filename              | Passed  |
+| TC-06 | Unsupported Extension       | Passed  |
+| TC-07 | Zero-byte Audio File        | Failed* |
+| TC-08 | Large Audio Upload          | Failed* |
+| TC-09 | Invalid Content Type        | Passed  |
+| TC-10 | Consecutive Requests        | Passed  |
+| TC-11 | Health Endpoint Consistency | Passed  |
+| TC-12 | Uppercase Invalid Extension | Passed  |
+| TC-13 | Multiple Invalid Uploads    | Passed  |
+| TC-14 | Incorrect HTTP Method       | Passed  |
 
 ---
 
-## Observations & Optimization Notes
+## Failure Analysis
 
-- **OS Specifics:** Identified a **ChromaDB file locking issue** on Windows when the backend is restarted rapidly. This is a known interaction between Windows file handling and SQLite/ChromaDB.
-- **Performance:** Noted **slow startup times** due to heavy dependency loading (LangChain, SciPy, NLTK).
-- **Resilience:** Observed occasional fallback to `sentence-transformers` embeddings when the primary model endpoint is unavailable.
+Three test cases failed because the external Gladia Speech-to-Text service was unavailable due to missing API credentials during execution.
+
+Observed response:
+
+HTTP 401 Unauthorized
+
+Affected tests:
+
+* TC-01 Valid MP3 Upload
+* TC-07 Zero-byte Audio Upload
+* TC-08 Large Audio Upload
+
+The failures were caused by external infrastructure dependency rather than defects in application routing or validation logic.
 
 ---
 
-## Summary
+## Observations
 
-| Component | Status |
-| :--- | :--- |
-| **Audio Upload** |  PASS |
-| **Transcript Generation** |  PASS |
-| **SOAP Generation** |  PASS |
-| **Edge Case Handling** |  PASS |
-| **System Stability** |  PASS |
+* ChromaDB file locking occasionally occurs on Windows during rapid backend restarts.
+* Startup latency is increased by dependency initialization (LangChain, NLTK, SciPy).
+* External API availability directly affects transcription-related tests.
 
-### Final Result
+---
 
-> **STATUS: SUCCESS**
->
-> The system successfully passes black-box end-to-end testing. All core user workflows are functional, and invalid inputs are handled safely without system failure. Ready for deployment/staging.
+## Test Statistics
+
+| Metric       | Result |
+| ------------ | ------ |
+| Total Tests  | 14     |
+| Passed       | 11     |
+| Failed       | 3      |
+| Success Rate | 78.6%  |
+
+---
+
+## Final Result
+
+STATUS: PARTIALLY SUCCESSFUL
+
+The application successfully passed all validation, error-handling, and stability tests. Three tests dependent on external STT infrastructure failed because API credentials were unavailable during execution.

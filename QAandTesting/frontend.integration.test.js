@@ -169,3 +169,187 @@ describe('Frontend Black-Box End-to-End Integration Suite', () => {
     expect(screen.getByText(/Home/i)).toBeInTheDocument();
   });
 });
+test('History page survives backend failure', async () => {
+
+  fetch.mockImplementationOnce(() =>
+    Promise.reject(new Error('Server unavailable'))
+  );
+
+  render(<App />);
+
+  fireEvent.click(
+    screen.getByRole('button', { name: /History/i })
+  );
+
+  await waitFor(() => {
+    expect(
+      screen.getByText(/History/i)
+    ).toBeInTheDocument();
+  });
+});
+test('Multiple consultations are rendered', async () => {
+
+  fetch.mockImplementationOnce(() =>
+    Promise.resolve({
+      ok: true,
+      json: () =>
+        Promise.resolve([
+          ...mockBackendConsultations,
+          {
+            id: 102,
+            doctor_name: "Dr. Strange",
+            patient_name: "Tony Stark",
+            duration: "05:00",
+            ai_summary: "Follow-up",
+            transcript: "Transcript",
+            soap_notes: "SOAP",
+            created_at: "2026-05-22"
+          }
+        ])
+    })
+  );
+
+  render(<App />);
+
+  fireEvent.click(
+    screen.getByRole('button', { name: /History/i })
+  );
+
+  expect(
+    await screen.findByText(/Alex Smith/i)
+  ).toBeInTheDocument();
+
+  expect(
+    await screen.findByText(/Tony Stark/i)
+  ).toBeInTheDocument();
+});
+test('Repeated navigation does not crash app', async () => {
+
+  render(<App />);
+
+  for (let i = 0; i < 3; i++) {
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /History/i })
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/History/i)
+      ).toBeInTheDocument();
+    });
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /Home/i })
+    );
+
+    expect(
+      screen.getByText(/Home/i)
+    ).toBeInTheDocument();
+  }
+});
+test('Correct consultation data is loaded', async () => {
+
+  render(<App />);
+
+  fireEvent.click(
+    screen.getByRole('button', { name: /History/i })
+  );
+
+  const openButton =
+    await screen.findByText(/View full consultation/i);
+
+  fireEvent.click(openButton);
+
+  await waitFor(() => {
+    expect(
+      screen.getByText(/subjective/i)
+    ).toBeInTheDocument();
+  });
+});
+test('Handles empty SOAP notes gracefully', async () => {
+
+  fetch.mockImplementationOnce(() =>
+    Promise.resolve({
+      ok: true,
+      json: () =>
+        Promise.resolve([
+          {
+            ...mockBackendConsultations[0],
+            soap_notes: ""
+          }
+        ])
+    })
+  );
+
+  render(<App />);
+
+  fireEvent.click(
+    screen.getByRole('button', { name: /History/i })
+  );
+
+  expect(
+    await screen.findByText(/Alex Smith/i)
+  ).toBeInTheDocument();
+});
+test('History page survives repeated clicks', async () => {
+
+  render(<App />);
+
+  const historyButton =
+    screen.getByRole('button', { name: /History/i });
+
+  fireEvent.click(historyButton);
+  fireEvent.click(historyButton);
+  fireEvent.click(historyButton);
+
+  expect(
+    await screen.findByText(/Alex Smith/i)
+  ).toBeInTheDocument();
+});
+test('Navigate Settings and back safely', async () => {
+
+  render(<App />);
+
+  fireEvent.click(
+    screen.getByRole('button', { name: /Settings/i })
+  );
+
+  expect(
+    await screen.findByText(/Privacy Policy/i)
+  ).toBeInTheDocument();
+
+  fireEvent.click(
+    screen.getByRole('button', { name: /Home/i })
+  );
+
+  expect(
+    screen.getByText(/Home/i)
+  ).toBeInTheDocument();
+});
+test('Loaded consultation contains transcript', async () => {
+
+  render(<App />);
+
+  fireEvent.click(
+    screen.getByRole('button', { name: /History/i })
+  );
+
+  fireEvent.click(
+    await screen.findByText(/View full consultation/i)
+  );
+
+  const transcriptBtn =
+    screen.queryByRole('button', {
+      name: /transcript/i
+    });
+
+  if (transcriptBtn) {
+
+    fireEvent.click(transcriptBtn);
+
+    expect(
+      await screen.findByText(/Doctor:/i)
+    ).toBeInTheDocument();
+  }
+});

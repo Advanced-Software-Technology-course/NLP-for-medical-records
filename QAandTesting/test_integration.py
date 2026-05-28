@@ -142,3 +142,105 @@ def test_valid_audio_upload(client):
     assert isinstance(result["transcript"], str)
     assert isinstance(result["summary"], str)
     assert isinstance(result["soap_notes"], str)
+
+def test_unsupported_audio_extension(client):
+    data = {
+        'file': (io.BytesIO(b"fake audio"), 'audio.xyz')
+    }
+
+    response = client.post(
+        '/api/process',
+        data=data,
+        content_type='multipart/form-data'
+    )
+
+    assert response.status_code == 400
+
+    json_data = response.get_json()
+
+    assert "error" in json_data
+
+def test_zero_byte_audio(client):
+    data = {
+        'file': (io.BytesIO(b''), 'empty.mp3')
+    }
+
+    response = client.post(
+        '/api/process',
+        data=data,
+        content_type='multipart/form-data'
+    )
+
+    assert response.status_code in [400, 500]
+
+def test_large_audio_upload(client):
+    large_audio = io.BytesIO(b'\0' * (5 * 1024 * 1024))
+
+    data = {
+        'file': (large_audio, 'large.mp3')
+    }
+
+    response = client.post(
+        '/api/process',
+        data=data,
+        content_type='multipart/form-data'
+    )
+
+    assert response.status_code in [200, 400, 413]
+
+def test_invalid_content_type(client):
+    response = client.post(
+        '/api/process',
+        data="not multipart"
+    )
+
+    assert response.status_code >= 400
+
+def test_multiple_consecutive_requests(client):
+    for _ in range(5):
+        response = client.get('/')
+        assert response.status_code == 200
+
+def test_health_endpoint_consistency(client):
+    response1 = client.get('/')
+    response2 = client.get('/')
+
+    assert response1.status_code == 200
+    assert response2.status_code == 200
+
+    assert response1.get_json() == response2.get_json()
+
+def test_uppercase_extension(client):
+    data = {
+        'file': (io.BytesIO(b"fake"), 'BAD.TXT')
+    }
+
+    response = client.post(
+        '/api/process',
+        data=data,
+        content_type='multipart/form-data'
+    )
+
+    assert response.status_code == 400
+
+def test_multiple_invalid_uploads(client):
+
+    for _ in range(5):
+
+        data = {
+            'file': (io.BytesIO(b"bad"), 'bad.txt')
+        }
+
+        response = client.post(
+            '/api/process',
+            data=data,
+            content_type='multipart/form-data'
+        )
+
+        assert response.status_code == 400
+
+def test_process_endpoint_wrong_method(client):
+
+    response = client.get('/api/process')
+
+    assert response.status_code in [400, 405]
