@@ -1,8 +1,10 @@
 {
   "samples_requested": 3619,
-  "samples_with_audio": 21,
-  "samples_evaluated": 21,
+  "samples_with_audio": 19,
+  "samples_evaluated": 19,
   "missing_audio_rows": [
+    8,
+    17,
     21,
     22,
     23,
@@ -3602,17 +3604,17 @@
     3617,
     3618
   ],
-  "wer_mean": 0.2308914345188247,
-  "cer_mean": 0.15065686283453816,
-  "mer_mean": 0.2240453272981273,
-  "wil_mean": 0.281525391735635,
-  "wip_mean": 0.718474608264365,
-  "rouge1_mean": 0.8068850714976563,
-  "rouge2_mean": 0.7244889654680615,
-  "rougeL_mean": 0.8068850714976563,
-  "semantic_similarity_mean": 0.7634137070746451,
-  "wer_std": 0.2686930591055086,
-  "cer_std": 0.2532543779091954,
-  "gladia_avg_sentence_confidence_mean": 0.6598341269841269,
-  "gladia_avg_sentence_confidence_percent_mean": 66.0
+  "wer_mean": 0.14197024277813522,
+  "cer_mean": 0.0632797126415311,
+  "mer_mean": 0.1351013603492739,
+  "wil_mean": 0.19395730715086956,
+  "wip_mean": 0.8060426928491304,
+  "rouge1_mean": 0.8915388393443252,
+  "rouge2_mean": 0.8181298608699933,
+  "rougeL_mean": 0.8915388393443252,
+  "semantic_similarity_mean": 0.8486030110510473,
+  "wer_std": 0.13358036159747275,
+  "cer_std": 0.08102036964331769,
+  "gladia_avg_sentence_confidence_mean": 0.6655457393483709,
+  "gladia_avg_sentence_confidence_percent_mean": 66.6
 }

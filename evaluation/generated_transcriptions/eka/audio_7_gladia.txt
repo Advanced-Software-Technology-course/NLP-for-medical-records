@@ -1,2 +1,2 @@
-SPEAKER_0: Patient has headache fever depression pain
+SPEAKER_0: Patient has headache fever depression leg pain
 SPEAKER_0: I want to prescribe giving patient doro 650
