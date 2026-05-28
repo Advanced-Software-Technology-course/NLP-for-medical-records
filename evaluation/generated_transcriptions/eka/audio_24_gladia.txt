@@ -1,0 +1,9 @@
+SPEAKER_0: Suffering from allergy,
+SPEAKER_0: depression, fever, headache,
+SPEAKER_0: take tolo 650, Allegra.
+SPEAKER_0: He is also suffering from cancer,
+SPEAKER_0: has COVID for a couple of days.
+SPEAKER_0: Take Vomitstop, take Eno,
+SPEAKER_1: avoid eating outside food,
+SPEAKER_1: avoid eating oily food.
+SPEAKER_1: Sleep for at least 6 to 8 hours.

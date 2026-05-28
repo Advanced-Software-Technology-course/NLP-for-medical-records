@@ -172,7 +172,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--config",
-        default="all",
+        default="en",
         help="Dataset config to download, e.g. en, hi, or all (default: all).",
     )
     parser.add_argument(
@@ -198,7 +198,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--limit",
         type=int,
-        default=None,
+        default=50,
         help="Optional maximum number of audio files to write per config.",
     )
     return parser.parse_args()

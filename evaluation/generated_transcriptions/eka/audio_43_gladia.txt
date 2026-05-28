@@ -1,0 +1,2 @@
+SPEAKER_0: Patient is having severe body ache.
+SPEAKER_0: Please take rest and drink lots of fluids.

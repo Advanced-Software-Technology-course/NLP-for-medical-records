@@ -1,0 +1,9 @@
+SPEAKER_0: Patient has reported fever,
+SPEAKER_0: back pain,
+SPEAKER_0: leg pain, headache,
+SPEAKER_0: all sorts of pains.
+SPEAKER_0: I am diagnosing him with
+SPEAKER_0: Dengue. He should get complete health checkup and
+SPEAKER_0: Dengue antibody antigen test done.
+SPEAKER_1: Also I recommend him to take
+SPEAKER_1: Dolo tablet for

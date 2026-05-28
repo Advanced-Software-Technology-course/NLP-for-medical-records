@@ -399,24 +399,10 @@ def preprocess_audio(
             y = y / peak * 0.95  # Leave headroom
             modified = True
     
-    # 3. Reduce noise (spectral gating - simple approach)
+    # 3. Reduce noise
+    # NOTE: denoising was removed after producing worse results on muffled audio
     if reduce_noise:
-        # Simple noise gate: zero out very quiet frames
-        frame_energy = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=1)
-        threshold = np.median(frame_energy) * 0.1
-        
-        # Convert back to time domain
-        S = librosa.stft(y)
-        mag = np.abs(S)
-        noise_gate = mag > threshold
-        S_gated = S * noise_gate
-        y_gated = librosa.istft(S_gated)
-        
-        # Only use if it helps
-        if np.mean(np.abs(y_gated)) > np.mean(np.abs(y)) * 0.5:
-            y = y_gated
-            print("Applied noise gate")
-            modified = True
+        print("[Preprocess] Denoising disabled (skipping noise reduction as requested)")
     
     # Save if modified
     if modified:

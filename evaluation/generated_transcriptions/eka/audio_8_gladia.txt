@@ -1,0 +1,5 @@
+SPEAKER_0: For the medicine take thyroxine,
+SPEAKER_0: also take dolo 650,
+SPEAKER_0: avoid eating outside food,
+SPEAKER_0: take proper bed rest and go for morning walks regularly.
+SPEAKER_0: Next follow up is scheduled within week.

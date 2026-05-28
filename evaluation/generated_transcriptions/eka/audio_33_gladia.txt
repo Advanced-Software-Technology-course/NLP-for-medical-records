@@ -1,0 +1,2 @@
+SPEAKER_0: Patient is allergic to Dolo 650. Patient consumes alcohol five times a week. Currently smokes.
+SPEAKER_0: I prescribe Grosian 650 and I suggest getting CBC lab test done.

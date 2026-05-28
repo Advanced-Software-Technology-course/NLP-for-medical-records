@@ -1,10 +1,10 @@
 {
     "samples_evaluated": 20,
     "rougeL_raw_mean": 0.26052240561057344,
-    "rougeL_styled_mean": 0.28718331562172117,
-    "rougeL_aligned_mean": 0.6009457280093997,
+    "rougeL_styled_mean": 0.2860259408510146,
+    "rougeL_aligned_mean": 0.6005886379127419,
     "reference_section_count_mean": 6.7,
     "generated_section_count_mean": 5.45,
-    "styled_section_count_mean": 5.9,
+    "styled_section_count_mean": 5.95,
     "aligned_section_count_mean": 4.8
 }
