@@ -1,24 +1,28 @@
-'''
-**Chief Complaint:** Wrist injury and pain after a fall.
+**Chief Complaint:** Diana, a [age not mentioned]-year-old female presents with a right wrist injury.
 
 **History of Present Illness:**
-The patient reports a sudden onset of severe wrist pain after slipping on the stairs while doing laundry, attempting to catch herself, and landing on her outstretched right arm. The pain is localized to the right wrist, with a severity of 9/10, and is accompanied by swelling and bruising. The patient also reports a little numbness and tingling in the fingers, possibly due to swelling. The patient has been using ice, an ACE wrap, and ibuprofen to alleviate the pain, with some temporary relief.
+The patient reports slipping while walking up and down stairs doing laundry yesterday morning, attempting to catch herself, and subsequently experiencing severe right wrist pain and swelling. The patient confirms the injured wrist is her right wrist. The patient rates her pain a 9 out of 10. The injury occurred yesterday morning. The patient has applied ice and used an ACE wrap at home. The patient has also taken ibuprofen, which provides some relief. Associated symptoms include swelling, bruising, and some tingling, but no numbness. The pain is localized to her wrist. The patient denies pain extending beyond her wrist.
+- **Pertinent Negatives:** Denies prior injury to the right arm.
 
 **Relevant Medical History:**
-- No previous injuries to the right arm or wrist.
+- Conditions: None mentioned.
+- Regional Trauma: Denies prior injury to the right arm.
 
 **Physical Examination & Vitals:**
-- Vitals: Blood pressure is elevated at 140/70, heart rate is slightly elevated at 80 beats per minute, and respiratory rate is normal at 20. No fever is present (97.2°F).
-- Physical examination: The patient has normal range of movement in the upper extremities, but the right wrist shows significant tenderness, swelling, and bruising. The patient experiences pain on flexion, extension, radial deviation, and lateral movement of the wrist. The patient is able to make a fist, but not tightly. Bony crepitus is noted, suggesting a potential fracture.
+- Vitals: BP: 140/70, HR: 80, RR: 20, Temp: Not mentioned. The patient's blood pressure is 140/70, which is slightly elevated but likely due to pain.
+- Systemic Clearances: Lungs clear to auscultation bilaterally, no lower edema, palpable pulses in lower legs, normal range of movement in upper extremities except for the right wrist.
+- Localized Exam: 
+  - Visual deformity: Obvious swelling and ecchymosis.
+  - Tenderness: Present throughout the wrist, especially on the inside and outside.
+  - Crepitus: Bony crepitus noted.
+  - Range of Motion: Limited, with pain on flexion, extension, radial deviation, and lateral movement. The patient has difficulty with wrist extension. The patient reports difficulty moving her wrist in any direction. The patient can make a fist but not tightly.
 
 **Assessment & Rationale:**
-1. Colles' fracture: Confirmed by X-ray, which shows a fracture of the distal radius with dorsal angulation and possible ulnar styloid fracture.
+1. **Colles' Fracture**: Supported by radiographic findings of an extra-articular fracture, proximal to the radial ulnar joint, with dorsal angulation of the distal fracture fragment, and clinical presentation of wrist deformity and pain. The patient's pain is mostly constant but somewhat relieved by ibuprofen. The patient reports that her wrist hurts less when kept at a regular level or elevated on a pillow.
 
 **Treatment Plan & Next Steps:**
-- The patient will be given a brace to immobilize the wrist.
-- Surgery is recommended to properly align and stabilize the fracture, likely with screw fixation.
-- The patient will be prescribed 50mg of Ultram every 6 hours for pain management.
-- The patient will undergo physical therapy a few weeks after surgery to regain strength and mobility in the wrist.
-- The patient will need to wear the brace for approximately 6 weeks after surgery.
-- A follow-up appointment will be scheduled to assess the patient's progress and determine the best course of action regarding an upcoming vacation.
-'''
+- Interventions: Surgery (ORIF) to straighten the wrist and secure it with screws, requiring an overnight hospital stay.
+- Immobilization: Brace for six weeks.
+- Medications: Ultram 50mg every six hours for pain.
+- Therapy: Physical therapy three times a week, starting a few weeks after surgery.
+- Logistics & Follow-up: The patient is advised to follow up in a month to assess the need for vacation postponement. Depending on physical therapy assessment, she may be able to perform exercises while on vacation.

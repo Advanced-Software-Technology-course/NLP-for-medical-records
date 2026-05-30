@@ -1,28 +1,24 @@
-**Chief Complaint:** Right knee pain following a fall.
+**Chief Complaint:** Philip, a [age not mentioned]-year-old male presents with right knee pain and the doctor wants to take a look at it.
 
-**Key Symptoms:**
-The patient reports pain in the right knee, particularly when flexing and moving the knee, with a pain score of 4-5 out of 10. The patient also mentions hearing a "pop" at the time of injury and notes some swelling. 
-- **Pertinent Negatives:** Denies chest pain, belly pain, and shortness of breath.
+**History of Present Illness:**
+The patient reports slipping and falling while working on his property approximately one week ago. He describes the pain as occurring mainly when flexing and moving his knee up and down, and when putting pressure on it. He reports hearing a pop during the incident and experiencing some swelling afterwards, and it looks a little bit swollen right now. His pain score is 4-5 out of 10, mainly when in motion. 
+- **Pertinent Negatives:** Denies chest pain, belly pain, and shortness of breath just to make sure you're not having any issues.
 
 **Relevant Medical History:**
-- Hypertension: Managed with lisinopril 20mg. The patient's current blood pressure is elevated at 150/70, possibly due to white coat syndrome.
+- Conditions: Hypertension managed by lisinopril 20 milligrams. The patient's diet got a little bit out of control during the pandemic. The patient reports needing help with dietary changes and has not made changes. The goal is to get you off that medication and get your blood pressure to a manageable level. The doctor recommends reduce his sodium intake to about 2300 milligrams per day.
+- Regional Trauma: No prior knee injuries mentioned.
 
 **Physical Examination & Vitals:**
-- Vitals: Blood pressure 150/70.
-- Knee: Pain to palpation of the medial aspect, pain with flexion and extension, edema, and effusion.
-- Lungs: Clear bilaterally, no wheezes or crackles.
-- Heart: Grade 2 out of 6 systolic ejection murmur, previously known.
+- Vitals: BP: 150/70.
+- Systemic Clearances: The doctor listened to his lungs and lungs are clear bilaterally, no wheezes or crackles; and then listened to his heart. The doctor still hears a grade 2 out of 6 systolic ejection murmur.
+- Localized Exam: 
+  - MSK: The doctor pressed on the inside and outside of the knee. The doctor asked the patient to flex his knee and the patient reported pain. The doctor identified pain to palpation of the medial aspect of the right knee, pain with flexion and extension, edema around the knee, and some effusion (fluid in the knee).
 
 **Assessment & Rationale:**
-1. Medial Collateral Ligament (MCL) strain: Suggested by the mechanism of injury, pain with flexion and extension, and medial knee pain.
-2. Hypertension: Elevated blood pressure reading, possibly exacerbated by non-adherence to a low-sodium diet.
+1. Medial Collateral Ligament (MCL) strain: Supported by the patient's history of a twisting injury, pain to palpation on the medial aspect of the right knee, pain with flexion and extension, and the presence of edema and effusion. An X-ray of the right knee showed no fractures or bony abnormalities.
 
 **Treatment Plan & Next Steps:**
-- For MCL strain: 
-  - Medication: Ibuprofen 800mg twice a day for pain and swelling.
-  - Lifestyle: Use a knee brace for support, ice the knee for 20 minutes, 3-4 times a day, elevate the leg, and avoid strenuous activities for a couple of weeks.
-- For Hypertension: 
-  - Continue lisinopril 20mg.
-  - Lifestyle: Reduce sodium intake to <2300mg/day.
-  - Referral to nutrition for dietary advice to help manage blood pressure.
-- Follow-up: [UNCERTAIN - no specific follow-up appointment mentioned].
+- Medications: Ibuprofen 800 milligrams twice a day for pain and swelling.
+- Immobilization: A knee brace to support the muscles and allow healing.
+- Therapy: Ice the knee for 20 minutes at a time, 3-4 times a day.
+- Logistics & Follow-up: The patient is advised to elevate his leg and stay off it as much as possible. A referral to nutrition counseling is made to help manage his hypertension through dietary changes. Follow-up appointment scheduled (duration not specified).

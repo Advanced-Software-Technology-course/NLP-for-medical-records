@@ -24,6 +24,7 @@ import os
 import time
 import mimetypes
 from openai import OpenAI
+from collections.abc import Sequence
 
 from pipeline.rag_pipeline import (   
     setup_knowledge_base,
@@ -40,6 +41,85 @@ RAG_LIMIT    = None   # set via --rag-limit; None = load everything
 CSV_WHITELIST = [     # filenames to include in RAG; empty list = load all
     "webbeteg_fogalomtar.csv",
 ]
+
+GROQ_PRIMARY_MODEL = "llama-3.3-70b-versatile"
+GROQ_FALLBACK_MODELS = [
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "qwen/qwen3-32b",
+    "llama-3.1-8b-instant",
+]
+
+
+def _is_rate_limit_error(exc: Exception) -> bool:
+    status_code = getattr(exc, "status_code", None)
+    response = getattr(exc, "response", None)
+    if status_code == 429 or getattr(response, "status_code", None) == 429:
+        return True
+
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        error = body.get("error", body)
+        if isinstance(error, dict):
+            error_code = str(error.get("code", "")).lower()
+            error_type = str(error.get("type", "")).lower()
+            error_message = str(error.get("message", "")).lower()
+            if error_code in {"rate_limit_exceeded", "429"}:
+                return True
+            if error_type in {"rate_limit", "tokens", "quota", "insufficient_quota"}:
+                return True
+            if "rate limit" in error_message or "too many requests" in error_message:
+                return True
+
+    message = str(exc).lower()
+    return (
+        "rate limit" in message
+        or "rate_limit" in message
+        or "429" in message
+        or "too many requests" in message
+        or "tokens per day" in message
+        or "tokens per minute" in message
+        or "requests per minute" in message
+        or "rate_limit_exceeded" in message
+        or "insufficient_quota" in message
+    )
+
+
+def _chat_completion_with_fallback(
+    client: OpenAI,
+    messages: Sequence[dict],
+    *,
+    max_tokens: int,
+    temperature: float,
+    primary_model: str = GROQ_PRIMARY_MODEL,
+    fallback_models: list[str] | None = None,
+):
+    models = [primary_model]
+    if fallback_models:
+        for model in fallback_models:
+            if model and model not in models:
+                models.append(model)
+
+    last_error: Exception | None = None
+
+    for model in models:
+        try:
+            print(f"[Groq] Trying model: {model}")
+            return client.chat.completions.create(
+                model=model,
+                messages=list(messages),
+                max_tokens=max_tokens,
+                temperature=temperature,
+            ), model
+        except Exception as exc:
+            last_error = exc
+            if _is_rate_limit_error(exc):
+                print(f"[Groq] Rate limit on {model}; trying fallback model. Details: {exc}")
+                continue
+            raise
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("No Groq model candidates were available.")
 
 
 def _load_custom_vocabulary_config() -> dict:
@@ -61,6 +141,8 @@ Given the following doctor-patient consultation transcript, generate a concise m
 Skip pleasantries and small talk, and focus on the medically relevant information.
 Keep it in the original language of the transcript.
 
+Prioritize fidelity to the transcript over completeness. If a fact is not explicitly stated, omit it rather than guessing.
+
 {context_block}
 
 Include:
@@ -70,12 +152,52 @@ Include:
 - Diagnosis or working diagnosis (if mentioned)
 - Treatment plan or next steps (if mentioned)
 
-Flag any parts you are uncertain about with '[UNCERTAIN]'.
+Preserve exact qualifiers and negations in exam findings. Do not collapse wording like "not palpable" or "present via Doppler" into a generic absence or normal finding.
+
+Flag any parts you are uncertain about with '[UNCERTAIN]'. Use it only where the transcript is genuinely ambiguous, incomplete, or contradictory. Do not attach '[UNCERTAIN]' to facts that are explicitly stated.
 
 Transcript:
 {transcript}
 
 Summary:"""
+
+EVALUATOR_PROMPT_TEMPLATE = """You are a clinical documentation auditor.
+Compare the candidate summary to the transcript and list only factual mismatches or missing critical facts.
+Use the transcript as the single source of truth.
+If there are no issues, respond with exactly: NO_ISSUES
+
+Transcript:
+{transcript}
+
+Candidate summary:
+{summary}
+
+Return format:
+- One short bullet per issue
+- Each bullet: "Issue: ... | Fix: ..."
+"""
+
+REFINER_PROMPT_TEMPLATE = """You are a clinical documentation editor.
+Revise the candidate summary using the transcript and the issue list.
+Rules:
+- Use the transcript as the single source of truth.
+- Fix only the issues listed.
+- Do not add new facts.
+- Preserve exact qualifiers and negations (e.g., "not palpable", "present via Doppler").
+- Keep section headers and overall structure.
+- Keep [UNCERTAIN] only where the transcript is genuinely ambiguous.
+
+Transcript:
+{transcript}
+
+Issues:
+{issues}
+
+Candidate summary:
+{summary}
+
+Revised summary:
+"""
 
 
 SOAP_PROMPT_TEMPLATE = """You are a clinical documentation assistant.
@@ -221,7 +343,7 @@ def summarize_transcript(
     rag_context: str = ""
 ) -> str:
     print("── Step 3/4: Summary ──")
-    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
+    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token, max_retries=0)
 
     context_block = build_context_block(rag_context, "")
     prompt = SUMMARY_PROMPT_TEMPLATE.format(
@@ -229,17 +351,57 @@ def summarize_transcript(
         context_block=context_block
     )
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}],
+    response, used_model = _chat_completion_with_fallback(
+        client,
+        [{"role": "user", "content": prompt}],
         max_tokens=512,
-        temperature=0.3
+        temperature=0.3,
+        fallback_models=GROQ_FALLBACK_MODELS,
     )
+    print(f"[Groq] Summary model used: {used_model}")
 
     summary = response.choices[0].message.content.strip()
 
+    print("── Step 3b/4: Summary Evaluation ──")
+    eval_prompt = EVALUATOR_PROMPT_TEMPLATE.format(
+        transcript=transcript,
+        summary=summary,
+    )
+    eval_response, eval_model = _chat_completion_with_fallback(
+        client,
+        [{"role": "user", "content": eval_prompt}],
+        max_tokens=400,
+        temperature=0.0,
+        primary_model=GROQ_FALLBACK_MODELS[0],
+        fallback_models=GROQ_FALLBACK_MODELS[1:],
+    )
+    print(f"[Groq] Evaluation model used: {eval_model}")
+    eval_text = eval_response.choices[0].message.content.strip()
+
+    if "no_issues" in eval_text.casefold():
+        print("Summary evaluation: no issues found.\n")
+        print("Summary complete.\n")
+        return summary
+
+    print("── Step 3c/4: Summary Refinement ──")
+    refine_prompt = REFINER_PROMPT_TEMPLATE.format(
+        transcript=transcript,
+        summary=summary,
+        issues=eval_text,
+    )
+    refine_response, refine_model = _chat_completion_with_fallback(
+        client,
+        [{"role": "user", "content": refine_prompt}],
+        max_tokens=700,
+        temperature=0.0,
+        primary_model=GROQ_FALLBACK_MODELS[0],
+        fallback_models=GROQ_FALLBACK_MODELS[1:],
+    )
+    print(f"[Groq] Refinement model used: {refine_model}")
+    refined_summary = refine_response.choices[0].message.content.strip()
+
     print("Summary complete.\n")
-    return summary
+    return refined_summary
 
 
 def summarize_soap_notes(
@@ -248,7 +410,7 @@ def summarize_soap_notes(
     rag_context: str = ""
 ) -> str:
     print("── Step 4/4: SOAP Notes ──")
-    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
+    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token, max_retries=0)
 
     context_block = build_context_block(rag_context, "")
     prompt = SOAP_PROMPT_TEMPLATE.format(
@@ -256,12 +418,14 @@ def summarize_soap_notes(
         context_block=context_block
     )
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}],
+    response, used_model = _chat_completion_with_fallback(
+        client,
+        [{"role": "user", "content": prompt}],
         max_tokens=512,
-        temperature=0.3
+        temperature=0.3,
+        fallback_models=GROQ_FALLBACK_MODELS,
     )
+    print(f"[Groq] SOAP model used: {used_model}")
 
     soap_notes = response.choices[0].message.content.strip()
 

@@ -1,30 +1,20 @@
-'''
-**Chief Complaint:** Chest pain and difficulty swallowing.
+CHIEF COMPLAINT:
+[doctor] next is betty hill , uh , date of birth is 2/21/1968
 
-**History of Present Illness:**
-The patient reports a 4-day episode of sharp, central chest pain that occurred in early October 2020, which resolved on its own. The pain was exacerbated by eating and was accompanied by difficulty swallowing. The patient denies any recent episodes of chest pain or difficulty swallowing.
-- **Pertinent Negatives:** Denies fever, abdominal pain, or recent weight loss.
+HISTORY OF PRESENT ILLNESS:
+- when i called to make the appointment , i was having chest pains , but it stopped after four days , and i have n't had any since then
+- when did these four days of chest pain occur ?
+- can you think of anything that might have caused the chest pain ?
 
-**Relevant Medical History:**
-- Uterine fibroids
-- Anemia
-- Cholecystectomy (gallbladder removal)
-- Recent ER visit for esophagitis
+MEDICATIONS:
+- [doctor] did they prescribe you any medications in the er ?
+- if you wan na lay down here on the table for me and lets take a look at you
+- [doctor] so we could do an , uh , egd or upper endoscopy to take a look at your esophagus and stomach
+- the other option is just to continue to monitor , uh , for any additional symptoms at which point we could do the egd
 
-**Physical Examination & Vitals:**
-- Vitals: [UNCERTAIN - check transcript for BP, HR, etc.]
-- Abdomen: Mild tenderness to light palpation in the upper abdominal quadrants, but otherwise normal.
-- Cardiovascular: [UNCERTAIN - mention if heart sounds were heard]
-- Key Symptoms: Difficulty swallowing (resolved), chest pain (resolved), and mild upper abdominal tenderness.
+ASSESSMENT AND PLAN:
+- um , i reviewed our records from the er , including the normal cardiac workup , and we're about to go in and see her now
+- if not , you can follow up with me
+- follow up with me as needed for any other gi complaints
 
-**Assessment & Rationale:**
-1. Esophagitis: Possible cause of chest pain and difficulty swallowing, but unlikely given the resolution of symptoms and lack of recent episodes.
-2. Gastroesophageal reflux disease (GERD): Possible cause of chest pain and difficulty swallowing.
-3. Anxiety: Possible contributing factor to chest pain, given the patient's recent job transition and stress.
-4. Musculoskeletal etiologies: Possible contributing factor to chest pain.
-
-**Treatment Plan & Next Steps:**
-- Diagnostics: Consider upper endoscopy (EGD) if symptoms recur.
-- Lifestyle: Continue to monitor symptoms and follow up as needed.
-- Follow-up: Patient will call the office if any additional episodes of pain or other symptoms occur, at which point an EGD can be scheduled.
-'''
+SOURCE: sample_8

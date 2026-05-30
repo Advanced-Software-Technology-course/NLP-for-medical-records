@@ -1,28 +1,19 @@
-'''
-**Chief Complaint:** Annual exam, with concerns about managing depression, hypertension, and prior lobectomy.
+CHIEF COMPLAINT:
+[doctor] i know the nurse told you about dax
 
-**History of Present Illness:**
-The patient reports doing relatively well, despite a tough spring with allergies and stress from dropping off his daughter at college. He has been managing his depression with Prozac and has not had any incidents recently. He is still working on managing his hypertension, with some difficulty in remembering to take his medication on weekends.
+HISTORY OF PRESENT ILLNESS:
+- [doctor] so ralph is a 62-year-old male with a past medical history significant for depression and prior lobectomy as well as hypertension , who presents for his annual exam
+- um , still kind of working with my hypertension
+- so i , i know that the nurse went over the review of systems sheet with you , and , and you endorsed some nasal congestion from the pollen , but how about any shortness of breath , cough , muscle aches ?
 
-**Relevant Medical History:**
-- Depression: Managed with Prozac 20mg daily.
-- Hypertension: Managed with Norvasc, with some difficulty in adherence on weekends.
-- Prior Lobectomy: No current issues, but patient experiences shortness of breath with exertion, especially in humid conditions.
+MEDICATIONS:
+- it was kind of a , a tough spring with all the pollen and everything and , uh , we dropped my oldest daughter off at college and moved her into her dorm , so little stressful , little chaotic , in the heat of the summer , but so far , so good
+- it looks lower than it has in the past , so continue on the current medication
+- let's continue you on the prozac 20 milligrams a day and do you need a refill on that ?
 
-**Physical Examination & Vitals:**
-- Vitals: Blood pressure 120/80, which is an improvement from previous readings.
-- Cardiovascular: Slight 2/6 systolic ejection murmur, but otherwise normal heart sounds.
-- Respiratory: Lungs sound clear, with some pain to palpation of the sinuses.
-- Musculoskeletal: No lower extremity edema.
+ASSESSMENT AND PLAN:
+- so i , i know that the nurse went over the review of systems sheet with you , and , and you endorsed some nasal congestion from the pollen , but how about any shortness of breath , cough , muscle aches ?
+- [doctor] and in reviewing the results , it looks like your ekg is completely normal , so that's good
+- so , uh , i , i do n't think you need to follow up with the surgeon anymore
 
-**Assessment & Rationale:**
-1. Depression: Well-managed on current medication.
-2. Hypertension: Blood pressure is well-controlled, but patient needs to improve adherence to medication regimen.
-3. Prior Lobectomy: No current issues, but patient experiences shortness of breath with exertion.
-
-**Treatment Plan & Next Steps:**
-- Medication: Continue Prozac 20mg daily, with a refill ordered.
-- Lifestyle: Improve adherence to Norvasc medication regimen, especially on weekends.
-- Diagnostics: Order an echocardiogram to investigate the systolic ejection murmur, and routine blood work.
-- Follow-up: Patient will be contacted through the patient portal with results, and will follow up as needed.
-'''
+SOURCE: sample_4

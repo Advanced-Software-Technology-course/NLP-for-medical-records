@@ -1,0 +1,1617 @@
+[
+  {
+    "sample_name": "sample_1",
+    "groq_raw": "\n{\n  \"sample_name\": \"sample\",\n  \"reference\": {\n    \"symptoms\": [\"feeling out of sorts\", \"fatigue\", \"lightheadedness\", \"shortness of breath\", \"chest cramps\", \"cough\", \"bloating\"],\n    \"diagnoses\": [\"congestive heart failure\", \"hypertension\"],\n    \"medications\": [\"Lasix\", \"lisinopril 20 mg\"],\n    \"treatment_plans\": [\"increase Lasix to 80 mg daily\", \"monitor and record daily weight\", \"continue lisinopril 20 mg daily\", \"monitor and record blood pressures at home\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"feeling out of sorts\", \"lack of energy\", \"fatigue\", \"lightheadedness\", \"bloating\", \"shortness of breath\", \"chest cramps\"],\n    \"diagnoses\": [\"Congestive Heart Failure (CHF)\", \"Hypertension\"],\n    \"medications\": [\"lasix\", \"lisinopril 20 mg\"],\n    \"treatment_plans\": [\"increase lasix to 80 mg once a day\", \"weigh himself daily\", \"order an echocardiogram\", \"continue lisinopril 20 mg a day\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"feeling out of sorts\", \"fatigue\", \"lightheadedness\", \"shortness of breath\", \"bloating\"],\n    \"diagnoses\": [\"congestive heart failure\", \"hypertension\"],\n    \"medications\": [\"lasix\", \"lisinopril 20 mg\"],\n    \"treatment_plans\": [\"increase lasix\", \"continue lisinopril 20 mg daily\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.71,\n    \"diagnoses\": 1.0,\n    \"medications\": 1.0,\n    \"treatment_plans\": 0.5\n  },\n  \"clinical_completeness\": 0.79\n}\n",
+    "groq_parsed": {
+      "sample_name": "sample",
+      "reference": {
+        "symptoms": [
+          "feeling out of sorts",
+          "fatigue",
+          "lightheadedness",
+          "shortness of breath",
+          "chest cramps",
+          "cough",
+          "bloating"
+        ],
+        "diagnoses": [
+          "congestive heart failure",
+          "hypertension"
+        ],
+        "medications": [
+          "Lasix",
+          "lisinopril 20 mg"
+        ],
+        "treatment_plans": [
+          "increase Lasix to 80 mg daily",
+          "monitor and record daily weight",
+          "continue lisinopril 20 mg daily",
+          "monitor and record blood pressures at home"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "feeling out of sorts",
+          "lack of energy",
+          "fatigue",
+          "lightheadedness",
+          "bloating",
+          "shortness of breath",
+          "chest cramps"
+        ],
+        "diagnoses": [
+          "Congestive Heart Failure (CHF)",
+          "Hypertension"
+        ],
+        "medications": [
+          "lasix",
+          "lisinopril 20 mg"
+        ],
+        "treatment_plans": [
+          "increase lasix to 80 mg once a day",
+          "weigh himself daily",
+          "order an echocardiogram",
+          "continue lisinopril 20 mg a day"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "feeling out of sorts",
+          "fatigue",
+          "lightheadedness",
+          "shortness of breath",
+          "bloating"
+        ],
+        "diagnoses": [
+          "congestive heart failure",
+          "hypertension"
+        ],
+        "medications": [
+          "lasix",
+          "lisinopril 20 mg"
+        ],
+        "treatment_plans": [
+          "increase lasix",
+          "continue lisinopril 20 mg daily"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 71.0,
+        "diagnoses": 100.0,
+        "medications": 100.0,
+        "treatment_plans": 50.0
+      },
+      "clinical_completeness": 79.0
+    }
+  },
+  {
+    "sample_name": "sample_10",
+    "groq_raw": "\n{\n  \"sample_name\": \"clinical_note\",\n  \"reference\": {\n    \"symptoms\": [\"right wrist pain\", \"swelling\", \"numbness\", \"tingling\", \"pain on flexion and extension\", \"pain with radial deviation and lateral deviation\"],\n    \"diagnoses\": [\"right wrist Colles fracture\", \"ulnar styloid fracture\"],\n    \"medications\": [\"ibuprofen\", \"Ultram 50 mg\"],\n    \"treatment_plans\": [\"right wrist ORIF\", \"wearing a thumb spica brace\", \"physical therapy\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"wrist pain\", \"swelling\", \"bruising\", \"numbness\", \"tingling\", \"pain on flexion and extension\", \"pain with radial deviation and lateral movement\"],\n    \"diagnoses\": [\"Colles' fracture\", \"ulnar styloid fracture\"],\n    \"medications\": [\"ibuprofen\", \"Ultram 50mg\"],\n    \"treatment_plans\": [\"surgery\", \"wearing a brace\", \"physical therapy\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"wrist pain\", \"swelling\", \"numbness\", \"tingling\"],\n    \"diagnoses\": [\"Colles' fracture\", \"ulnar styloid fracture\"],\n    \"medications\": [\"ibuprofen\", \"Ultram 50 mg\"],\n    \"treatment_plans\": [\"surgery\", \"wearing a brace\", \"physical therapy\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.57,\n    \"diagnoses\": 1.0,\n    \"medications\": 1.0,\n    \"treatment_plans\": 0.75\n  },\n  \"clinical_completeness\": 0.83\n}\n",
+    "groq_parsed": {
+      "sample_name": "clinical_note",
+      "reference": {
+        "symptoms": [
+          "right wrist pain",
+          "swelling",
+          "numbness",
+          "tingling",
+          "pain on flexion and extension",
+          "pain with radial deviation and lateral deviation"
+        ],
+        "diagnoses": [
+          "right wrist Colles fracture",
+          "ulnar styloid fracture"
+        ],
+        "medications": [
+          "ibuprofen",
+          "Ultram 50 mg"
+        ],
+        "treatment_plans": [
+          "right wrist ORIF",
+          "wearing a thumb spica brace",
+          "physical therapy"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "wrist pain",
+          "swelling",
+          "bruising",
+          "numbness",
+          "tingling",
+          "pain on flexion and extension",
+          "pain with radial deviation and lateral movement"
+        ],
+        "diagnoses": [
+          "Colles' fracture",
+          "ulnar styloid fracture"
+        ],
+        "medications": [
+          "ibuprofen",
+          "Ultram 50mg"
+        ],
+        "treatment_plans": [
+          "surgery",
+          "wearing a brace",
+          "physical therapy"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "wrist pain",
+          "swelling",
+          "numbness",
+          "tingling"
+        ],
+        "diagnoses": [
+          "Colles' fracture",
+          "ulnar styloid fracture"
+        ],
+        "medications": [
+          "ibuprofen",
+          "Ultram 50 mg"
+        ],
+        "treatment_plans": [
+          "surgery",
+          "wearing a brace",
+          "physical therapy"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 56.99999999999999,
+        "diagnoses": 100.0,
+        "medications": 100.0,
+        "treatment_plans": 75.0
+      },
+      "clinical_completeness": 83.0
+    }
+  },
+  {
+    "sample_name": "sample_11",
+    "groq_raw": "\n{\n  \"sample_name\": \"sample\",\n  \"reference\": {\n    \"symptoms\": [\"right knee pain\", \"chest pain\", \"shortness of breath\", \"abdominal pain\"],\n    \"diagnoses\": [\"Right knee MCL strain\", \"Hypertension\"],\n    \"medications\": [\"ibuprofen 800 mg\", \"lisinopril 20 mg\"],\n    \"treatment_plans\": [\"knee brace\", \"ice the knee\", \"elevate his leg\", \"avoid strenuous activities for 2-3 weeks\", \"referral to see a nutritionist\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"right knee pain\", \"pain with flexion and extension\", \"swelling\", \"chest pain\", \"belly pain\", \"shortness of breath\"],\n    \"diagnoses\": [\"Medial Collateral Ligament (MCL) strain\", \"Hypertension\"],\n    \"medications\": [\"ibuprofen 800mg\", \"lisinopril 20mg\"],\n    \"treatment_plans\": [\"knee brace\", \"ice the knee\", \"elevate the leg\", \"avoid strenuous activities for a couple of weeks\", \"reduce sodium intake to <2300mg/day\", \"referral to nutrition\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"right knee pain\"],\n    \"diagnoses\": [\"MCL strain\", \"Hypertension\"],\n    \"medications\": [\"ibuprofen 800 mg\", \"lisinopril 20 mg\"],\n    \"treatment_plans\": [\"knee brace\", \"ice the knee\", \"elevate the leg\", \"referral to nutrition\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.25,\n    \"diagnoses\": 1.0,\n    \"medications\": 1.0,\n    \"treatment_plans\": 0.8\n  },\n  \"clinical_completeness\": 0.75\n}\n",
+    "groq_parsed": {
+      "sample_name": "sample",
+      "reference": {
+        "symptoms": [
+          "right knee pain",
+          "chest pain",
+          "shortness of breath",
+          "abdominal pain"
+        ],
+        "diagnoses": [
+          "Right knee MCL strain",
+          "Hypertension"
+        ],
+        "medications": [
+          "ibuprofen 800 mg",
+          "lisinopril 20 mg"
+        ],
+        "treatment_plans": [
+          "knee brace",
+          "ice the knee",
+          "elevate his leg",
+          "avoid strenuous activities for 2-3 weeks",
+          "referral to see a nutritionist"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "right knee pain",
+          "pain with flexion and extension",
+          "swelling",
+          "chest pain",
+          "belly pain",
+          "shortness of breath"
+        ],
+        "diagnoses": [
+          "Medial Collateral Ligament (MCL) strain",
+          "Hypertension"
+        ],
+        "medications": [
+          "ibuprofen 800mg",
+          "lisinopril 20mg"
+        ],
+        "treatment_plans": [
+          "knee brace",
+          "ice the knee",
+          "elevate the leg",
+          "avoid strenuous activities for a couple of weeks",
+          "reduce sodium intake to <2300mg/day",
+          "referral to nutrition"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "right knee pain"
+        ],
+        "diagnoses": [
+          "MCL strain",
+          "Hypertension"
+        ],
+        "medications": [
+          "ibuprofen 800 mg",
+          "lisinopril 20 mg"
+        ],
+        "treatment_plans": [
+          "knee brace",
+          "ice the knee",
+          "elevate the leg",
+          "referral to nutrition"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 25.0,
+        "diagnoses": 100.0,
+        "medications": 100.0,
+        "treatment_plans": 80.0
+      },
+      "clinical_completeness": 75.0
+    }
+  },
+  {
+    "sample_name": "sample_12",
+    "groq_raw": "\n{\n  \"sample_name\": \"Left Shoulder Pain\",\n  \"reference\": {\n    \"symptoms\": [\"left shoulder pain\", \"intermittent aches and pains\", \"difficulty reaching or lifting objects\", \"unbearable pain when lying on left shoulder\"],\n    \"diagnoses\": [\"rotator cuff tendinopathy\"],\n    \"medications\": [\"2 Extra Strength Tylenol every 6 to 8 hours\"],\n    \"treatment_plans\": [\"MRI of the left shoulder\", \"formal physical therapy for 6-8 weeks\", \"steroid injection if symptoms do not improve\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"constant left shoulder pain\", \"worsening with movement\", \"unbearable when lying on affected shoulder\"],\n    \"diagnoses\": [\"rotator cuff tendinopathy\"],\n    \"medications\": [\"Tylenol for pain management\"],\n    \"treatment_plans\": [\"MRI of the left shoulder\", \"physical therapy for 6-8 weeks\", \"steroid injection if symptoms do not improve\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"left shoulder pain\"],\n    \"diagnoses\": [\"rotator cuff tendinopathy\"],\n    \"medications\": [\"Tylenol\"],\n    \"treatment_plans\": [\"MRI of the left shoulder\", \"physical therapy\", \"steroid injection if symptoms do not improve\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.25,\n    \"diagnoses\": 1.0,\n    \"medications\": 1.0,\n    \"treatment_plans\": 0.75\n  },\n  \"clinical_completeness\": 0.75\n}\n",
+    "groq_parsed": {
+      "sample_name": "Left Shoulder Pain",
+      "reference": {
+        "symptoms": [
+          "left shoulder pain",
+          "intermittent aches and pains",
+          "difficulty reaching or lifting objects",
+          "unbearable pain when lying on left shoulder"
+        ],
+        "diagnoses": [
+          "rotator cuff tendinopathy"
+        ],
+        "medications": [
+          "2 Extra Strength Tylenol every 6 to 8 hours"
+        ],
+        "treatment_plans": [
+          "MRI of the left shoulder",
+          "formal physical therapy for 6-8 weeks",
+          "steroid injection if symptoms do not improve"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "constant left shoulder pain",
+          "worsening with movement",
+          "unbearable when lying on affected shoulder"
+        ],
+        "diagnoses": [
+          "rotator cuff tendinopathy"
+        ],
+        "medications": [
+          "Tylenol for pain management"
+        ],
+        "treatment_plans": [
+          "MRI of the left shoulder",
+          "physical therapy for 6-8 weeks",
+          "steroid injection if symptoms do not improve"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "left shoulder pain"
+        ],
+        "diagnoses": [
+          "rotator cuff tendinopathy"
+        ],
+        "medications": [
+          "Tylenol"
+        ],
+        "treatment_plans": [
+          "MRI of the left shoulder",
+          "physical therapy",
+          "steroid injection if symptoms do not improve"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 25.0,
+        "diagnoses": 100.0,
+        "medications": 100.0,
+        "treatment_plans": 75.0
+      },
+      "clinical_completeness": 75.0
+    }
+  },
+  {
+    "sample_name": "sample_13",
+    "groq_raw": "\n{\n  \"sample_name\": \"Andrea Barnes\",\n  \"reference\": {\n    \"symptoms\": [\"left knee pain\", \"sudden instability\", \"deep patella pain\"],\n    \"diagnoses\": [\"left knee pain\", \"hypertension\", \"diabetes mellitus type 2\"],\n    \"medications\": [\"amlodipine\", \"lisinopril 20 mg\", \"hydrochlorothiazide\", \"metformin\", \"Farxiga\"],\n    \"treatment_plans\": [\"meloxicam 15 mg once daily\", \"physical therapy\", \"echocardiogram\", \"lipid panel\", \"hemoglobin A1c\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"left knee pain\", \"knee instability\", \"internal kneecap pain\"],\n    \"diagnoses\": [\"left knee pain\", \"hypertension\", \"diabetes mellitus\"],\n    \"medications\": [\"Farxiga\", \"Amlodipine\", \"Lisinopril\", \"Hydrochlorothiazide\", \"Metformin\", \"meloxicam 15mg\"],\n    \"treatment_plans\": [\"meloxicam 15mg daily\", \"physical therapy\", \"echocardiogram\", \"lipid panel\", \"hemoglobin A1c\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"left knee pain\"],\n    \"diagnoses\": [\"left knee pain\", \"hypertension\", \"diabetes mellitus\"],\n    \"medications\": [\"amlodipine\", \"lisinopril\", \"hydrochlorothiazide\", \"metformin\", \"meloxicam 15mg\"],\n    \"treatment_plans\": [\"meloxicam 15 mg once daily\", \"physical therapy\", \"echocardiogram\", \"lipid panel\", \"hemoglobin A1c\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.33,\n    \"diagnoses\": 1.0,\n    \"medications\": 0.8,\n    \"treatment_plans\": 1.0\n  },\n  \"clinical_completeness\": 0.83\n}\n",
+    "groq_parsed": {
+      "sample_name": "Andrea Barnes",
+      "reference": {
+        "symptoms": [
+          "left knee pain",
+          "sudden instability",
+          "deep patella pain"
+        ],
+        "diagnoses": [
+          "left knee pain",
+          "hypertension",
+          "diabetes mellitus type 2"
+        ],
+        "medications": [
+          "amlodipine",
+          "lisinopril 20 mg",
+          "hydrochlorothiazide",
+          "metformin",
+          "Farxiga"
+        ],
+        "treatment_plans": [
+          "meloxicam 15 mg once daily",
+          "physical therapy",
+          "echocardiogram",
+          "lipid panel",
+          "hemoglobin A1c"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "left knee pain",
+          "knee instability",
+          "internal kneecap pain"
+        ],
+        "diagnoses": [
+          "left knee pain",
+          "hypertension",
+          "diabetes mellitus"
+        ],
+        "medications": [
+          "Farxiga",
+          "Amlodipine",
+          "Lisinopril",
+          "Hydrochlorothiazide",
+          "Metformin",
+          "meloxicam 15mg"
+        ],
+        "treatment_plans": [
+          "meloxicam 15mg daily",
+          "physical therapy",
+          "echocardiogram",
+          "lipid panel",
+          "hemoglobin A1c"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "left knee pain"
+        ],
+        "diagnoses": [
+          "left knee pain",
+          "hypertension",
+          "diabetes mellitus"
+        ],
+        "medications": [
+          "amlodipine",
+          "lisinopril",
+          "hydrochlorothiazide",
+          "metformin",
+          "meloxicam 15mg"
+        ],
+        "treatment_plans": [
+          "meloxicam 15 mg once daily",
+          "physical therapy",
+          "echocardiogram",
+          "lipid panel",
+          "hemoglobin A1c"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 33.0,
+        "diagnoses": 100.0,
+        "medications": 80.0,
+        "treatment_plans": 100.0
+      },
+      "clinical_completeness": 83.0
+    }
+  },
+  {
+    "sample_name": "sample_14",
+    "groq_raw": "\n{\n  \"sample_name\": \"lung_cancer_followup\",\n  \"reference\": {\n    \"symptoms\": [\"fatigue\", \"decrease in appetite\", \"sore throat\", \"dry cough\"],\n    \"diagnoses\": [\"stage III non-small cell lung cancer\", \"radiation pneumonitis\", \"painful swallowing\"],\n    \"medications\": [\"Cisplatin\", \"etoposide\", \"prednisone 40 mg\", \"lidocaine viscous solution\"],\n    \"treatment_plans\": [\"continue chemotherapy\", \"continue radiation at 45 Gy\", \"prescribe prednisone for radiation pneumonitis\", \"prescribe lidocaine for esophageal inflammation\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"dry cough\", \"sore throat\", \"fatigue\"],\n    \"diagnoses\": [\"stage three non-small cell lung cancer\", \"radiation pneumonitis\", \"esophageal inflammation\"],\n    \"medications\": [\"Cisplatin\", \"Etoposide\", \"Prednisone 40 mg\", \"Lidocaine\"],\n    \"treatment_plans\": [\"continue chemotherapy\", \"continue radiation at 45 Gy\", \"prescribe Prednisone for radiation pneumonitis\", \"prescribe Lidocaine for esophageal inflammation\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"dry cough\", \"sore throat\", \"fatigue\"],\n    \"diagnoses\": [\"stage III non-small cell lung cancer\", \"radiation pneumonitis\"],\n    \"medications\": [\"Cisplatin\", \"Etoposide\", \"Prednisone 40 mg\", \"Lidocaine\"],\n    \"treatment_plans\": [\"continue chemotherapy\", \"continue radiation at 45 Gy\", \"prescribe Prednisone for radiation pneumonitis\", \"prescribe Lidocaine for esophageal inflammation\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.75,\n    \"diagnoses\": 0.67,\n    \"medications\": 1.0,\n    \"treatment_plans\": 1.0\n  },\n  \"clinical_completeness\": 0.83\n}\n",
+    "groq_parsed": {
+      "sample_name": "lung_cancer_followup",
+      "reference": {
+        "symptoms": [
+          "fatigue",
+          "decrease in appetite",
+          "sore throat",
+          "dry cough"
+        ],
+        "diagnoses": [
+          "stage III non-small cell lung cancer",
+          "radiation pneumonitis",
+          "painful swallowing"
+        ],
+        "medications": [
+          "Cisplatin",
+          "etoposide",
+          "prednisone 40 mg",
+          "lidocaine viscous solution"
+        ],
+        "treatment_plans": [
+          "continue chemotherapy",
+          "continue radiation at 45 Gy",
+          "prescribe prednisone for radiation pneumonitis",
+          "prescribe lidocaine for esophageal inflammation"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "dry cough",
+          "sore throat",
+          "fatigue"
+        ],
+        "diagnoses": [
+          "stage three non-small cell lung cancer",
+          "radiation pneumonitis",
+          "esophageal inflammation"
+        ],
+        "medications": [
+          "Cisplatin",
+          "Etoposide",
+          "Prednisone 40 mg",
+          "Lidocaine"
+        ],
+        "treatment_plans": [
+          "continue chemotherapy",
+          "continue radiation at 45 Gy",
+          "prescribe Prednisone for radiation pneumonitis",
+          "prescribe Lidocaine for esophageal inflammation"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "dry cough",
+          "sore throat",
+          "fatigue"
+        ],
+        "diagnoses": [
+          "stage III non-small cell lung cancer",
+          "radiation pneumonitis"
+        ],
+        "medications": [
+          "Cisplatin",
+          "Etoposide",
+          "Prednisone 40 mg",
+          "Lidocaine"
+        ],
+        "treatment_plans": [
+          "continue chemotherapy",
+          "continue radiation at 45 Gy",
+          "prescribe Prednisone for radiation pneumonitis",
+          "prescribe Lidocaine for esophageal inflammation"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 75.0,
+        "diagnoses": 67.0,
+        "medications": 100.0,
+        "treatment_plans": 100.0
+      },
+      "clinical_completeness": 83.0
+    }
+  },
+  {
+    "sample_name": "sample_15",
+    "groq_raw": "\n{\n  \"sample_name\": \"Kyle Lee\",\n  \"reference\": {\n    \"symptoms\": [\"frequent infections\", \"colds\", \"low immunoglobulin A level\"],\n    \"diagnoses\": [\"IgA deficiency\", \"type 2 diabetes\"],\n    \"medications\": [\"metformin\"],\n    \"treatment_plans\": [\"obtain additional blood work\", \"report IgA deficiency for blood transfusions\", \"monitor for lingering infections or abdominal changes\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"frequent infections\", \"colds\", \"low immunoglobulin A level\"],\n    \"diagnoses\": [\"IgA deficiency\", \"type 2 diabetes\"],\n    \"medications\": [\"metformin\"],\n    \"treatment_plans\": [\"additional blood work\", \"lifestyle awareness\", \"follow-up\", \"patient education\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"frequent infections\", \"colds\", \"low immunoglobulin A level\"],\n    \"diagnoses\": [\"IgA deficiency\", \"type 2 diabetes\"],\n    \"medications\": [\"metformin\"],\n    \"treatment_plans\": [\"obtain additional blood work\", \"patient education\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 1.0,\n    \"diagnoses\": 1.0,\n    \"medications\": 1.0,\n    \"treatment_plans\": 0.67\n  },\n  \"clinical_completeness\": 0.86\n}\n",
+    "groq_parsed": {
+      "sample_name": "Kyle Lee",
+      "reference": {
+        "symptoms": [
+          "frequent infections",
+          "colds",
+          "low immunoglobulin A level"
+        ],
+        "diagnoses": [
+          "IgA deficiency",
+          "type 2 diabetes"
+        ],
+        "medications": [
+          "metformin"
+        ],
+        "treatment_plans": [
+          "obtain additional blood work",
+          "report IgA deficiency for blood transfusions",
+          "monitor for lingering infections or abdominal changes"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "frequent infections",
+          "colds",
+          "low immunoglobulin A level"
+        ],
+        "diagnoses": [
+          "IgA deficiency",
+          "type 2 diabetes"
+        ],
+        "medications": [
+          "metformin"
+        ],
+        "treatment_plans": [
+          "additional blood work",
+          "lifestyle awareness",
+          "follow-up",
+          "patient education"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "frequent infections",
+          "colds",
+          "low immunoglobulin A level"
+        ],
+        "diagnoses": [
+          "IgA deficiency",
+          "type 2 diabetes"
+        ],
+        "medications": [
+          "metformin"
+        ],
+        "treatment_plans": [
+          "obtain additional blood work",
+          "patient education"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 100.0,
+        "diagnoses": 100.0,
+        "medications": 100.0,
+        "treatment_plans": 67.0
+      },
+      "clinical_completeness": 86.0
+    }
+  },
+  {
+    "sample_name": "sample_16",
+    "groq_raw": "\n{\n  \"sample_name\": \"elbow_pain\",\n  \"reference\": {\n    \"symptoms\": [\"right elbow pain\", \"pain in the inside of the elbow\", \"radiation into the forearm\", \"pain with lifting objects\", \"pain with pronation of the forearm\", \"pain with resistance against flexion of the wrist\"],\n    \"diagnoses\": [\"right medial epicondylitis\"],\n    \"medications\": [\"ibuprofen\", \"ibuprofen 600 mg\"],\n    \"treatment_plans\": [\"wear a sling during the day\", \"ice the elbow for 20 minutes, 3 times daily\", \"rest the elbow\", \"avoid doing any pottery for the next couple of weeks\", \"follow up in 1 week\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"right elbow pain\", \"radiation to the forearm\", \"pain with lifting\", \"pain at night\"],\n    \"diagnoses\": [\"medial epicondylitis\"],\n    \"medications\": [\"ibuprofen 600mg\"],\n    \"treatment_plans\": [\"wear a sling while awake\", \"apply ice to the elbow for 20 minutes, 3 times a day\", \"avoid pottery work for 2 weeks\", \"follow-up in 1 week\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"right elbow pain\", \"radiation to the forearm\"],\n    \"diagnoses\": [\"medial epicondylitis\"],\n    \"medications\": [\"ibuprofen 600mg\"],\n    \"treatment_plans\": [\"wear a sling\", \"apply ice to the elbow\", \"avoid pottery work\", \"follow-up in 1 week\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.33,\n    \"diagnoses\": 1.0,\n    \"medications\": 1.0,\n    \"treatment_plans\": 0.8\n  },\n  \"clinical_completeness\": 0.83\n}\n",
+    "groq_parsed": {
+      "sample_name": "elbow_pain",
+      "reference": {
+        "symptoms": [
+          "right elbow pain",
+          "pain in the inside of the elbow",
+          "radiation into the forearm",
+          "pain with lifting objects",
+          "pain with pronation of the forearm",
+          "pain with resistance against flexion of the wrist"
+        ],
+        "diagnoses": [
+          "right medial epicondylitis"
+        ],
+        "medications": [
+          "ibuprofen",
+          "ibuprofen 600 mg"
+        ],
+        "treatment_plans": [
+          "wear a sling during the day",
+          "ice the elbow for 20 minutes, 3 times daily",
+          "rest the elbow",
+          "avoid doing any pottery for the next couple of weeks",
+          "follow up in 1 week"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "right elbow pain",
+          "radiation to the forearm",
+          "pain with lifting",
+          "pain at night"
+        ],
+        "diagnoses": [
+          "medial epicondylitis"
+        ],
+        "medications": [
+          "ibuprofen 600mg"
+        ],
+        "treatment_plans": [
+          "wear a sling while awake",
+          "apply ice to the elbow for 20 minutes, 3 times a day",
+          "avoid pottery work for 2 weeks",
+          "follow-up in 1 week"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "right elbow pain",
+          "radiation to the forearm"
+        ],
+        "diagnoses": [
+          "medial epicondylitis"
+        ],
+        "medications": [
+          "ibuprofen 600mg"
+        ],
+        "treatment_plans": [
+          "wear a sling",
+          "apply ice to the elbow",
+          "avoid pottery work",
+          "follow-up in 1 week"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 33.0,
+        "diagnoses": 100.0,
+        "medications": 100.0,
+        "treatment_plans": 80.0
+      },
+      "clinical_completeness": 83.0
+    }
+  },
+  {
+    "sample_name": "sample_17",
+    "groq_raw": "\n{\n  \"sample_name\": \"sample_17\",\n  \"reference\": {\n    \"symptoms\": [\"chest pain\", \"shortness of breath\", \"bilateral ankle swelling\"],\n    \"diagnoses\": [\"CHF\", \"Hypertension\", \"Systolic ejection murmur\"],\n    \"medications\": [\"Bumex 2 mg\", \"Cozaar 100 mg\", \"Norvasc 5 mg\"],\n    \"treatment_plans\": [\"follow dietary restrictions\", \"take medication consistently\", \"purchase a scale to weigh himself daily\", \"purchase a blood pressure cuff\", \"track blood pressures\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"chest pain\", \"shortness of breath\", \"bilateral ankle swelling\"],\n    \"diagnoses\": [\"CHF\", \"Hypertension\"],\n    \"medications\": [\"Bumex 2 mg\", \"Cozaar 100 mg\", \"Norvasc 5 mg\"],\n    \"treatment_plans\": [\"continue Bumex 2 mg once daily\", \"continue Cozaar 100 mg daily\", \"continue Norvasc 5 mg once daily\", \"weigh himself daily\", \"call if gains 3 pounds in 2 days\", \"see a nutritionist\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"chest pain\", \"shortness of breath\"],\n    \"diagnoses\": [\"CHF\", \"Hypertension\"],\n    \"medications\": [\"Bumex 2 mg\", \"Cozaar 100 mg\", \"Norvasc 5 mg\"],\n    \"treatment_plans\": [\"continue Bumex 2 mg once daily\", \"continue Cozaar 100 mg daily\", \"continue Norvasc 5 mg once daily\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.67,\n    \"diagnoses\": 0.67,\n    \"medications\": 1.0,\n    \"treatment_plans\": 0.6\n  },\n  \"clinical_completeness\": 0.73\n}\n",
+    "groq_parsed": {
+      "sample_name": "sample_17",
+      "reference": {
+        "symptoms": [
+          "chest pain",
+          "shortness of breath",
+          "bilateral ankle swelling"
+        ],
+        "diagnoses": [
+          "CHF",
+          "Hypertension",
+          "Systolic ejection murmur"
+        ],
+        "medications": [
+          "Bumex 2 mg",
+          "Cozaar 100 mg",
+          "Norvasc 5 mg"
+        ],
+        "treatment_plans": [
+          "follow dietary restrictions",
+          "take medication consistently",
+          "purchase a scale to weigh himself daily",
+          "purchase a blood pressure cuff",
+          "track blood pressures"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "chest pain",
+          "shortness of breath",
+          "bilateral ankle swelling"
+        ],
+        "diagnoses": [
+          "CHF",
+          "Hypertension"
+        ],
+        "medications": [
+          "Bumex 2 mg",
+          "Cozaar 100 mg",
+          "Norvasc 5 mg"
+        ],
+        "treatment_plans": [
+          "continue Bumex 2 mg once daily",
+          "continue Cozaar 100 mg daily",
+          "continue Norvasc 5 mg once daily",
+          "weigh himself daily",
+          "call if gains 3 pounds in 2 days",
+          "see a nutritionist"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "chest pain",
+          "shortness of breath"
+        ],
+        "diagnoses": [
+          "CHF",
+          "Hypertension"
+        ],
+        "medications": [
+          "Bumex 2 mg",
+          "Cozaar 100 mg",
+          "Norvasc 5 mg"
+        ],
+        "treatment_plans": [
+          "continue Bumex 2 mg once daily",
+          "continue Cozaar 100 mg daily",
+          "continue Norvasc 5 mg once daily"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 67.0,
+        "diagnoses": 67.0,
+        "medications": 100.0,
+        "treatment_plans": 60.0
+      },
+      "clinical_completeness": 73.0
+    }
+  },
+  {
+    "sample_name": "sample_18",
+    "groq_raw": "\n{\n  \"sample_name\": \"sample_18\",\n  \"reference\": {\n    \"symptoms\": [\"right-sided abdominal pain\", \"nausea\", \"dysuria\", \"dark colored urine\"],\n    \"diagnoses\": [\"kidney stones\", \"acute nephrolithiasis\"],\n    \"medications\": [\"Tylenol\", \"oxycodone 5 mg\"],\n    \"treatment_plans\": [\"push fluids\", \"strainer to pass the stone\", \"basic metabolic panel\", \"urinalysis\", \"urine culture\", \"lithotripsy\", \"ureteroscopy\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"sharp pain on the right side of the abdomen\", \"pain in the lower abdomen\", \"pain in the groin\", \"burning sensation while urinating\", \"nausea\"],\n    \"diagnoses\": [\"kidney stone\", \"acute nephrolithiasis\"],\n    \"medications\": [\"Tylenol\", \"oxycodone 5 mg\"],\n    \"treatment_plans\": [\"push fluids\", \"strainer to pass the stone\", \"basic metabolic panel\", \"urinalysis\", \"urine culture\", \"lithotripsy\", \"ureteroscopy\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"right-sided abdominal pain\", \"nausea\"],\n    \"diagnoses\": [\"kidney stones\", \"acute nephrolithiasis\"],\n    \"medications\": [\"Tylenol\", \"oxycodone 5 mg\"],\n    \"treatment_plans\": [\"push fluids\", \"strainer to pass the stone\", \"basic metabolic panel\", \"urinalysis\", \"urine culture\", \"lithotripsy\", \"ureteroscopy\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.5,\n    \"diagnoses\": 1.0,\n    \"medications\": 1.0,\n    \"treatment_plans\": 1.0\n  },\n  \"clinical_completeness\": 0.86\n}\n",
+    "groq_parsed": {
+      "sample_name": "sample_18",
+      "reference": {
+        "symptoms": [
+          "right-sided abdominal pain",
+          "nausea",
+          "dysuria",
+          "dark colored urine"
+        ],
+        "diagnoses": [
+          "kidney stones",
+          "acute nephrolithiasis"
+        ],
+        "medications": [
+          "Tylenol",
+          "oxycodone 5 mg"
+        ],
+        "treatment_plans": [
+          "push fluids",
+          "strainer to pass the stone",
+          "basic metabolic panel",
+          "urinalysis",
+          "urine culture",
+          "lithotripsy",
+          "ureteroscopy"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "sharp pain on the right side of the abdomen",
+          "pain in the lower abdomen",
+          "pain in the groin",
+          "burning sensation while urinating",
+          "nausea"
+        ],
+        "diagnoses": [
+          "kidney stone",
+          "acute nephrolithiasis"
+        ],
+        "medications": [
+          "Tylenol",
+          "oxycodone 5 mg"
+        ],
+        "treatment_plans": [
+          "push fluids",
+          "strainer to pass the stone",
+          "basic metabolic panel",
+          "urinalysis",
+          "urine culture",
+          "lithotripsy",
+          "ureteroscopy"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "right-sided abdominal pain",
+          "nausea"
+        ],
+        "diagnoses": [
+          "kidney stones",
+          "acute nephrolithiasis"
+        ],
+        "medications": [
+          "Tylenol",
+          "oxycodone 5 mg"
+        ],
+        "treatment_plans": [
+          "push fluids",
+          "strainer to pass the stone",
+          "basic metabolic panel",
+          "urinalysis",
+          "urine culture",
+          "lithotripsy",
+          "ureteroscopy"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 50.0,
+        "diagnoses": 100.0,
+        "medications": 100.0,
+        "treatment_plans": 100.0
+      },
+      "clinical_completeness": 86.0
+    }
+  },
+  {
+    "sample_name": "sample_19",
+    "groq_raw": "\n{\n  \"sample_name\": \"sample_19\",\n  \"reference\": {\n    \"symptoms\": [\n      \"non-healing ulcer on his right foot\",\n      \"burning, stinging, and throbbing sensation\",\n      \"blister on the pad of the plantar aspect of his foot\",\n      \"unpleasant smell and yellow drainage\",\n      \"chills\",\n      \"fever of 99.7 degrees Fahrenheit\",\n      \"cramping in his calf muscle\",\n      \"burning red streak that was coming up the front part of his ankle\",\n      \"coughing\",\n      \"shortness of breath with ambulation\"\n    ],\n    \"diagnoses\": [\n      \"diabetic foot ulcer\",\n      \"diabetes\",\n      \"diabetic neuropathy\"\n    ],\n    \"medications\": [\n      \"antibiotics (10-day course)\"\n    ],\n    \"treatment_plans\": [\n      \"debridement of the wound\",\n      \"venous ultrasound to check blood supply for the wound\",\n      \"continue antibiotics\",\n      \"follow up with endocrinologist to monitor blood sugar\"\n    ]\n  },\n  \"generated\": {\n    \"symptoms\": [\n      \"nonhealing foot ulcer on his right foot\",\n      \"stinging and burning sensation\",\n      \"blister on the pad of the bottom of his foot\",\n      \"foul smell and yellow drainage\",\n      \"chills\",\n      \"fever\",\n      \"cramping in his calf muscle\",\n      \"red streak coming up the front part of his ankle\",\n      \"coughing\",\n      \"shortness of breath with ambulation\"\n    ],\n    \"diagnoses\": [\n      \"diabetic foot ulcer\",\n      \"diabetes\",\n      \"diabetic neuropathy\"\n    ],\n    \"medications\": [\n      \"antibiotics (10-day course)\"\n    ],\n    \"treatment_plans\": [\n      \"debridement of the wound\",\n      \"culture and potential change in antibiotic therapy\",\n      \"continue antibiotics\",\n      \"follow up with endocrinologist to monitor blood sugar\"\n    ]\n  },\n  \"matched\": {\n    \"symptoms\": [\n      \"non-healing ulcer on his right foot\",\n      \"burning, stinging, and throbbing sensation\",\n      \"blister on the pad of the plantar aspect of his foot\",\n      \"unpleasant smell and yellow drainage\",\n      \"chills\",\n      \"fever\",\n      \"cramping in his calf muscle\",\n      \"burning red streak that was coming up the front part of his ankle\",\n      \"coughing\",\n      \"shortness of breath with ambulation\"\n    ],\n    \"diagnoses\": [\n      \"diabetic foot ulcer\",\n      \"diabetes\",\n      \"diabetic neuropathy\"\n    ],\n    \"medications\": [\n      \"antibiotics (10-day course)\"\n    ],\n    \"treatment_plans\": [\n      \"debridement of the wound\",\n      \"continue antibiotics\",\n      \"follow up with endocrinologist to monitor blood sugar\"\n    ]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 1.0,\n    \"diagnoses\": 1.0,\n    \"medications\": 1.0,\n    \"treatment_plans\": 0.75\n  },\n  \"clinical_completeness\": 0.92\n}\n",
+    "groq_parsed": {
+      "sample_name": "sample_19",
+      "reference": {
+        "symptoms": [
+          "non-healing ulcer on his right foot",
+          "burning, stinging, and throbbing sensation",
+          "blister on the pad of the plantar aspect of his foot",
+          "unpleasant smell and yellow drainage",
+          "chills",
+          "fever of 99.7 degrees Fahrenheit",
+          "cramping in his calf muscle",
+          "burning red streak that was coming up the front part of his ankle",
+          "coughing",
+          "shortness of breath with ambulation"
+        ],
+        "diagnoses": [
+          "diabetic foot ulcer",
+          "diabetes",
+          "diabetic neuropathy"
+        ],
+        "medications": [
+          "antibiotics (10-day course)"
+        ],
+        "treatment_plans": [
+          "debridement of the wound",
+          "venous ultrasound to check blood supply for the wound",
+          "continue antibiotics",
+          "follow up with endocrinologist to monitor blood sugar"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "nonhealing foot ulcer on his right foot",
+          "stinging and burning sensation",
+          "blister on the pad of the bottom of his foot",
+          "foul smell and yellow drainage",
+          "chills",
+          "fever",
+          "cramping in his calf muscle",
+          "red streak coming up the front part of his ankle",
+          "coughing",
+          "shortness of breath with ambulation"
+        ],
+        "diagnoses": [
+          "diabetic foot ulcer",
+          "diabetes",
+          "diabetic neuropathy"
+        ],
+        "medications": [
+          "antibiotics (10-day course)"
+        ],
+        "treatment_plans": [
+          "debridement of the wound",
+          "culture and potential change in antibiotic therapy",
+          "continue antibiotics",
+          "follow up with endocrinologist to monitor blood sugar"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "non-healing ulcer on his right foot",
+          "burning, stinging, and throbbing sensation",
+          "blister on the pad of the plantar aspect of his foot",
+          "unpleasant smell and yellow drainage",
+          "chills",
+          "fever",
+          "cramping in his calf muscle",
+          "burning red streak that was coming up the front part of his ankle",
+          "coughing",
+          "shortness of breath with ambulation"
+        ],
+        "diagnoses": [
+          "diabetic foot ulcer",
+          "diabetes",
+          "diabetic neuropathy"
+        ],
+        "medications": [
+          "antibiotics (10-day course)"
+        ],
+        "treatment_plans": [
+          "debridement of the wound",
+          "continue antibiotics",
+          "follow up with endocrinologist to monitor blood sugar"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 100.0,
+        "diagnoses": 100.0,
+        "medications": 100.0,
+        "treatment_plans": 75.0
+      },
+      "clinical_completeness": 92.0
+    }
+  },
+  {
+    "sample_name": "sample_2",
+    "groq_raw": "\n{\n  \"sample_name\": \"knee_pain\",\n  \"reference\": {\n    \"symptoms\": [\"right knee pain\", \"pain with flexion\", \"tenderness over the medial joint line\", \"pain with valgus stress\"],\n    \"diagnoses\": [\"atrial fibrillation\", \"right knee acute medial meniscus sprain\"],\n    \"medications\": [\"Ibuprofen\", \"digoxin\", \"Motrin 800 mg\"],\n    \"treatment_plans\": [\"knee brace\", \"crutches\", \"follow up in 1 week\", \"MRI if not better\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"right knee pain\", \"pain on the inside of the knee\", \"pain with bending and twisting the knee\", \"tender to palpation over the medial portion of the knee\", \"pain with flexion and valgus stress\"],\n    \"diagnoses\": [\"atrial fibrillation\", \"acute medial meniscus sprain/strain\"],\n    \"medications\": [\"ibuprofen\", \"digoxin\", \"Motrin 800mg\"],\n    \"treatment_plans\": [\"knee brace\", \"crutches\", \"follow up in a week\", \"MRI if symptoms do not improve\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"right knee pain\", \"pain with flexion\", \"pain with valgus stress\"],\n    \"diagnoses\": [\"atrial fibrillation\", \"acute medial meniscus sprain/strain\"],\n    \"medications\": [\"Ibuprofen\", \"digoxin\", \"Motrin 800 mg\"],\n    \"treatment_plans\": [\"knee brace\", \"crutches\", \"follow up in 1 week\", \"MRI if not better\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.5,\n    \"diagnoses\": 1.0,\n    \"medications\": 1.0,\n    \"treatment_plans\": 1.0\n  },\n  \"clinical_completeness\": 0.83\n}\n",
+    "groq_parsed": {
+      "sample_name": "knee_pain",
+      "reference": {
+        "symptoms": [
+          "right knee pain",
+          "pain with flexion",
+          "tenderness over the medial joint line",
+          "pain with valgus stress"
+        ],
+        "diagnoses": [
+          "atrial fibrillation",
+          "right knee acute medial meniscus sprain"
+        ],
+        "medications": [
+          "Ibuprofen",
+          "digoxin",
+          "Motrin 800 mg"
+        ],
+        "treatment_plans": [
+          "knee brace",
+          "crutches",
+          "follow up in 1 week",
+          "MRI if not better"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "right knee pain",
+          "pain on the inside of the knee",
+          "pain with bending and twisting the knee",
+          "tender to palpation over the medial portion of the knee",
+          "pain with flexion and valgus stress"
+        ],
+        "diagnoses": [
+          "atrial fibrillation",
+          "acute medial meniscus sprain/strain"
+        ],
+        "medications": [
+          "ibuprofen",
+          "digoxin",
+          "Motrin 800mg"
+        ],
+        "treatment_plans": [
+          "knee brace",
+          "crutches",
+          "follow up in a week",
+          "MRI if symptoms do not improve"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "right knee pain",
+          "pain with flexion",
+          "pain with valgus stress"
+        ],
+        "diagnoses": [
+          "atrial fibrillation",
+          "acute medial meniscus sprain/strain"
+        ],
+        "medications": [
+          "Ibuprofen",
+          "digoxin",
+          "Motrin 800 mg"
+        ],
+        "treatment_plans": [
+          "knee brace",
+          "crutches",
+          "follow up in 1 week",
+          "MRI if not better"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 50.0,
+        "diagnoses": 100.0,
+        "medications": 100.0,
+        "treatment_plans": 100.0
+      },
+      "clinical_completeness": 83.0
+    }
+  },
+  {
+    "sample_name": "sample_20",
+    "groq_raw": "\n{\n  \"sample_name\": \"sample_20\",\n  \"reference\": {\n    \"symptoms\": [\"tick bite\", \"general ill feelings\", \"warmth on the right knee\", \"headache\"],\n    \"diagnoses\": [\"arthritis\", \"hypertension\", \"diabetes type 2\", \"possible Lyme disease\"],\n    \"medications\": [\"lisinopril 20 mg\", \"metformin 1000 mg twice daily\", \"doxycycline 100 mg twice a day\"],\n    \"treatment_plans\": [\"blood testing for Lyme disease\", \"continue lisinopril\", \"continue metformin\", \"hemoglobin A1c test\", \"lipid panel\", \"basic metabolic panel\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"tick bite\", \"warmth on the right knee\", \"headache\", \"general ill feelings\"],\n    \"diagnoses\": [\"possible Lyme disease\", \"hypertension\", \"diabetes\"],\n    \"medications\": [\"doxycycline 100 mg twice a day\", \"lisinopril 20 mg once a day\", \"metformin 1000 mg twice a day\"],\n    \"treatment_plans\": [\"blood tests for Lyme disease\", \"continue lisinopril\", \"continue metformin\", \"hemoglobin A1c test\", \"lipid panel\", \"basic metabolic panel\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"tick bite\", \"headache\", \"general ill feelings\"],\n    \"diagnoses\": [\"hypertension\", \"diabetes\"],\n    \"medications\": [\"lisinopril 20 mg\", \"metformin 1000 mg twice daily\", \"doxycycline 100 mg twice a day\"],\n    \"treatment_plans\": [\"continue lisinopril\", \"continue metformin\", \"hemoglobin A1c test\", \"lipid panel\", \"basic metabolic panel\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.75,\n    \"diagnoses\": 0.5,\n    \"medications\": 1.0,\n    \"treatment_plans\": 0.83\n  },\n  \"clinical_completeness\": 0.86\n}\n",
+    "groq_parsed": {
+      "sample_name": "sample_20",
+      "reference": {
+        "symptoms": [
+          "tick bite",
+          "general ill feelings",
+          "warmth on the right knee",
+          "headache"
+        ],
+        "diagnoses": [
+          "arthritis",
+          "hypertension",
+          "diabetes type 2",
+          "possible Lyme disease"
+        ],
+        "medications": [
+          "lisinopril 20 mg",
+          "metformin 1000 mg twice daily",
+          "doxycycline 100 mg twice a day"
+        ],
+        "treatment_plans": [
+          "blood testing for Lyme disease",
+          "continue lisinopril",
+          "continue metformin",
+          "hemoglobin A1c test",
+          "lipid panel",
+          "basic metabolic panel"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "tick bite",
+          "warmth on the right knee",
+          "headache",
+          "general ill feelings"
+        ],
+        "diagnoses": [
+          "possible Lyme disease",
+          "hypertension",
+          "diabetes"
+        ],
+        "medications": [
+          "doxycycline 100 mg twice a day",
+          "lisinopril 20 mg once a day",
+          "metformin 1000 mg twice a day"
+        ],
+        "treatment_plans": [
+          "blood tests for Lyme disease",
+          "continue lisinopril",
+          "continue metformin",
+          "hemoglobin A1c test",
+          "lipid panel",
+          "basic metabolic panel"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "tick bite",
+          "headache",
+          "general ill feelings"
+        ],
+        "diagnoses": [
+          "hypertension",
+          "diabetes"
+        ],
+        "medications": [
+          "lisinopril 20 mg",
+          "metformin 1000 mg twice daily",
+          "doxycycline 100 mg twice a day"
+        ],
+        "treatment_plans": [
+          "continue lisinopril",
+          "continue metformin",
+          "hemoglobin A1c test",
+          "lipid panel",
+          "basic metabolic panel"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 75.0,
+        "diagnoses": 50.0,
+        "medications": 100.0,
+        "treatment_plans": 83.0
+      },
+      "clinical_completeness": 86.0
+    }
+  },
+  {
+    "sample_name": "sample_3",
+    "groq_raw": "\n{\n  \"sample_name\": \"Logan Walker\",\n  \"reference\": {\n    \"symptoms\": [\"back pain\", \"stiffness\", \"tingling in toes\", \"knee pain with exertion\"],\n    \"diagnoses\": [\"diabetes type 2\", \"hypertension\", \"osteoarthritis\", \"lumbar strain\"],\n    \"medications\": [\"Tylenol\", \"ibuprofen\", \"Icy Hot\", \"meloxicam 15 mg\", \"metformin 1000 mg\", \"lisinopril 20 mg\"],\n    \"treatment_plans\": [\"icing\", \"avoiding strenuous activity\", \"referral to physical therapy\", \"dietary changes\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"lower back pain\", \"tingling in right toes\", \"exacerbated by movement\"],\n    \"diagnoses\": [\"lumbar strain\", \"diabetes type 2\", \"hypertension\", \"osteoarthritis\"],\n    \"medications\": [\"meloxicam 15 mg\", \"metformin 1000 mg\", \"lisinopril 20 mg\"],\n    \"treatment_plans\": [\"icing\", \"avoiding strenuous activity\", \"referral to physical therapy\", \"improve diet\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"back pain\", \"tingling in toes\"],\n    \"diagnoses\": [\"diabetes type 2\", \"hypertension\", \"osteoarthritis\", \"lumbar strain\"],\n    \"medications\": [\"meloxicam 15 mg\", \"metformin 1000 mg\", \"lisinopril 20 mg\"],\n    \"treatment_plans\": [\"icing\", \"avoiding strenuous activity\", \"referral to physical therapy\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.5,\n    \"diagnoses\": 1.0,\n    \"medications\": 0.75,\n    \"treatment_plans\": 0.75\n  },\n  \"clinical_completeness\": 0.83\n}\n",
+    "groq_parsed": {
+      "sample_name": "Logan Walker",
+      "reference": {
+        "symptoms": [
+          "back pain",
+          "stiffness",
+          "tingling in toes",
+          "knee pain with exertion"
+        ],
+        "diagnoses": [
+          "diabetes type 2",
+          "hypertension",
+          "osteoarthritis",
+          "lumbar strain"
+        ],
+        "medications": [
+          "Tylenol",
+          "ibuprofen",
+          "Icy Hot",
+          "meloxicam 15 mg",
+          "metformin 1000 mg",
+          "lisinopril 20 mg"
+        ],
+        "treatment_plans": [
+          "icing",
+          "avoiding strenuous activity",
+          "referral to physical therapy",
+          "dietary changes"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "lower back pain",
+          "tingling in right toes",
+          "exacerbated by movement"
+        ],
+        "diagnoses": [
+          "lumbar strain",
+          "diabetes type 2",
+          "hypertension",
+          "osteoarthritis"
+        ],
+        "medications": [
+          "meloxicam 15 mg",
+          "metformin 1000 mg",
+          "lisinopril 20 mg"
+        ],
+        "treatment_plans": [
+          "icing",
+          "avoiding strenuous activity",
+          "referral to physical therapy",
+          "improve diet"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "back pain",
+          "tingling in toes"
+        ],
+        "diagnoses": [
+          "diabetes type 2",
+          "hypertension",
+          "osteoarthritis",
+          "lumbar strain"
+        ],
+        "medications": [
+          "meloxicam 15 mg",
+          "metformin 1000 mg",
+          "lisinopril 20 mg"
+        ],
+        "treatment_plans": [
+          "icing",
+          "avoiding strenuous activity",
+          "referral to physical therapy"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 50.0,
+        "diagnoses": 100.0,
+        "medications": 75.0,
+        "treatment_plans": 75.0
+      },
+      "clinical_completeness": 83.0
+    }
+  },
+  {
+    "sample_name": "sample_4",
+    "groq_raw": "\n{\n  \"sample_name\": \"annual_exam\",\n  \"reference\": {\n    \"symptoms\": [\n      \"shortness of breath with exertion\",\n      \"nasal congestion\",\n      \"dyspnea on exertion\",\n      \"intermittent palpitations\",\n      \"cough\",\n      \"depression\",\n      \"stress\",\n      \"pain to palpation to the sinuses\"\n    ],\n    \"diagnoses\": [\n      \"depression\",\n      \"hypertension\",\n      \"prior lobectomy\"\n    ],\n    \"medications\": [\n      \"Prozac 20 mg\",\n      \"Norvasc\"\n    ],\n    \"treatment_plans\": [\n      \"continue Prozac 20 mg a day\",\n      \"continue Norvasc\",\n      \"ordered routine blood work\",\n      \"ordered an echocardiogram to evaluate his murmur\"\n    ]\n  },\n  \"generated\": {\n    \"symptoms\": [\n      \"shortness of breath with exertion\",\n      \"nasal congestion\",\n      \"dyspnea on exertion\",\n      \"intermittent palpitations\",\n      \"cough\",\n      \"depression\",\n      \"stress\"\n    ],\n    \"diagnoses\": [\n      \"depression\",\n      \"hypertension\",\n      \"prior lobectomy\"\n    ],\n    \"medications\": [\n      \"Prozac 20mg daily\",\n      \"Norvasc\"\n    ],\n    \"treatment_plans\": [\n      \"continue Prozac 20mg daily\",\n      \"improve adherence to Norvasc medication regimen\",\n      \"ordered an echocardiogram to investigate the systolic ejection murmur\",\n      \"ordered routine blood work\"\n    ]\n  },\n  \"matched\": {\n    \"symptoms\": [\n      \"shortness of breath with exertion\",\n      \"nasal congestion\",\n      \"dyspnea on exertion\",\n      \"depression\"\n    ],\n    \"diagnoses\": [\n      \"depression\",\n      \"hypertension\",\n      \"prior lobectomy\"\n    ],\n    \"medications\": [\n      \"Prozac 20 mg\",\n      \"Norvasc\"\n    ],\n    \"treatment_plans\": [\n      \"continue Prozac 20 mg a day\",\n      \"continue Norvasc\",\n      \"ordered an echocardiogram\",\n      \"ordered routine blood work\"\n    ]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.57,\n    \"diagnoses\": 1.0,\n    \"medications\": 1.0,\n    \"treatment_plans\": 0.8\n  },\n  \"clinical_completeness\": 0.83\n}\n",
+    "groq_parsed": {
+      "sample_name": "annual_exam",
+      "reference": {
+        "symptoms": [
+          "shortness of breath with exertion",
+          "nasal congestion",
+          "dyspnea on exertion",
+          "intermittent palpitations",
+          "cough",
+          "depression",
+          "stress",
+          "pain to palpation to the sinuses"
+        ],
+        "diagnoses": [
+          "depression",
+          "hypertension",
+          "prior lobectomy"
+        ],
+        "medications": [
+          "Prozac 20 mg",
+          "Norvasc"
+        ],
+        "treatment_plans": [
+          "continue Prozac 20 mg a day",
+          "continue Norvasc",
+          "ordered routine blood work",
+          "ordered an echocardiogram to evaluate his murmur"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "shortness of breath with exertion",
+          "nasal congestion",
+          "dyspnea on exertion",
+          "intermittent palpitations",
+          "cough",
+          "depression",
+          "stress"
+        ],
+        "diagnoses": [
+          "depression",
+          "hypertension",
+          "prior lobectomy"
+        ],
+        "medications": [
+          "Prozac 20mg daily",
+          "Norvasc"
+        ],
+        "treatment_plans": [
+          "continue Prozac 20mg daily",
+          "improve adherence to Norvasc medication regimen",
+          "ordered an echocardiogram to investigate the systolic ejection murmur",
+          "ordered routine blood work"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "shortness of breath with exertion",
+          "nasal congestion",
+          "dyspnea on exertion",
+          "depression"
+        ],
+        "diagnoses": [
+          "depression",
+          "hypertension",
+          "prior lobectomy"
+        ],
+        "medications": [
+          "Prozac 20 mg",
+          "Norvasc"
+        ],
+        "treatment_plans": [
+          "continue Prozac 20 mg a day",
+          "continue Norvasc",
+          "ordered an echocardiogram",
+          "ordered routine blood work"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 56.99999999999999,
+        "diagnoses": 100.0,
+        "medications": 100.0,
+        "treatment_plans": 80.0
+      },
+      "clinical_completeness": 83.0
+    }
+  },
+  {
+    "sample_name": "sample_5",
+    "groq_raw": "\n{\n  \"sample_name\": \"sample\",\n  \"reference\": {\n    \"symptoms\": [\"right finger pain\", \"pain with movement\"],\n    \"diagnoses\": [\"right hand index finger contusion\"],\n    \"medications\": [\"Ibuprofen\", \"MiraLax\", \"Motrin 600 mg\"],\n    \"treatment_plans\": [\"applying ice\", \"splint\", \"follow up if no improvement\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"right finger pain\", \"pain exacerbated by movement\", \"tenderness over the distal phalanx\", \"pain on flexion\"],\n    \"diagnoses\": [\"right index finger contusion\"],\n    \"medications\": [\"ibuprofen\", \"Miralax\", \"Motrin 600mg\"],\n    \"treatment_plans\": [\"aluminum foam splint\", \"Motrin 600mg every 6 hours for about a week\", \"follow-up if symptoms do not improve\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"right finger pain\", \"pain with movement\"],\n    \"diagnoses\": [\"right index finger contusion\"],\n    \"medications\": [\"Ibuprofen\", \"MiraLax\", \"Motrin 600 mg\"],\n    \"treatment_plans\": [\"splint\", \"follow up if no improvement\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.5,\n    \"diagnoses\": 1.0,\n    \"medications\": 0.75,\n    \"treatment_plans\": 0.67\n  },\n  \"clinical_completeness\": 0.73\n}\n",
+    "groq_parsed": {
+      "sample_name": "sample",
+      "reference": {
+        "symptoms": [
+          "right finger pain",
+          "pain with movement"
+        ],
+        "diagnoses": [
+          "right hand index finger contusion"
+        ],
+        "medications": [
+          "Ibuprofen",
+          "MiraLax",
+          "Motrin 600 mg"
+        ],
+        "treatment_plans": [
+          "applying ice",
+          "splint",
+          "follow up if no improvement"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "right finger pain",
+          "pain exacerbated by movement",
+          "tenderness over the distal phalanx",
+          "pain on flexion"
+        ],
+        "diagnoses": [
+          "right index finger contusion"
+        ],
+        "medications": [
+          "ibuprofen",
+          "Miralax",
+          "Motrin 600mg"
+        ],
+        "treatment_plans": [
+          "aluminum foam splint",
+          "Motrin 600mg every 6 hours for about a week",
+          "follow-up if symptoms do not improve"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "right finger pain",
+          "pain with movement"
+        ],
+        "diagnoses": [
+          "right index finger contusion"
+        ],
+        "medications": [
+          "Ibuprofen",
+          "MiraLax",
+          "Motrin 600 mg"
+        ],
+        "treatment_plans": [
+          "splint",
+          "follow up if no improvement"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 50.0,
+        "diagnoses": 100.0,
+        "medications": 75.0,
+        "treatment_plans": 67.0
+      },
+      "clinical_completeness": 73.0
+    }
+  },
+  {
+    "sample_name": "sample_6",
+    "groq_raw": "\n{\n  \"sample_name\": \"Christina Cooper\",\n  \"reference\": {\n    \"symptoms\": [\"fatigued\", \"feverish with chills\", \"cannot catch her breath\", \"wheezing\", \"headaches\", \"tingling sensations\", \"cold sensitivity\", \"anxiety\", \"depression\"],\n    \"diagnoses\": [\"iron deficiency anemia\"],\n    \"medications\": [\"Ferrous Sulfate 25 mg\", \"Vitamin B12\"],\n    \"treatment_plans\": [\"continue ferrous sulfate with vitamin C\", \"referral to hematologist\", \"EGD and colonoscopy\", \"capsule endoscopy if inconclusive\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"fatigue\", \"dyspnea\", \"headaches\", \"chilling sensations\", \"increased sensitivity to cold\"],\n    \"diagnoses\": [\"iron deficiency anemia\"],\n    \"medications\": [\"ferrous sulfate 25mg\"],\n    \"treatment_plans\": [\"continue ferrous sulfate with orange juice\", \"upper endoscopy and colonoscopy\", \"referral to hematologist\", \"capsule endoscopy if inconclusive\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"fatigued\", \"dyspnea\", \"headaches\"],\n    \"diagnoses\": [\"iron deficiency anemia\"],\n    \"medications\": [\"Ferrous Sulfate 25 mg\"],\n    \"treatment_plans\": [\"continue ferrous sulfate\", \"referral to hematologist\", \"colonoscopy\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.44,\n    \"diagnoses\": 1.0,\n    \"medications\": 0.5,\n    \"treatment_plans\": 0.6\n  },\n  \"clinical_completeness\": 0.63\n}\n",
+    "groq_parsed": {
+      "sample_name": "Christina Cooper",
+      "reference": {
+        "symptoms": [
+          "fatigued",
+          "feverish with chills",
+          "cannot catch her breath",
+          "wheezing",
+          "headaches",
+          "tingling sensations",
+          "cold sensitivity",
+          "anxiety",
+          "depression"
+        ],
+        "diagnoses": [
+          "iron deficiency anemia"
+        ],
+        "medications": [
+          "Ferrous Sulfate 25 mg",
+          "Vitamin B12"
+        ],
+        "treatment_plans": [
+          "continue ferrous sulfate with vitamin C",
+          "referral to hematologist",
+          "EGD and colonoscopy",
+          "capsule endoscopy if inconclusive"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "fatigue",
+          "dyspnea",
+          "headaches",
+          "chilling sensations",
+          "increased sensitivity to cold"
+        ],
+        "diagnoses": [
+          "iron deficiency anemia"
+        ],
+        "medications": [
+          "ferrous sulfate 25mg"
+        ],
+        "treatment_plans": [
+          "continue ferrous sulfate with orange juice",
+          "upper endoscopy and colonoscopy",
+          "referral to hematologist",
+          "capsule endoscopy if inconclusive"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "fatigued",
+          "dyspnea",
+          "headaches"
+        ],
+        "diagnoses": [
+          "iron deficiency anemia"
+        ],
+        "medications": [
+          "Ferrous Sulfate 25 mg"
+        ],
+        "treatment_plans": [
+          "continue ferrous sulfate",
+          "referral to hematologist",
+          "colonoscopy"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 44.0,
+        "diagnoses": 100.0,
+        "medications": 50.0,
+        "treatment_plans": 60.0
+      },
+      "clinical_completeness": 63.0
+    }
+  },
+  {
+    "sample_name": "sample_7",
+    "groq_raw": "\n{\n  \"sample_name\": \"Pituitary Lesion\",\n  \"reference\": {\n    \"symptoms\": [\"headaches\", \"bitemporal hemianopia\", \"bumping into door frames\"],\n    \"diagnoses\": [\"pituitary adenoma\", \"bitemporal hemianopia\"],\n    \"medications\": [\"Tylenol\"],\n    \"treatment_plans\": [\"trans-sphenoidal resection of pituitary adenoma\", \"visual field testing with ophthalmology\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"headaches\", \"bitemporal hemianopia\", \"bumping into door frames\"],\n    \"diagnoses\": [\"pituitary adenoma\"],\n    \"medications\": [],\n    \"treatment_plans\": [\"transsphenoidal approach to excise and decompress the pituitary fossa\", \"pre-surgery visual field test\", \"referral to an eye doctor\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"headaches\", \"bitemporal hemianopia\"],\n    \"diagnoses\": [\"pituitary adenoma\"],\n    \"medications\": [],\n    \"treatment_plans\": [\"trans-sphenoidal resection of pituitary adenoma\", \"visual field testing\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.67,\n    \"diagnoses\": 0.5,\n    \"medications\": 0.0,\n    \"treatment_plans\": 0.5\n  },\n  \"clinical_completeness\": 0.56\n}\n",
+    "groq_parsed": {
+      "sample_name": "Pituitary Lesion",
+      "reference": {
+        "symptoms": [
+          "headaches",
+          "bitemporal hemianopia",
+          "bumping into door frames"
+        ],
+        "diagnoses": [
+          "pituitary adenoma",
+          "bitemporal hemianopia"
+        ],
+        "medications": [
+          "Tylenol"
+        ],
+        "treatment_plans": [
+          "trans-sphenoidal resection of pituitary adenoma",
+          "visual field testing with ophthalmology"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "headaches",
+          "bitemporal hemianopia",
+          "bumping into door frames"
+        ],
+        "diagnoses": [
+          "pituitary adenoma"
+        ],
+        "medications": [],
+        "treatment_plans": [
+          "transsphenoidal approach to excise and decompress the pituitary fossa",
+          "pre-surgery visual field test",
+          "referral to an eye doctor"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "headaches",
+          "bitemporal hemianopia"
+        ],
+        "diagnoses": [
+          "pituitary adenoma"
+        ],
+        "medications": [],
+        "treatment_plans": [
+          "trans-sphenoidal resection of pituitary adenoma",
+          "visual field testing"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 67.0,
+        "diagnoses": 50.0,
+        "medications": 0.0,
+        "treatment_plans": 50.0
+      },
+      "clinical_completeness": 56.00000000000001
+    }
+  },
+  {
+    "sample_name": "sample_8",
+    "groq_raw": "\n{\n  \"sample_name\": \"clinical_note\",\n  \"reference\": {\n    \"symptoms\": [\"chest pain\", \"dysphagia\", \"sharp pain behind the sternum\", \"stress\"],\n    \"diagnoses\": [\"esophagitis\", \"anxiety\", \"musculoskeletal etiologies\", \"GERD\", \"dyspepsia\"],\n    \"medications\": [],\n    \"treatment_plans\": [\"self-monitor for symptom recurrence\", \"notify office if symptoms return\", \"consider EGD\"]\n  },\n  \"generated\": {\n    \"symptoms\": [\"chest pain\", \"difficulty swallowing\", \"mild upper abdominal tenderness\"],\n    \"diagnoses\": [\"esophagitis\", \"GERD\", \"anxiety\", \"musculoskeletal etiologies\"],\n    \"medications\": [],\n    \"treatment_plans\": [\"consider upper endoscopy (EGD) if symptoms recur\", \"continue to monitor symptoms\", \"follow up as needed\"]\n  },\n  \"matched\": {\n    \"symptoms\": [\"chest pain\", \"difficulty swallowing\"],\n    \"diagnoses\": [\"esophagitis\", \"anxiety\", \"musculoskeletal etiologies\"],\n    \"medications\": [],\n    \"treatment_plans\": [\"consider EGD\", \"continue to monitor symptoms\"]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.5,\n    \"diagnoses\": 0.6,\n    \"medications\": null,\n    \"treatment_plans\": 0.67\n  },\n  \"clinical_completeness\": 0.63\n}\n",
+    "groq_parsed": {
+      "sample_name": "clinical_note",
+      "reference": {
+        "symptoms": [
+          "chest pain",
+          "dysphagia",
+          "sharp pain behind the sternum",
+          "stress"
+        ],
+        "diagnoses": [
+          "esophagitis",
+          "anxiety",
+          "musculoskeletal etiologies",
+          "GERD",
+          "dyspepsia"
+        ],
+        "medications": [],
+        "treatment_plans": [
+          "self-monitor for symptom recurrence",
+          "notify office if symptoms return",
+          "consider EGD"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "chest pain",
+          "difficulty swallowing",
+          "mild upper abdominal tenderness"
+        ],
+        "diagnoses": [
+          "esophagitis",
+          "GERD",
+          "anxiety",
+          "musculoskeletal etiologies"
+        ],
+        "medications": [],
+        "treatment_plans": [
+          "consider upper endoscopy (EGD) if symptoms recur",
+          "continue to monitor symptoms",
+          "follow up as needed"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "chest pain",
+          "difficulty swallowing"
+        ],
+        "diagnoses": [
+          "esophagitis",
+          "anxiety",
+          "musculoskeletal etiologies"
+        ],
+        "medications": [],
+        "treatment_plans": [
+          "consider EGD",
+          "continue to monitor symptoms"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 50.0,
+        "diagnoses": 60.0,
+        "medications": null,
+        "treatment_plans": 67.0
+      },
+      "clinical_completeness": 63.0
+    }
+  },
+  {
+    "sample_name": "sample_9",
+    "groq_raw": "\n{\n  \"sample_name\": \"Katherine Lopez\",\n  \"reference\": {\n    \"symptoms\": [\n      \"feeding difficulties\",\n      \"temperature regulation issues\",\n      \"developmental delays\",\n      \"severe reflux\",\n      \"global developmental delays\"\n    ],\n    \"diagnoses\": [\n      \"Smith-Magenis syndrome\",\n      \"premature birth\",\n      \"autism (brother)\"\n    ],\n    \"medications\": [],\n    \"treatment_plans\": [\n      \"renal screening tests\",\n      \"kidney ultrasound screening\",\n      \"speech therapy\",\n      \"occupational therapy\",\n      \"feeding therapy\",\n      \"physical therapy\"\n    ]\n  },\n  \"generated\": {\n    \"symptoms\": [\n      \"feeding difficulties\",\n      \"temperature regulation issues\",\n      \"developmental delays\"\n    ],\n    \"diagnoses\": [\n      \"Smith-Magenis syndrome\",\n      \"congenital anomalies of the kidney and urinary tract\"\n    ],\n    \"medications\": [],\n    \"treatment_plans\": [\n      \"kidney ultrasound\",\n      \"speech therapy\",\n      \"feeding therapy\",\n      \"occupational therapy\",\n      \"physical therapy\"\n    ]\n  },\n  \"matched\": {\n    \"symptoms\": [\n      \"feeding difficulties\",\n      \"temperature regulation issues\",\n      \"developmental delays\"\n    ],\n    \"diagnoses\": [\n      \"Smith-Magenis syndrome\"\n    ],\n    \"medications\": [],\n    \"treatment_plans\": [\n      \"kidney ultrasound\",\n      \"speech therapy\",\n      \"feeding therapy\",\n      \"occupational therapy\",\n      \"physical therapy\"\n    ]\n  },\n  \"recall_by_category\": {\n    \"symptoms\": 0.6,\n    \"diagnoses\": 0.5,\n    \"medications\": null,\n    \"treatment_plans\": 0.71\n  },\n  \"clinical_completeness\": 0.63\n}\n",
+    "groq_parsed": {
+      "sample_name": "Katherine Lopez",
+      "reference": {
+        "symptoms": [
+          "feeding difficulties",
+          "temperature regulation issues",
+          "developmental delays",
+          "severe reflux",
+          "global developmental delays"
+        ],
+        "diagnoses": [
+          "Smith-Magenis syndrome",
+          "premature birth",
+          "autism (brother)"
+        ],
+        "medications": [],
+        "treatment_plans": [
+          "renal screening tests",
+          "kidney ultrasound screening",
+          "speech therapy",
+          "occupational therapy",
+          "feeding therapy",
+          "physical therapy"
+        ]
+      },
+      "generated": {
+        "symptoms": [
+          "feeding difficulties",
+          "temperature regulation issues",
+          "developmental delays"
+        ],
+        "diagnoses": [
+          "Smith-Magenis syndrome",
+          "congenital anomalies of the kidney and urinary tract"
+        ],
+        "medications": [],
+        "treatment_plans": [
+          "kidney ultrasound",
+          "speech therapy",
+          "feeding therapy",
+          "occupational therapy",
+          "physical therapy"
+        ]
+      },
+      "matched": {
+        "symptoms": [
+          "feeding difficulties",
+          "temperature regulation issues",
+          "developmental delays"
+        ],
+        "diagnoses": [
+          "Smith-Magenis syndrome"
+        ],
+        "medications": [],
+        "treatment_plans": [
+          "kidney ultrasound",
+          "speech therapy",
+          "feeding therapy",
+          "occupational therapy",
+          "physical therapy"
+        ]
+      },
+      "recall_by_category": {
+        "symptoms": 60.0,
+        "diagnoses": 50.0,
+        "medications": null,
+        "treatment_plans": 71.0
+      },
+      "clinical_completeness": 63.0
+    }
+  }
+]

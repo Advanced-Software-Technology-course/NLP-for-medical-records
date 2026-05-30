@@ -1,23 +1,29 @@
-**Chief Complaint:** Left shoulder pain.
+**Chief Complaint:** Wayne, a [age not specified]-year-old male presents with left shoulder pain, aside from this left shoulder pain that I've been having.
 
-**Key Symptoms:**
-The patient reports a constant left shoulder pain that worsens with movement, particularly when reaching or lifting objects, and is unbearable when lying on the affected shoulder. The pain has been present for approximately three weeks.
-- **Pertinent Negatives:** Denies numbness, tingling, fever, or chest pain.
+**History of Present Illness:**
+The patient reports experiencing left shoulder pain for approximately I want to say a few weeks, I think it's been about three weeks now. He denies any specific injury, Honestly, I've been trying to recall if I had any specific injury, and I can't think of that, but mentions being active and doing a lot of work in their basement, Of anything, the only thing I can think of is that, you know, I am active and we've just been doing a lot of work in our basement, so I don't know if I did something while doing that. The pain is constant and worsens with movement or pressure on the shoulder, The pain is always there, and then it gets worse, like if I try to put any pressure on it, it gets worse, so if I'm laying at night, if I try to even lay on that shoulder, it's unbearable, making it unbearable to lay on that shoulder at night. He rates the pain as significant, though an exact severity score is not provided. 
+- **Pertinent Negatives:** Denies numbness or tingling in the arms or hands.
 
 **Relevant Medical History:**
-- The patient is active and has been renovating his basement, which may have contributed to the injury.
-- No previous significant shoulder problems, but occasional aches and pains relieved by Tylenol.
+- Conditions: No specific conditions mentioned.
+- Regional Trauma: You know, I'm really active, and so I will get some aches and pains here and there, but nothing that Tylenol can't take care of, though he mentions occasional aches and pains managed with Tylenol.
 
 **Physical Examination & Vitals:**
-- Vitals: All vitals are within normal limits.
-- Shoulder: Limited active and passive range of motion, tenderness of the greater tuberosity of the humerus, but no tenderness at the sternoclavicular or acromioclavicular joints.
-- Neurovascular exam: Good hand grips, capillary refill less than three seconds, and sensation intact to light touch.
+- Vitals: Not explicitly documented, but the doctor mentions that the patient's vitals look good.
+- Systemic Clearances: Not mentioned.
+- Localized Exam (MSK/Neuro): 
+  - The patient has limited active and passive range of motion in the left shoulder, which is painful, You know, I have trouble when I'm trying to reach for something or lift any objects, and I don't even try to reach it for anything over my head because then it'll really hurt.
+  - Tenderness is noted at the greater tuberosity of the humerus, but not at the sternoclavicular or acromioclavicular joints.
+  - Good hand grips.
+  - Neurovascular exam: Capillary refill is less than three seconds, and sensation is intact to light touch.
 
 **Assessment & Rationale:**
-1. Rotator cuff tendinopathy: Suggested by the patient's symptoms, limited range of motion, and tenderness of the greater tuberosity of the humerus.
+1. **Rotator Cuff Tendinopathy**: Suspected based on the patient's symptoms of shoulder pain, limited range of motion, and tenderness at the greater tuberosity of the humerus. The diagnosis is further supported by the absence of fractures on the shoulder X-ray.
 
 **Treatment Plan & Next Steps:**
-- Diagnostics: An MRI of the left shoulder has been ordered to confirm the diagnosis and rule out other potential causes.
-- Medication: The patient may continue to take Tylenol for pain management.
-- Therapy: The patient will be referred to physical therapy for approximately six to eight weeks to strengthen the shoulder muscles.
-- Follow-up: A follow-up visit is scheduled after completing physical therapy to assess the patient's progress. If symptoms do not improve, a steroid injection may be considered.
+- **Interventions**: 
+  - An MRI of the left shoulder is ordered to confirm the diagnosis and rule out other conditions.
+  - Referral to physical therapy for approximately six to eight weeks to strengthen the shoulder muscles.
+- **Medications**: I've been taking two extra-strength Tylenol every six to eight hours as needed for pain; It does take the edge off, but I still have some pain, consider a steroid injection if symptoms do not improve with physical therapy.
+- **Therapy**: Physical therapy scheduled for approximately six to eight weeks, with a frequency not specified but implied to be multiple times per week.
+- **Logistics & Follow-up**: The patient will have a follow-up visit after completing the physical therapy. Educational materials on physical therapy and what to expect will be provided.

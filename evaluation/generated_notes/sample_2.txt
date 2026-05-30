@@ -1,25 +1,18 @@
-'''
-**Chief Complaint:** Right knee pain after a fall.
+CHIEF COMPLAINT:
+[doctor] hi , ms
 
-**History of Present Illness:**
-The patient reports twisting her right knee while falling from a ladder, resulting in pain on the inside of the knee. The pain is exacerbated by bending and twisting the knee. She has been using ice and taking ibuprofen without significant relief.
-- **Pertinent Negatives:** Denies injury to other areas, fever, or other systemic symptoms.
+HISTORY OF PRESENT ILLNESS:
+- thompson is a 43 year old female here for right knee pain
+- any other pain down here in your calves ?
 
-**Relevant Medical History:**
-- Atrial Fibrillation (AFib): Managed with digoxin.
-- Past Surgery: Nose job.
+MEDICATIONS:
+- so let's take a look at your x-rays
+- [doctor] i'm going to recommend we give you some motrin , 800 milligrams
+- uh , you can take it about every six hours , uh , with food
+- uh , and we'll give you about a two week supply
 
-**Physical Examination & Vitals:**
-- **Key Symptoms:** Tender to palpation over the medial portion of the knee, pain with flexion and valgus stress, normal sensation.
-- Vitals: [UNCERTAIN - no specific vitals mentioned].
-- Musculoskeletal: Tenderness over the medial meniscus area, no other significant findings.
+ASSESSMENT AND PLAN:
+- [doctor] okay , let's review your past history for a second
+- we'll have you come back in about a week and see how you're doing , and if it's not better , we'll get an mri at that time
 
-**Assessment & Rationale:**
-1. Acute Medial Meniscus Sprain/Strain: Suggested by the mechanism of injury, location of pain, and physical examination findings.
-
-**Treatment Plan & Next Steps:**
-- **Medication:** Motrin 800mg every 6 hours with food for pain management.
-- **Lifestyle:** Use of a knee brace and crutches for the next couple of days to reduce stress on the knee.
-- **Diagnostics:** X-rays were taken, showing no fracture or dislocation but some fluid; an MRI is planned if symptoms do not improve within a week.
-- **Follow-up:** Return in about a week to assess improvement and consider further diagnostic steps if necessary.
-'''
+SOURCE: sample_2

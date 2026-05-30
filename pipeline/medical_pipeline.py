@@ -33,6 +33,7 @@ import time
 import mimetypes
 import importlib.util
 import re
+from collections.abc import Sequence
 from functools import lru_cache
 from typing import List, Optional
 from openai import OpenAI
@@ -71,6 +72,84 @@ CSV_WHITELIST = [     # filenames to include in RAG; empty list = load all
     "DDI_data_clean.csv",
 ]
 SCORE_CLAMP_FLOOR = 0.75  # confidence floor for exact phrase matches during export
+GROQ_PRIMARY_MODEL = "llama-3.3-70b-versatile"
+GROQ_FALLBACK_MODELS = [
+    "meta-llama/llama-4-scout-17b-16e-instruct",
+    "qwen/qwen3-32b",
+    "llama-3.1-8b-instant",
+]
+
+
+def _is_rate_limit_error(exc: Exception) -> bool:
+    status_code = getattr(exc, "status_code", None)
+    response = getattr(exc, "response", None)
+    if status_code == 429 or getattr(response, "status_code", None) == 429:
+        return True
+
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        error = body.get("error", body)
+        if isinstance(error, dict):
+            error_code = str(error.get("code", "")).lower()
+            error_type = str(error.get("type", "")).lower()
+            error_message = str(error.get("message", "")).lower()
+            if error_code in {"rate_limit_exceeded", "429"}:
+                return True
+            if error_type in {"rate_limit", "tokens", "quota", "insufficient_quota"}:
+                return True
+            if "rate limit" in error_message or "too many requests" in error_message:
+                return True
+
+    message = str(exc).lower()
+    return (
+        "rate limit" in message
+        or "rate_limit" in message
+        or "429" in message
+        or "too many requests" in message
+        or "tokens per day" in message
+        or "tokens per minute" in message
+        or "requests per minute" in message
+        or "rate_limit_exceeded" in message
+        or "insufficient_quota" in message
+    )
+
+
+def _chat_completion_with_fallback(
+    client: OpenAI,
+    messages: Sequence[dict],
+    *,
+    max_tokens: int,
+    temperature: float,
+    primary_model: str = GROQ_PRIMARY_MODEL,
+    fallback_models: Optional[Sequence[str]] = None,
+):
+    models = [primary_model]
+    if fallback_models:
+        for model in fallback_models:
+            if model and model not in models:
+                models.append(model)
+
+    last_error: Exception | None = None
+
+    for model in models:
+        try:
+            print(f"[Groq] Trying model: {model}")
+            return client.chat.completions.create(
+                model=model,
+                messages=list(messages),
+                max_tokens=max_tokens,
+                temperature=temperature,
+            ), model
+        except Exception as exc:
+            last_error = exc
+            if _is_rate_limit_error(exc):
+                print(f"[Groq] Rate limit on {model}; trying fallback model. Details: {exc}")
+                continue
+            raise
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("No Groq model candidates were available.")
 
 
 def _load_custom_vocabulary_config() -> dict:
@@ -129,64 +208,126 @@ def _chroma_dir_missing_or_empty() -> bool:
 
 # ── PROMPT TEMPLATES ──────────────────────────────────────────────────────────
 
-SUMMARY_PROMPT_TEMPLATE = """You are an expert clinical documentation assistant.
-Given the following doctor-patient consultation transcript, generate a medical summary.
-Skip pleasantries and small talk, and focus on the medically relevant information, the 'why' behind medical decisions, and the distinction between subjective and objective data.
+SUMMARY_PROMPT_TEMPLATE = """You are an expert clinical documentation assistant specializing in highly precise, legally and clinically complete medical charts.
+
+Given the following doctor-patient consultation transcript, generate a comprehensive medical summary. 
+Skip pleasantries and small talk, but DO NOT sacrifice clinical specificity for brevity. Every exact anatomical descriptor, specific surgical procedure, and explicit timeline must be preserved.
+
+Prioritize fidelity to the transcript over completeness. If a fact is not explicitly stated, omit it rather than guessing.
+
 Output language must be strictly: {output_language}.
 Do not mix languages.
 Do not add parenthetical translations like "X (Y)" unless that parenthetical translation already exists in the transcript.
-Always include physical examination results in Key Symptoms. If there isn't have a immediate action item mentioned, include the details anyway. Include lifestyle changes and states.
-Always use the clinical variant of medical terms (e.g. "hypertension" instead of "high blood pressure", "dyspnea" instead of "shortness of breath", etc.) unless only the layman's term is used in the transcript and the clinical term is not mentioned at all.
+
+### STRICT RULES FOR CLINICAL ACCURACY:
+1. **Zero Extrapolation:** Do not assume, infer, or invent any clinical data, physical exam maneuvers, or patient capabilities (e.g., do not state a patient can perform an action like "making a fist" unless explicitly stated).
+2. **Preserve Limitations:** If an exam notes a restriction (e.g., "limited range of motion"), do not gloss over it or characterize the broader system as "normal."
+3. **Anatomical & Radiographic Specificity:** Exhaustively capture precise radiological and structural findings (e.g., "extra-articular", "proximal to radioulnar joint", "dorsal angulation", "dinner fork deformity"). Do not generalize these to "wrist fracture."
+4. **Exact Nomenclature:** Always use the clinical variant of medical terms. Capture exact surgical procedures by name (e.g., "ORIF" instead of just "surgery"), exact immobilization devices (e.g., "thumb spica brace" instead of just "brace"), and exact frequencies (e.g., "PT 3 times per week").
+5. **Timeline & Logistical Precision:** Capture exact dates/timelines of injury, exact postoperative timelines, admission statuses (e.g., "overnight hospital stay"), and specific multi-week follow-up metrics.
+6. **No Placeholder Fabrication:** Do not invent patient demographics, medication names, dosages, exam findings, imaging results, or follow-up details. If they are absent, leave them out.
+7. **Preserve Exact Qualifiers:** Do not collapse nuanced exam wording into a generic normal/abnormal statement. Preserve exact negations and qualifiers such as "not palpable", "present via Doppler", "no bony exposure", and similar phrasing exactly as stated.
 
 Retrieved context from medical knowledge base (if any):
 {context_block}
 
-Include:
-- Chief complaint: The primary reason for the visit.
-- Key symptoms mentioned: A narrative summary of the current issue, including relevant 'pertinent negatives' (symptoms the patient denies, like fevers or chest pain).
-- Relevant medical history (if mentioned): Past diagnoses and their current status/control.
-- Physical Examination & Vitals: Include vitals (especially if abnormal) and objective findings (heart sounds, lung sounds, musculoskeletal tests, etc.).
-- Diagnosis or working diagnosis (if mentioned): The working diagnosis and the evidence supporting it.
-- Treatment plan or next steps (if mentioned): Medications (with dosages), lifestyle advice, and follow-up timeline. Match each action to a specific diagnosis.
+### Required Sections to Generate:
+- **Chief Complaint:** The primary reason for the visit, including patient name and age if mentioned.
+- **History of Present Illness:** A detailed narrative of the current issue, including the exact date/time of injury, mechanism of injury, exacerbating/alleviating factors, severity score, and relevant 'pertinent negatives'.
+- **Relevant Medical History:** Past diagnoses, previous regional injuries (or explicitly note if denied), and current status.
+- **Physical Examination & Vitals:** Document all vitals. Exhaustively list all objective findings by system (HEENT, CV, Respiratory, MSK, Neuro, etc.) exactly as reported. Include specific physical deformities, crepitus, and specific limitations.
+- **Assessment & Rationale:** The exact diagnoses/working diagnoses and the specific radiographic or clinical evidence supporting them.
+- **Treatment Plan & Next Steps:** Exact medications (with precise dosages/frequencies), specific surgical interventions, exact immobilization types, specific ancillary therapies (with weekly frequency), and concrete follow-up timelines. Address logistical notes (e.g., vacations, work status) exactly as discussed.
 
-Always flag any parts you are uncertain about with '[UNCERTAIN]', even if only a little bit. Use it liberally for anything that is not explicitly stated or is ambiguous in the transcript.
+Always flag any parts you are uncertain about with '[UNCERTAIN]'. Use it only where the transcript is genuinely ambiguous, incomplete, or contradictory. Do not attach '[UNCERTAIN]' to facts that are explicitly stated.
 
 Transcript:
 {transcript}
 
-Example format of summary (but adapt to content, and keep it concise):
+Example format of summary (adapt to content depth, prioritizing completeness over brevity):
 '''
-**Chief Complaint:** Headache, abdominal pain, and fatigue.
+**Chief Complaint:** [Patient Name], a [Age]-year-old female presents with [Complaint].
 
 **History of Present Illness:**
-The patient reports intermittent, intense retro-orbital headaches exacerbated by bright light. These are accompanied by occasional nausea. Also notes crampy post-prandial abdominal pain.
-- **Pertinent Negatives:** Denies vomiting, fever, or unintentional weight loss.
+The patient reports [Onset/Mechanism] occurring on [Exact Date/Timeline]. Pain is rated [X/10], aggravated by [Factors], and alleviated by [Specific Positions/Actions]. Associated symptoms include [Symptoms].
+- **Pertinent Negatives:** Denies [Symptoms].
 
 **Relevant Medical History:**
-- Hypothyroidism: Managed with Euthyrox 75 mcg. Last labs >12 months ago.
-- Family History: Maternal migraines.
-- Social: High caffeine intake (5+ cups/day) and high work stress.
+- Conditions: [Condition Name] managed by [Medication/Dosage].
+- Regional Trauma: Explicitly state if denies prior injury to the affected area.
 
 **Physical Examination & Vitals:**
-- Vitals: [UNCERTAIN - check transcript for BP].
-- Abdomen: Soft, non-distended, mild tenderness to palpation in the epigastric region. No guarding.
-- Neuro: Normal gait, no cranial nerve deficits.
-- Cardiovascular: [UNCERTAIN - mention if heart sounds were heard].
+- Vitals: BP: [X], HR: [X], RR: [X], Temp: [X].
+- Systemic Clearances: [e.g., Lungs clear, CV normal if mentioned].
+- Localized Exam (e.g., MSK/Neuro): Note exact visual deformities, specific tenderness locations, presence of crepitus, and clear status of range of motion (e.g., Limited ROM).
 
 **Assessment & Rationale:**
-1. Migraine: Suggested by unilateral location, photophobia, and family history.
-2. Dyspepsia: Likely related to high caffeine and fatty food intake.
-3. Fatigue: Etiology uncertain; consider poorly controlled hypothyroidism or iron deficiency.
+1. [Exact Clinical Diagnosis]: Supported by [Specific Radiographic Findings, e.g., extra-articular fragment displacement] and [Clinical Presentation].
 
 **Treatment Plan & Next Steps:**
-- Diagnostics: Order TSH, CBC, and Ferritin to investigate fatigue.
-- Medication: Ibuprofen 400mg PRN for acute headache.
-- Lifestyle: Reduce coffee to <2 cups/day; maintain a food and symptom diary.
-- Follow-up: Return in 2 weeks for lab review.
+- Interventions: [Exact Surgical Procedure, e.g., ORIF] requiring [Admission Status, e.g., overnight stay].
+- Immobilization: [Specific Device, e.g., Thumb Spica Brace] for [Exact Duration].
+- Medications: [Name] [Dosage] [Frequency] for [Indication].
+- Therapy: [Type] scheduled [X times/week] starting [Timeline].
+- Logistics & Follow-up: [Specific accommodations for lifestyle/vacations]. Follow up in [Exact Weeks/Days].
 '''
+"""
 
-Summary:"""
+EVALUATOR_PROMPT_TEMPLATE = """You are a clinical documentation auditor.
 
+Task: Compare the candidate summary to the transcript and RETURN ONLY FACTS THAT ARE
+PRESENT IN THE TRANSCRIPT BUT MISSING FROM THE CANDIDATE SUMMARY. Do NOT list
+style, wording, ordering, or paraphrasing differences — only missing facts.
+
+If there are no missing facts, respond with exactly: NO_MISSING_FACTS
+
+Output language must be strictly: {output_language}.
+
+Transcript:
+{transcript}
+
+Candidate summary:
+{summary}
+
+Return format:
+- One short bullet per missing fact.
+- Each bullet must use this exact format:
+    - Issue: Missing fact: "<concise transcript excerpt>" | Fix: Add: "<exact wording to insert>"
+
+Rules:
+- Use the transcript as the single source of truth.
+- For each missing fact include the most concise exact text from the transcript that should be added.
+- Do not add commentary or list anything other than missing facts in the specified bullet format.
+"""
+
+REFINER_PROMPT_TEMPLATE = """You are a clinical documentation editor.
+
+Task: Revise the candidate summary solely to INSERT the missing facts listed in the
+Issues block. Do NOT change wording, reorder sections, remove content, or rephrase
+existing text except to minimally place the provided exact wording where it belongs.
+
+Rules:
+- Use the transcript as the single source of truth.
+- Fix ONLY the issues listed (do not add any other facts).
+- For each issue, insert the exact text provided in the "Fix: Add: \"...\"" portion
+    into the most appropriate section header; keep the rest of the summary unchanged.
+- Preserve exact qualifiers and negations (e.g., "not palpable", "present via Doppler").
+- Keep section headers and overall structure intact.
+- Keep [UNCERTAIN] only where the transcript is genuinely ambiguous.
+
+Output language must be strictly: {output_language}.
+
+Transcript:
+{transcript}
+
+Issues:
+{issues}
+
+Candidate summary:
+{summary}
+
+Revised summary:
+"""
 
 SOAP_PROMPT_TEMPLATE = """You are a clinical documentation assistant.
 Given the following doctor-patient consultation transcript, generate SOAP notes.
@@ -994,7 +1135,7 @@ def summarize_transcript(
     suggested_codes: Optional[List[dict]] = None,
 ) -> str:
     print("── Step 3/4: Summary ──")
-    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
+    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token, max_retries=0)
     output_language = _prompt_language_name(transcript)
 
     context_block = build_context_block(rag_context, "", suggested_codes=suggested_codes)
@@ -1004,17 +1145,60 @@ def summarize_transcript(
         output_language=output_language,
     )
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=2000,
-        temperature=0.2
+    response, used_model = _chat_completion_with_fallback(
+        client,
+        [{"role": "user", "content": prompt}],
+        max_tokens=3000,
+        temperature=0.2,
+        fallback_models=GROQ_FALLBACK_MODELS,
     )
+    print(f"[Groq] Summary model used: {used_model}")
 
     summary = response.choices[0].message.content.strip()
 
+    print("── Step 3b/4: Summary Evaluation ──")
+    eval_prompt = EVALUATOR_PROMPT_TEMPLATE.format(
+        transcript=transcript,
+        summary=summary,
+        output_language=output_language,
+    )
+    eval_response, eval_model = _chat_completion_with_fallback(
+        client,
+        [{"role": "user", "content": eval_prompt}],
+        max_tokens=600,
+        temperature=0.1,
+        primary_model=GROQ_FALLBACK_MODELS[0],
+        fallback_models=GROQ_FALLBACK_MODELS[1:],
+    )
+    print(f"[Groq] Evaluation model used: {eval_model}")
+    eval_text = eval_response.choices[0].message.content.strip()
+
+    # Accept either legacy token or new missing-facts token to preserve backward compatibility
+    if ("no_issues" in eval_text.casefold()) or ("no_missing_facts" in eval_text.casefold()):
+        print("Summary evaluation: no missing facts found.\n")
+        print("Summary complete.\n")
+        return summary
+
+    print("── Step 3c/4: Summary Refinement ──")
+    refine_prompt = REFINER_PROMPT_TEMPLATE.format(
+        transcript=transcript,
+        summary=summary,
+        issues=eval_text,
+        output_language=output_language,
+    )
+    refine_response, refine_model = _chat_completion_with_fallback(
+        client,
+        [{"role": "user", "content": refine_prompt}],
+        max_tokens=3000,
+        temperature=0.1,
+        primary_model=GROQ_FALLBACK_MODELS[0],
+        fallback_models=GROQ_FALLBACK_MODELS[1:],
+    )
+    print(f"[Groq] Refinement model used: {refine_model}")
+    refined_summary = refine_response.choices[0].message.content.strip()
+
     print("Summary complete.\n")
-    return summary
+    return refined_summary
 
 
 def summarize_soap_notes(
@@ -1024,7 +1208,7 @@ def summarize_soap_notes(
     suggested_codes: Optional[List[dict]] = None,
 ) -> str:
     print("── Step 4/4: SOAP Notes ──")
-    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token)
+    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token, max_retries=0)
     output_language = _prompt_language_name(transcript)
 
     context_block = build_context_block(rag_context, "", suggested_codes=suggested_codes)
@@ -1034,12 +1218,14 @@ def summarize_soap_notes(
         output_language=output_language,
     )
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=900,
-        temperature=0.2
+    response, used_model = _chat_completion_with_fallback(
+        client,
+        [{"role": "user", "content": prompt}],
+        max_tokens=2000,
+        temperature=0.1,
+        fallback_models=GROQ_FALLBACK_MODELS,
     )
+    print(f"[Groq] SOAP model used: {used_model}")
 
     soap_notes = response.choices[0].message.content.strip()
 

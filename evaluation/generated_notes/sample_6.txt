@@ -1,30 +1,19 @@
-'''
-**Chief Complaint:** Long-standing iron deficiency anemia, recently diagnosed when attempting to donate blood, with associated symptoms of fatigue, dyspnea, and headaches.
+CHIEF COMPLAINT:
+[doctor] today i'm seeing christina cooper
 
-**History of Present Illness:**
-The patient reports feeling fatigued often during the day, feverish with chills at times, and experiencing dyspnea when trying to be active, accompanied by wheezing. Also notes headaches, chilling sensations, and an increased sensitivity to cold. 
-- **Pertinent Negatives:** No mention of chest pain or recent weight loss.
+HISTORY OF PRESENT ILLNESS:
+- i have been feeling fatigued often during the day , and even feverish with chills at times
+- when i try to be active i like i ca n't catch my breath and i feel like i'm wheezing
+- i've had some headaches too , which is not like me
 
-**Relevant Medical History:**
-- Iron deficiency anemia: Diagnosed at age 13, with no clear explanation provided by previous doctors.
-- Hysterectomy: Performed in 1996, which resolved previous heavy menstrual periods.
-- Colonoscopy: Last performed 5-6 years ago, with normal results.
+MEDICATIONS:
+- [patient] i'm taking 25 milligram tablets , twice daily
+- i take one in the morning and one in the evening
+- [patient] yeah , i take vitamin b12 , just the over the counter stuff
+- all right , well let's go ahead and take a look and see what's going on
 
-**Physical Examination & Vitals:**
-- [UNCERTAIN - specifics of vitals not mentioned]
-- Abdomen: No tenderness noted on palpation.
-- Cardiovascular and Respiratory: No significant findings mentioned, but the patient subjectively reports wheezing and dyspnea.
-- General: Physical exam otherwise normal without significant findings.
+ASSESSMENT AND PLAN:
+- they said they'd see me in 10 years
+- unfortunately our cameras do not meet all the way in the middle , so if those tests back , come , if those tests come back fine , then we'll have you swallow a pill camera to take pictures as it moves through your , uh , system
 
-**Assessment & Rationale:**
-1. Iron deficiency anemia: Confirmed diagnosis, with the patient already on ferrous sulfate treatment.
-2. Potential gastrointestinal bleeding: Suspected as a possible cause of anemia, prompting the need for upper endoscopy and colonoscopy.
-3. Fatigue and dyspnea: Possibly related to anemia, but etiology may be multifactorial, including potential anxiety and depression.
-
-**Treatment Plan & Next Steps:**
-- Diagnostics: Upper endoscopy and colonoscopy scheduled to investigate potential sources of gastrointestinal bleeding.
-- Medication: Patient to continue ferrous sulfate 25mg twice daily, with instructions to take with orange juice to enhance iron absorption.
-- Lifestyle: No specific lifestyle changes mentioned beyond continuing iron supplementation.
-- Follow-up: Referral to a hematologist, with follow-up appointments to be scheduled after diagnostic tests are completed.
-- Additional Testing: Capsule endoscopy may be considered if initial tests are inconclusive.
-'''
+SOURCE: sample_6

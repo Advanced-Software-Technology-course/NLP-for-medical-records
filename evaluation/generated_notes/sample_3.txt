@@ -1,30 +1,20 @@
-'''
-**Chief Complaint:** Back pain.
+CHIEF COMPLAINT:
+[doctor] hi logan
 
-**Key Symptoms:**
-The patient reports lower back pain that started after lifting heavy boxes, accompanied by a popping sensation and initial tingling in the right toes that resolved by Sunday. The pain is exacerbated by movement and improves slightly when lying on the right side. 
-- **Pertinent Negatives:** Denies chest pain, nausea, vomiting, fever, or chills.
+HISTORY OF PRESENT ILLNESS:
+- [doctor] so logan is a 58 year old male , with a past medical history significant for diabetes type 2 , hypertension , osteoarthritis , who presents today with some back pain
+- and did you strain your back , did something- [patient] i thought i heard a pop when i moved and i had to lie down for about an hour before it actually relieved the pain
+- and what- what have you taken for the pain ?
 
-**Relevant Medical History:**
-- Diabetes Type 2: Managed with metformin, but with a recent history of less-than-ideal diet.
-- Hypertension: Managed with lisinopril, with blood pressure readings sometimes on the high side.
-- Osteoarthritis: Managed with occasional exacerbations, especially with heavy lifting or running.
+MEDICATIONS:
+- were you able to take any vacations over the summer ?
+- if i- maybe if i run too much or if i've lift boxes that are a little too heavy , i start to feel the strain
+- we can prescribe you some meloxicam 15 mg once a day
+- [doctor] i want you to continue to ice it , okay
 
-**Physical Examination & Vitals:**
-- Vitals: Elevated blood pressure, exact reading not specified.
-- Back: Pain to palpation of the lumbar spine, pain with flexion and extension, but a negative straight leg raise.
-- Heart: A 2 out of 6 systolic heart murmur, stable and previously noted.
-- Diabetes Labs: Hemoglobin A1c is elevated at 8.
+ASSESSMENT AND PLAN:
+- let me go ahead and- you know , i know that the nurse did a review of systems sheet with you when you- when you checked in
+- in reviewing the results of your diabetes labs , your hemoglobin a1c is a little elevated at eight
+- [doctor] so in reviewing the results of your back x-ray , this looks like a normal x-ray
 
-**Assessment & Rationale:**
-1. Lumbar Strain: Suggested by the history of lifting heavy boxes and the presence of lower back pain.
-2. Poorly Controlled Diabetes: Indicated by an elevated Hemoglobin A1c, likely due to recent dietary indiscretions.
-3. Hypertension: Blood pressure readings are sometimes elevated, necessitating better control.
-
-**Treatment Plan & Next Steps:**
-- For Lumbar Strain: Meloxicam 15 mg once a day, icing, avoiding strenuous activity, and referral to physical therapy.
-- For Diabetes: Increase metformin to 1000 mg twice a day and repeat Hemoglobin A1c in 6 months.
-- For Hypertension: Increase lisinopril from 10 mg to 20 mg a day.
-- Lifestyle: Improve diet to better manage diabetes and hypertension.
-- Follow-up: Not explicitly stated, but implied for review of lab results and assessment of treatment efficacy.
-'''
+SOURCE: sample_3
