@@ -1,18 +1,22 @@
-CHIEF COMPLAINT:
-[doctor] hi , ms
+**Chief Complaint:** Ms. Thompson, a 43-year-old female, presents with right knee pain.
 
-HISTORY OF PRESENT ILLNESS:
-- thompson is a 43 year old female here for right knee pain
-- any other pain down here in your calves ?
+**History of Present Illness:**
+The patient reports a stumble and twist of her knee while changing a light bulb on a ladder, occurring yesterday. Pain is located on the inside of her knee and is aggravated by bending the knee forward and twisting. The patient has been using ice on her knee. The patient has been taking ibuprofen and using ice. Associated symptoms include tenderness over the medial portion of the knee and pain when bending or twisting the knee. The patient reports that ibuprofen and ice do not seem to help much.
+- **Pertinent Negatives:** Denies injury to any other area besides the knee.
 
-MEDICATIONS:
-- so let's take a look at your x-rays
-- [doctor] i'm going to recommend we give you some motrin , 800 milligrams
-- uh , you can take it about every six hours , uh , with food
-- uh , and we'll give you about a two week supply
+**Relevant Medical History:**
+- Conditions: Atrial fibrillation (afib) managed by Digoxin.
+- Regional Trauma: No prior injury to the knee is mentioned, but the patient does have a history of a nose job.
 
-ASSESSMENT AND PLAN:
-- [doctor] okay , let's review your past history for a second
-- we'll have you come back in about a week and see how you're doing , and if it's not better , we'll get an mri at that time
+**Physical Examination & Vitals:**
+No vitals are explicitly reported. 
+- Localized Exam (MSK): The patient has tenderness over the medial portion of her knee, specifically over the medial meniscus area. There is tenderness when valgus stressing is applied to her leg. She has normal sensation in her knee area. No other pain is noted in her calves.
 
-SOURCE: sample_2
+**Assessment & Rationale:**
+1. **Acute medial meniscus sprain or strain [UNCERTAIN]**: Supported by tenderness over the medial meniscus area and the patient's clinical presentation of pain on the inside of her knee, which is aggravated by bending and twisting. X-rays were reviewed. The x-ray of the left knee was reviewed, but it was noted that the injury is to the right knee. The x-ray shows some fluid in the knee. The x-ray shows that everything else is lined up properly. 
+
+**Treatment Plan & Next Steps:**
+- Interventions: The patient will use crutches temporarily for the next couple of days.
+- Immobilization: A knee brace will be used.
+- Medications: Motrin 800 milligrams will be taken every 6 hours with food for 2 weeks.
+- Logistics & Follow-up: The patient will follow up in a week. If symptoms persist, an MRI will be considered at that time. The patient was asked if she had any questions. The medications and procedures discussed were ordered. The report was finalized. The patient was escorted to check out.

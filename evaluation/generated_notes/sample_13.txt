@@ -1,51 +1,33 @@
-<think>
-Alright, let's tackle this step by step. The user wants me to revise the candidate summary by inserting the missing facts listed in the Issues block. The key here is to only add the exact text provided and not change anything else. Let me go through each issue one by one.
+**Chief Complaint:** Andrea, a [age not mentioned]-year-old female presents with left knee pain. Patient initially reported right knee pain but corrected to left knee pain.
 
-First, the missing fact about the trip to Columbus, Georgia for the Lion's Club function. The candidate summary has a section under History of Present Illness. The fix says to add the trip and the concern about line dancing. I need to find where in the existing summary to insert this. The current History of Present Illness mentions the trip in the transcript, so I should add the exact sentence there. Let me check the existing text. The current History of Present Illness ends with the patient's concern about participating in line dancing. The fix adds the trip details, so I'll insert that sentence right after the mention of the trip in the existing text.
+**History of Present Illness:**
+The patient reports experiencing occasional left knee pain, described as the knee "giving out," which occurs less than once a day, typically when walking. The episodes are transient, lasting as long as they take to come on, and are not associated with a specific mechanism of injury. The pain is located internally and around the whole kneecap. The patient does not recall hearing a pop or feeling a sudden onset of pain. The episodes are alleviated by holding onto something, such as a grocery cart. The patient does not take any pain medication for these episodes as they resolve quickly. The patient has a trip planned to Columbus, Georgia, for a Lion's Club function with line dancing, which she's worried about participating in due to her knee pain.
 
-Next, the blood sugar level of 130. The candidate summary under Relevant Medical History mentions diabetes managed by metformin. The fix is to add the blood sugar level. I'll add the exact sentence there, probably in the diabetes section. Let me look at the existing text. The current entry is "diabetes mellitus managed by metformin..." so I'll add the blood sugar fact right after that.
+- **Pertinent Negatives:** Denies any history of trauma to the left knee.
 
-Third, the medication timing at 8:30 AM and PM. The candidate summary under Relevant Medical History lists the medications but not the timing. The fix is to add the exact sentence about taking them at 8:30. I'll insert that after the list of medications.
+**Relevant Medical History:**
+- Conditions: Hypertension, diabetes mellitus, managed by medications.
+- Regional Trauma: Denies any prior injury to the left knee.
 
-Fourth, the patient's uncertainty about using a cane. The candidate summary under History of Present Illness has a section where the doctor asks about a cane. The fix is to add the exact sentence about not needing a cane because she can't keep track. I'll place that in the existing section where the cane is mentioned.
+**Physical Examination & Vitals:**
+- Vitals: BP: 122/70, HR: 72, RR: 16, Temp: 98.2.
+- Systemic Clearances: Lungs clear to auscultation bilaterally, heart exam shows a regular rate and rhythm with a slight 2/6 systolic ejection murmur at the left base.
+- Localized Exam: 
+  - Left knee exam: No ecchymosis, edema, or effusion. No pain to palpation. Full range of motion without any limitations. Negative varus and valgus test.
 
-Fifth, the blood pressure readings at home being 120/70. The candidate summary under Physical Examination & Vitals lists the BP as 122/70. The fix is to add the home readings. I'll add the exact sentence in the Vitals section, probably after the current BP reading.
+**Assessment & Rationale:**
+1. **Knee Pain of Uncertain Etiology**: Supported by the patient's episodic symptoms of the knee "giving out" without a clear traumatic incident or structural abnormality on X-ray. 
+2. **Arthritis**: Suspected, as a possible cause for the knee pain, although no specific radiographic evidence mentioned.
 
-Lastly, the patient eating by 6 PM and not eating late. The candidate summary under Relevant Medical History mentions diet. The fix is to add the exact sentence about eating by 6. I'll insert that in the diet section.
+**Treatment Plan & Next Steps:**
+- Medications: 
+  - Meloxicam 15 mg once daily for knee pain.
+  - Continue current medications for hypertension (lisinopril 20 mg daily, amlodipine, hydrochlorothiazide 20 mg daily, and Farxiga) and diabetes mellitus (metformin).
+- Therapy: Physical therapy to strengthen muscles around the knee, frequency not specified.
+- Diagnostics: 
+  - Echocardiogram to evaluate the heart murmur.
+  - Hemoglobin A1c to assess diabetes control.
+  - Lipid panel.
+- Logistics & Follow-up: The patient is to be scheduled for the echocardiogram. No specific follow-up timeline mentioned.
 
-Now, I need to make sure I don't reorder sections or change existing wording. Each fix should be placed in the most appropriate section header. Let me verify each insertion point again to ensure they fit naturally without altering the structure. Also, check that all the exact wording from the fixes is used and that no other content is changed. Once all six issues are addressed, the summary should be complete with the missing facts inserted correctly.
-</think>
-
-**Chief Complaint:** Andrea, a [age not mentioned]-year-old female presents with left knee pain.  
-
-**History of Present Illness:**  
-The patient reports intermittent left knee pain that occurs occasionally, less than once a day, mainly when walking. The pain is described as the knee "giving out," and she sometimes catches herself to prevent falling. The episodes are brief, lasting as long as they take to come on, and are not associated with any specific mechanism of injury. The pain is located internally and around the whole kneecap. The patient denies hearing or feeling a pop at any point. She also denies any prior injury to the knee. The patient has a trip planned to Columbus, Georgia for a Lion's Club function and is concerned about participating in line dancing due to her knee. The patient does not think a cane would be necessary because she would not be able to keep track of it.  
-
-- **Pertinent Negatives:** Denies prior injury to the knee, denies pain.  
-
-**Relevant Medical History:**  
-- Conditions: Hypertension, diabetes mellitus managed by metformin, Farxiga, amlodipine, lisinopril, and hydrochlorothiazide. The patient's blood sugar has been running a little higher at about 130.  
-- Regional Trauma: Denies prior injury to the left knee.  
-- Medication Timing: The patient takes her medications at 8:30 in the morning and 8:30 at night.  
-- Diet: The patient usually eats by 6 and does not eat late at night.  
-- Blood Pressure: The patient's blood pressure readings at home have been around 120 over 70.  
-
-**Physical Examination & Vitals:**  
-- Vitals: BP: 122/70, HR: 72, RR: 16, Temp: 98.2.  
-- Systemic Clearances: Lungs clear to auscultation bilaterally, heart exam shows a regular rate and rhythm with a slight 2/6 systolic ejection murmur at the left base.  
-- Localized Exam:  
-  - Left knee exam: No ecchymosis, edema, effusion, or pain to palpation. Full range of motion without decreased mobility. Negative varus and valgus test.  
-
-**Assessment & Rationale:**  
-1. **Arthritis of the Left Knee**: Supported by the patient's symptoms and the absence of evidence of fracture or bony abnormality on the left knee X-ray.  
-
-**Treatment Plan & Next Steps:**  
-- Medications:  
-  - Meloxicam 15 milligrams once a day for arthritis.  
-  - Continue current medications for hypertension (lisinopril 20 milligrams a day) and diabetes (metformin).  
-- Therapy: Physical therapy to strengthen the muscles around the left knee, specifics not provided but implied to start soon.  
-- Diagnostics:  
-  - Echocardiogram to evaluate the heart murmur.  
-  - Hemoglobin A1c to assess diabetes control.  
-  - Lipid panel.  
-- Logistics & Follow-up: The patient is to be scheduled for the echocardiogram; no specific follow-up timeline provided.
+The patient takes her medications at 8:30 AM and 8:30 PM daily, using an alarm on her phone to remind her. Her fasting blood sugar has been running higher at about 130, which she attributes to a normal variation in morning blood sugars. The patient is not interested in using a cane due to concerns about tracking it.

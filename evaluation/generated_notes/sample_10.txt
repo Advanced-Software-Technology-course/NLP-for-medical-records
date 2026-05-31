@@ -1,28 +1,25 @@
-**Chief Complaint:** Diana, a [age not mentioned]-year-old female presents with a right wrist injury.
+**Chief Complaint:** Diana, a female of unspecified age, presents with a chief complaint of wrist pain.
 
 **History of Present Illness:**
-The patient reports slipping while walking up and down stairs doing laundry yesterday morning, attempting to catch herself, and subsequently experiencing severe right wrist pain and swelling. The patient confirms the injured wrist is her right wrist. The patient rates her pain a 9 out of 10. The injury occurred yesterday morning. The patient has applied ice and used an ACE wrap at home. The patient has also taken ibuprofen, which provides some relief. Associated symptoms include swelling, bruising, and some tingling, but no numbness. The pain is localized to her wrist. The patient denies pain extending beyond her wrist.
-- **Pertinent Negatives:** Denies prior injury to the right arm.
+The patient reports an injury occurring yesterday morning while walking up and down the stairs, doing laundry, and slipping, which caused her to extend her arms to catch herself, resulting in immediate wrist pain and swelling. Pain is rated 9/10, aggravated by movement, and alleviated by ice and ibuprofen. The patient also used an ACE wrap at home to help alleviate the pain. Associated symptoms include swelling, numbness, tingling, limited range of motion, pain on flexion, pain on extension, pain on radial deviation, and pain on lateral movement. The patient finds it comfortable to keep the arm at a level similar to typing and resting it on a pillow. 
+- **Pertinent Negatives:** No mention of prior similar injuries or other significant symptoms.
 
 **Relevant Medical History:**
-- Conditions: None mentioned.
-- Regional Trauma: Denies prior injury to the right arm.
+- Conditions: None explicitly mentioned.
+- Regional Trauma: The patient denies any prior injury to the affected wrist.
 
 **Physical Examination & Vitals:**
-- Vitals: BP: 140/70, HR: 80, RR: 20, Temp: Not mentioned. The patient's blood pressure is 140/70, which is slightly elevated but likely due to pain.
-- Systemic Clearances: Lungs clear to auscultation bilaterally, no lower edema, palpable pulses in lower legs, normal range of movement in upper extremities except for the right wrist.
-- Localized Exam: 
-  - Visual deformity: Obvious swelling and ecchymosis.
-  - Tenderness: Present throughout the wrist, especially on the inside and outside.
-  - Crepitus: Bony crepitus noted.
-  - Range of Motion: Limited, with pain on flexion, extension, radial deviation, and lateral movement. The patient has difficulty with wrist extension. The patient reports difficulty moving her wrist in any direction. The patient can make a fist but not tightly.
+- Vitals: BP: 140/70, HR: 80, RR: 20, Temp: 97.2.
+- Systemic Clearances: Lungs are clear to auscultation bilaterally, heart has no murmur, rub, or gallop, and lower legs have palpable pulses with no edema.
+- Localized Exam (MSK/Neuro): The patient exhibits swelling, ecchymosis, tenderness on palpation throughout the wrist, and evidence of bony crepitus. Range of motion is limited due to pain, with specific pain on flexion, extension, radial deviation, and lateral movement. The patient can move their wrist towards their arm but only with extreme pain. The patient can make a fist, but not tightly.
 
 **Assessment & Rationale:**
-1. **Colles' Fracture**: Supported by radiographic findings of an extra-articular fracture, proximal to the radial ulnar joint, with dorsal angulation of the distal fracture fragment, and clinical presentation of wrist deformity and pain. The patient's pain is mostly constant but somewhat relieved by ibuprofen. The patient reports that her wrist hurts less when kept at a regular level or elevated on a pillow.
+1. **Colles' Fracture**: Supported by X-ray results showing a fracture and clinical presentation of wrist pain, swelling, and limited range of motion.
+2. **Extra-articular Fracture**: Noted with dorsal angulation of the distal fracture fragment and an associated ulnar styloid fracture. The fracture presents with dorsal angulation of the distal fracture fragment, potentially severe enough to cause a dinner fork deformity, and an associated ulnar styloid fracture.
 
 **Treatment Plan & Next Steps:**
-- Interventions: Surgery (ORIF) to straighten the wrist and secure it with screws, requiring an overnight hospital stay.
-- Immobilization: Brace for six weeks.
-- Medications: Ultram 50mg every six hours for pain.
-- Therapy: Physical therapy three times a week, starting a few weeks after surgery.
-- Logistics & Follow-up: The patient is advised to follow up in a month to assess the need for vacation postponement. Depending on physical therapy assessment, she may be able to perform exercises while on vacation.
+- Interventions: Surgery is recommended to happen as soon as possible, requiring an overnight hospital stay. The patient will undergo surgery, stay overnight, and then wear the brace for six weeks.
+- Immobilization: The patient will be braced for about six weeks.
+- Medications: Ibuprofen (dosage and frequency not specified) and Ultram 50 milligrams every six hours.
+- Therapy: Physical therapy is scheduled to start a few weeks after surgery, likely three times a week, to assess and determine the best course for strengthening the wrist.
+- Logistics & Follow-up: The patient has a vacation planned in a month, which will last for a couple of weeks. The vacation is scheduled to start in a month, and a follow-up appointment will assess whether it can proceed as planned.

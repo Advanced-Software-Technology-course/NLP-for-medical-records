@@ -1,15 +1,24 @@
-CHIEF COMPLAINT:
-[doctor] hello
+**Chief Complaint:** Katherine, a 22-month-old female, presents with problems related to Smith Magenis Syndrome, including difficulties with eating, temperature regulation, and potential kidney issues.
 
-MEDICATIONS:
-- [doctor] so- [doctor] can you start at the beginning ?
-- she also had a dietician , who told us to take her off cow's milk
-- [patient_guest] but so now she is crawling and she is trying to take steps , so think she's doing pretty good
-- [patient_guest] so i give her that milk , water now that she's used to it , and sometimes water with just a little bit of juice
+**History of Present Illness:**
+The patient has a history of problems with eating, where she would stop breathing when eating, and had a hard time regulating her temperature. She also has reflux and was diagnosed with Smith Magenis Syndrome by a neurologist due to her developmental delays, including not sitting by herself at a year old and not walking. The patient's twin was born at a weight of 3 pounds, 13 ounces. The patient is currently crawling and attempting to take steps. Associated symptoms include mild hypotonia of the lower extremities. 
+- **Pertinent Negatives:** Denies nausea/vomiting.
 
-ASSESSMENT AND PLAN:
-- if it's normal , you wo n't need to see me again , but if it's abnormal , you can see me in kennesaw
-- if there are abnormalities on the kidney ultrasound , we will determine next steps and future follow-up
-- the family lives in dallas , georgia , so her follow-up should be at the town center location
+**Relevant Medical History:**
+- Conditions: Smith Magenis Syndrome, reflux, and autism (in her brother).
+- Regional Trauma: No prior injury to the affected area is mentioned.
+- The patient has seen multiple specialists, including a GI doctor, dietician, allergist, neurologist, orthopedic, ophthalmologist, and audiology, due to her complex condition. The patient has a GI doctor due to severe reflux. A dietician recommended removing cow's milk from the patient's diet. The patient was previously on dairy milk, but was switched to a non-dairy milk, specifically ripple pea protein milk.
 
-SOURCE: sample_9
+**Physical Examination & Vitals:**
+- Vitals: Not explicitly stated.
+- Systemic Clearances: Not explicitly stated.
+- Localized Exam: The patient is slightly fussy when examined, has small appearing eyes, mild hypotonia of the lower extremities, and normal external female genitalia.
+
+**Assessment & Rationale:**
+1. **Smith Magenis Syndrome**: Supported by clinical presentation and diagnosis by a neurologist.
+2. **Congenital anomalies of the kidney and urinary tract [UNCERTAIN]**: Potential concern due to the patient's syndrome, but no explicit radiographic findings are mentioned yet.
+
+**Treatment Plan & Next Steps:**
+- Interventions: A kidney ultrasound will be performed today to screen for potential kidney issues.
+- The patient is currently in multiple therapies, including feeding therapy, occupational therapy, physical therapy, and speech therapy. The patient has also been seen by an orthopedic specialist and an ophthalmologist. Additionally, the patient has been seen by an audiologist.
+- Logistics & Follow-up: The patient's age is nearly 2 years, with her birthday being next month. The patient's family resides in Dallas, Georgia. There is no family history of kidney failure, dialysis, or transplant. The patient appears to have a high urine output and fluid intake. The patient has approximately 8 to 10 wet diapers in a 24-hour period. The doctor will call with the results, and next steps will be determined based on the ultrasound findings. The nurse will provide instructions for the ultrasound and have the family complete necessary paperwork. Follow-up should be at the town center location if abnormalities are found on the kidney ultrasound.

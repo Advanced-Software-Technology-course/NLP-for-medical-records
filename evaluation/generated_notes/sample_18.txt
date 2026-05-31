@@ -1,10 +1,36 @@
-CHIEF COMPLAINT:
-[doctor] hi russell how are you what's been going on [patient] well i've been having this sharp pain on the right side of my abdomen below my ribs for the last several days [doctor] i saw my doctor and they ordered a cat scan and said i had a kidney stone and sent me to see a urologist okay well does the pain move or or or go anywhere or does it stay right in that same spot yeah it feels like it goes to my lower abdomen in into my groin okay and is the pain constant or does it come and go it comes and goes when it comes it's it's pretty it's pretty bad i feel like i ca n't find a comfortable position okay and do you notice any any pain when you urinate or when you pee [patient] yeah it kinda burns a little bit [doctor] okay do you notice any blood i do n't think there is any you know frank blood but the urine looks a little dark sometimes okay and what have you taken for the pain i have taken some tylenol but it has n't really helped okay and do you have any nausea vomiting any fever chills i feel nauseated but i'm not vomiting okay is anyone in your in your family had kidney stones yes my father had them and have you had kidney stones before yeah so i i've i've had them but i've been able to pass them but this is taking a lot longer okay well i'm just gon na go ahead and do a physical examination i'm gon na be calling out some of my exam findings and i'm going to explain what what those mean when i'm done okay [patient] okay [doctor] okay so on physical examination of the abdomen on a abdominal exam there is no tenderness to palpation there is no evidence of any rebound or guarding there is no peritoneal signs there is positive cva tenderness on the right flank so essentially what that means russell is that you know you have some tenderness over your over your right kidney and that just means that you might have some inflammation there so i i reviewed the results of the ct scan of your abdomen that the primary care doctor ordered and it does show a
+**Chief Complaint:** Russell, presents with sharp pain on the right side of his abdomen below his ribs for the last several days.
 
-HISTORY OF PRESENT ILLNESS:
-- five centimeter kidney stone located in the proximal right ureter so this the ureter is the duct in which urine passes between the kidney and the bladder there's no evidence of what we call hydronephrosis this means you know swelling of the kidney which is good means that things are still able to get through so let's talk a little bit about my assessment and my plan okay so for your first problem of this acute nephrolithiasis or kidney stone i i wan na go ahead and recommend that you push fluids to help facilitate urination and peeing to help pass the stone i'm going to prescribe oxycodone five milligrams every six to eight hours as needed for pain you can continue to alternate that with some tylenol i'm going to give you a strainer that you can use to strain your urine so that we can see it see the stone when it passes and we can send it for some some tests if that happens i'm also gon na order what we call a basic metabolic panel a urinalysis and a urine culture now i wan na see you again in one to two weeks and if you're still having symptoms we'll have to discuss further treatment such as lithotripsy which is essentially a shock wave procedure in which we sedate you and use shock waves to break up the stone to help it pass we could also do what we call a ureteroscopy which is a small telescope small camera used to go up to to the urethra and bladder and up into the ureter to retrieve the stone so let's see how you do over the next week and i want you to contact me if you're having worsening symptoms okay okay sounds good thank you
+**History of Present Illness:**
+The patient reports sharp pain on the right side of his abdomen below his ribs for the last several days. 
+- Symptoms and complaints:
+  * Sharp pain on the right side of the abdomen below the ribs
+  * Pain radiating to the lower abdomen and into my groin
+  * Burning sensation while urinating, a burning sensation that is described as a little bit
+  * Dark urine, and sometimes the urine looks a little dark
+  * Nausea and nausea without vomiting
+  * Pain that comes and goes, and when it comes, it's pretty bad
+The pain is described as coming and going, with no specific pattern or trigger mentioned. The patient notes that when the pain occurs, it is severe and he cannot find a comfortable position. He also experiences a burning sensation while urinating and notices that his urine looks dark sometimes. He has taken some Tylenol but it hasn't really helped.
 
-MEDICATIONS:
-- five centimeter kidney stone located in the proximal right ureter so this the ureter is the duct in which urine passes between the kidney and the bladder there's no evidence of what we call hydronephrosis this means you know swelling of the kidney which is good means that things are still able to get through so let's talk a little bit about my assessment and my plan okay so for your first problem of this acute nephrolithiasis or kidney stone i i wan na go ahead and recommend that you push fluids to help facilitate urination and peeing to help pass the stone i'm going to prescribe oxycodone five milligrams every six to eight hours as needed for pain you can continue to alternate that with some tylenol i'm going to give you a strainer that you can use to strain your urine so that we can see it see the stone when it passes and we can send it for some some tests if that happens i'm also gon na order what we call a basic metabolic panel a urinalysis and a urine culture now i wan na see you again in one to two weeks and if you're still having symptoms we'll have to discuss further treatment such as lithotripsy which is essentially a shock wave procedure in which we sedate you and use shock waves to break up the stone to help it pass we could also do what we call a ureteroscopy which is a small telescope small camera used to go up to to the urethra and bladder and up into the ureter to retrieve the stone so let's see how you do over the next week and i want you to contact me if you're having worsening symptoms okay okay sounds good thank you
+**Relevant Medical History:**
+- Conditions: The patient has a history of kidney stones and has been able to pass them before, and he has had kidney stones before but was able to pass them. His father also has a history of kidney stones, and a family history of kidney stones, with his father having had them.
 
-SOURCE: sample_18
+**Physical Examination & Vitals:**
+- Vitals: Not explicitly stated.
+- Systemic Clearances: Not explicitly stated.
+- Localized Exam: 
+  * Abdominal exam: The abdominal exam shows no tenderness to palpation, no rebound, no guarding, and no peritoneal signs, and positive CVA tenderness on the right flank, which indicates tenderness over the right kidney and possible inflammation.
+
+**Assessment & Rationale:**
+1. **Acute nephrolithiasis (Kidney stone)**: Supported by the CT scan of the abdomen showing a 0.5 centimeter kidney stone located in the proximal right ureter, and the patient's clinical presentation of sharp pain on the right side of the abdomen, radiating to the lower abdomen and groin, and burning sensation while urinating, and the doctor reviewed the CT scan results of the abdomen. and there is no evidence of hydronephrosis, which means there is no swelling of the kidney, and urine flow is not obstructed.
+
+**Treatment Plan & Next Steps:**
+- Interventions: The patient is advised to push fluids to help facilitate urination and pass the stone, and to push fluids to help pass the stone.
+- Medications: 
+  * Oxycodone 5 milligrams every 6 to 8 hours as needed for pain.
+  * Tylenol to be alternated with oxycodone for pain management, and continue to alternate with Tylenol.
+- Ancillary therapies: The patient is given a strainer to strain his urine to catch the stone when it passes, and to send it for tests, and a strainer to catch the stone when it passes for further testing.
+- Diagnostic tests: 
+  * Basic metabolic panel
+  * Urinalysis
+  * Urine culture, and to order a basic metabolic panel, urinalysis, and urine culture.
+- Logistics & Follow-up: The patient is to follow up in 1 to 2 weeks, and to follow up in 1 to 2 weeks to assess symptoms and discuss further treatment if needed. If symptoms persist, further treatment options such as lithotripsy, a shock wave procedure to break up the stone, or ureteroscopy, which is a small telescope, small camera used to go up to the urethra and bladder and up into the ureter to retrieve the stone may be discussed. The patient is advised to contact the doctor if he experiences worsening symptoms.

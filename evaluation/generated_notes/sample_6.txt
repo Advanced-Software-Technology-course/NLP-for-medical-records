@@ -1,19 +1,36 @@
-CHIEF COMPLAINT:
-[doctor] today i'm seeing christina cooper
+**Chief Complaint:** Christina Cooper, a 65-year-old female, presents with iron deficiency anemia and associated symptoms. Date of birth: 07/01/1954. Referred by: Diane Nelson
 
-HISTORY OF PRESENT ILLNESS:
-- i have been feeling fatigued often during the day , and even feverish with chills at times
-- when i try to be active i like i ca n't catch my breath and i feel like i'm wheezing
-- i've had some headaches too , which is not like me
+**History of Present Illness:**
+The patient reports trying to donate blood in December and being told she was anemic, which is a long-standing issue for her. She has been experiencing:
+- Fatigue
+- Feverish feelings
+- Chills
+- Shortness of breath
+- Wheezing
+- Headaches
+- Chilling sensations
+- Cold intolerance
+- Anxiety
+- Depression
+These symptoms have been ongoing, with no specific onset date mentioned. The patient had a hysterectomy in 1996 due to heavy periods but has not been told why she is anemic. Anemia onset: 13 years old. She had a colonoscopy about 5-6 years ago, which was normal. Last colonoscopy: 5-6 years ago. Colonoscopy results: Normal, next scheduled in 10 years
 
-MEDICATIONS:
-- [patient] i'm taking 25 milligram tablets , twice daily
-- i take one in the morning and one in the evening
-- [patient] yeah , i take vitamin b12 , just the over the counter stuff
-- all right , well let's go ahead and take a look and see what's going on
+**Relevant Medical History:**
+- Conditions: Iron deficiency anemia, managed by ferrous sulfate 25 milligrams, twice daily. The patient also takes over-the-counter Vitamin B12, but the dosage and frequency are not specified. Vitamin B12: Over-the-counter, dosage and frequency not specified
+- Regional Trauma: The patient denies any issues with her gastrointestinal system other than the anemia and previous heavy periods. Pacemaker/defibrillator/sleep apnea/oxygen use: No. Alcohol use: Yes, 1-2 times per year
+- Past surgeries: Hysterectomy: 1996.
 
-ASSESSMENT AND PLAN:
-- they said they'd see me in 10 years
-- unfortunately our cameras do not meet all the way in the middle , so if those tests back , come , if those tests come back fine , then we'll have you swallow a pill camera to take pictures as it moves through your , uh , system
+**Physical Examination & Vitals:**
+- Vitals: Not explicitly stated.
+- Systemic Clearances: The patient's physical exam is normal without any significant findings.
+- Localized Exam: No specific visual deformities, tenderness locations, or crepitus are noted. The patient's abdomen is non-tender to palpation. Sedation history: No issues, just sleepy afterwards. Bowel prep: Yes, to be used ahead of scheduled procedures
 
-SOURCE: sample_6
+**Assessment & Rationale:**
+1. Iron deficiency anemia: Supported by the patient's low hemoglobin, stable hematocrit, and low ferritin levels. Lab results: Low hemoglobin, stable hematocrit, normal iron labs, low ferritin on 01/20/20
+2. [UNCERTAIN] Internal bleeding: Suspected due to the patient's anemia and symptoms, but no explicit evidence is provided.
+3. [UNCERTAIN] GI bleed: Also suspected as a potential cause of the anemia, but no explicit evidence is provided.
+
+**Treatment Plan & Next Steps:**
+- Interventions: The patient is scheduled for an upper endoscopy and colonoscopy to assess for potential sources of anemia or GI bleed. Planned procedures: EGD and colonoscopy to assess for potential sources of anemia or GI bleed. Further testing: Capsule endoscopy if EGD and colonoscopy are inconclusive
+- Medications: Ferrous sulfate 25 milligrams, twice daily, to be taken with orange juice for 8-12 weeks to improve iron absorption. Iron supplementation instructions: Take with orange juice to improve absorption
+- Therapy: None specified.
+- Logistics & Follow-up: The patient is to follow up with a hematologist, Dr. Flores, and schedule the upper endoscopy and colonoscopy. Referral: To Dr. Flores, hematologist. Scheduling instructions: Schedule upper endoscopy and colonoscopy on the way out. Follow-up blood work: Scheduled in 8-12 weeks to reassess iron levels. Patient instructions: Call with questions or worsening symptoms

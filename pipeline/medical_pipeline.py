@@ -37,6 +37,10 @@ from collections.abc import Sequence
 from functools import lru_cache
 from typing import List, Optional
 from openai import OpenAI
+try:
+    from together import Together
+except ImportError:
+    Together = None
 from pathlib import Path
 
 RAG_IMPORT_ERROR = None
@@ -72,10 +76,10 @@ CSV_WHITELIST = [     # filenames to include in RAG; empty list = load all
     "DDI_data_clean.csv",
 ]
 SCORE_CLAMP_FLOOR = 0.75  # confidence floor for exact phrase matches during export
+TOGETHER_PRIMARY_MODEL = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
 GROQ_PRIMARY_MODEL = "llama-3.3-70b-versatile"
 GROQ_FALLBACK_MODELS = [
     "meta-llama/llama-4-scout-17b-16e-instruct",
-    "qwen/qwen3-32b",
     "llama-3.1-8b-instant",
 ]
 
@@ -152,6 +156,58 @@ def _chat_completion_with_fallback(
     raise RuntimeError("No Groq model candidates were available.")
 
 
+def _chat_completion_with_together_fallback(
+    groq_token: str,
+    messages: Sequence[dict],
+    *,
+    max_tokens: int,
+    temperature: float,
+    groq_primary_model: str = GROQ_PRIMARY_MODEL,
+    primary_model: Optional[str] = None,
+    groq_fallback_models: Optional[Sequence[str]] = None,
+    fallback_models: Optional[Sequence[str]] = None,
+    together_primary_model: str = TOGETHER_PRIMARY_MODEL,
+):
+    if primary_model:
+        groq_primary_model = primary_model
+    if groq_fallback_models is None:
+        groq_fallback_models = fallback_models
+
+    together_api_token = os.environ.get("TOGETHER_API_TOKEN") or os.environ.get("TOGETHER_TOKEN")
+    if not together_api_token:
+        token_file = os.path.join(PROJECT_ROOT, ".api_token.json")
+        if os.path.exists(token_file):
+            try:
+                with open(token_file, "r", encoding="utf-8") as handle:
+                    tokens = json.load(handle)
+                together_api_token = tokens.get("together-token") or tokens.get("TOGETHER_API_TOKEN")
+            except (OSError, json.JSONDecodeError, AttributeError):
+                together_api_token = None
+
+    if together_api_token and Together is not None:
+        try:
+            client = Together(api_key=together_api_token)
+            print(f"[Together] Trying model: {together_primary_model}")
+            return client.chat.completions.create(
+                model=together_primary_model,
+                messages=list(messages),
+                max_tokens=max_tokens,
+                temperature=temperature,
+            ), together_primary_model
+        except Exception as exc:
+            print(f"[Together] Request failed; falling back to Groq. Details: {exc}")
+
+    groq_client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token, max_retries=0)
+    return _chat_completion_with_fallback(
+        groq_client,
+        messages,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        primary_model=groq_primary_model,
+        fallback_models=groq_fallback_models,
+    )
+
+
 def _load_custom_vocabulary_config() -> dict:
     if not os.path.exists(CUSTOM_VOCABULARY_PATH):
         return {}
@@ -208,6 +264,40 @@ def _chroma_dir_missing_or_empty() -> bool:
 
 # ── PROMPT TEMPLATES ──────────────────────────────────────────────────────────
 
+SUMMARY_FACT_SHEET_PROMPT_TEMPLATE = """You are a clinical fact extraction engine.
+
+Given the following doctor-patient consultation transcript, extract a structured fact sheet.
+
+VERBATIM EXTRACTION RULES (highest priority):
+- For every blood glucose reading, A1c value, temperature, or lab value: copy the exact number(s) as spoken, including ranges (e.g. "300s to 400s", "spike to 500 or 600"). Never replace with "elevated" or "high".
+- For wound progression: copy the exact sequence of descriptors (e.g. "turned black around the outside", "red streak moving up the leg").
+- For medications: always include name + dosage + frequency + duration as a single bullet. If any component is missing from the transcript, write "[not stated]" for that component rather than omitting the bullet.
+- For prior medical history values (e.g. past A1c, prior treatments): include even if the patient describes them conversationally (e.g. "my A1c was 13", "I was on an insulin pump").
+- For explicit denials: capture as "Denies: [symptom]" (e.g. "Denies nausea/vomiting").
+
+Rules:
+1. Do not write a narrative summary.
+2. Keep each fact as a short bullet.
+3. List symptoms individually, one per bullet, even if they appear together in the transcript.
+4. List all diagnoses mentioned, including secondary, rare, and suspected diagnoses.
+5. Preserve exact procedure names, medication names, dosages, frequencies, and dates verbatim when possible.
+6. If a diagnosis is uncertain or suspected, keep it and mark it with [UNCERTAIN].
+7. Do not invent missing facts.
+8. If a section has no facts, write "- None stated".
+
+Return these sections only:
+- Symptoms / complaints
+- Diagnoses / assessments
+- Medications
+- Procedures / interventions
+- Imaging / exam findings
+- Treatment plan / follow-up
+- Dates / timeline / logistics
+
+Transcript:
+{transcript}
+"""
+
 SUMMARY_PROMPT_TEMPLATE = """You are an expert clinical documentation assistant specializing in highly precise, legally and clinically complete medical charts.
 
 Given the following doctor-patient consultation transcript, generate a comprehensive medical summary. 
@@ -227,20 +317,26 @@ Do not add parenthetical translations like "X (Y)" unless that parenthetical tra
 5. **Timeline & Logistical Precision:** Capture exact dates/timelines of injury, exact postoperative timelines, admission statuses (e.g., "overnight hospital stay"), and specific multi-week follow-up metrics.
 6. **No Placeholder Fabrication:** Do not invent patient demographics, medication names, dosages, exam findings, imaging results, or follow-up details. If they are absent, leave them out.
 7. **Preserve Exact Qualifiers:** Do not collapse nuanced exam wording into a generic normal/abnormal statement. Preserve exact negations and qualifiers such as "not palpable", "present via Doppler", "no bony exposure", and similar phrasing exactly as stated.
+8. **Do Not Generalize Procedures:** Do NOT write generic labels like "surgery", "procedure", or "operation" when the transcript names a specific intervention such as ORIF, arthroplasty, incision and drainage, debridement, reduction, or steroid injection.
+9. **Do Not Collapse Medications:** Do NOT replace exact medication names or dosing instructions with vague phrasing like "medications were prescribed".
+10. **Do Not Drop Diagnoses:** List ALL diagnoses mentioned, including secondary, rare, and suspected diagnoses. Do not omit a diagnosis because it is qualified as uncertain; flag it with [UNCERTAIN] instead.
 
 Retrieved context from medical knowledge base (if any):
 {context_block}
 
+Structured fact sheet extracted from the transcript:
+{fact_sheet_block}
+
 ### Required Sections to Generate:
 - **Chief Complaint:** The primary reason for the visit, including patient name and age if mentioned.
-- **History of Present Illness:** A detailed narrative of the current issue, including the exact date/time of injury, mechanism of injury, exacerbating/alleviating factors, severity score, and relevant 'pertinent negatives'.
+- **History of Present Illness:** Start with a bullet list of all individual symptoms and complaints, then write a detailed narrative of the current issue, including the exact date/time of injury, mechanism of injury, exacerbating/alleviating factors, severity score, and relevant 'pertinent negatives'. Do not merge symptoms into a single item.
 - **Relevant Medical History:** Past diagnoses, previous regional injuries (or explicitly note if denied), and current status.
 - **Physical Examination & Vitals:** Document all vitals. Exhaustively list all objective findings by system (HEENT, CV, Respiratory, MSK, Neuro, etc.) exactly as reported. Include specific physical deformities, crepitus, and specific limitations.
 - **Assessment & Rationale:** The exact diagnoses/working diagnoses and the specific radiographic or clinical evidence supporting them.
 - **Treatment Plan & Next Steps:** Exact medications (with precise dosages/frequencies), specific surgical interventions, exact immobilization types, specific ancillary therapies (with weekly frequency), and concrete follow-up timelines. Address logistical notes (e.g., vacations, work status) exactly as discussed.
 
 Always flag any parts you are uncertain about with '[UNCERTAIN]'. Use it only where the transcript is genuinely ambiguous, incomplete, or contradictory. Do not attach '[UNCERTAIN]' to facts that are explicitly stated.
-
+ 
 Transcript:
 {transcript}
 
@@ -275,9 +371,14 @@ The patient reports [Onset/Mechanism] occurring on [Exact Date/Timeline]. Pain i
 
 EVALUATOR_PROMPT_TEMPLATE = """You are a clinical documentation auditor.
 
-Task: Compare the candidate summary to the transcript and RETURN ONLY FACTS THAT ARE
-PRESENT IN THE TRANSCRIPT BUT MISSING FROM THE CANDIDATE SUMMARY. Do NOT list
-style, wording, ordering, or paraphrasing differences — only missing facts.
+Task: Compare the candidate summary to the transcript for the following focus: {focus_name}.
+
+Verify: (a) all symptoms named, (b) all diagnoses with supporting evidence, (c) all medications with dosage/frequency, (d) all procedure names verbatim.
+
+Return ONLY facts that are present in the transcript but missing from the candidate summary. Do NOT list style, wording, ordering, or paraphrasing differences.
+
+Focus guidance:
+{focus_guidance}
 
 If there are no missing facts, respond with exactly: NO_MISSING_FACTS
 
@@ -1126,6 +1227,138 @@ def build_context_block(
     
     return "\n".join(parts) if parts else ""
 
+
+_CHIEF_COMPLAINT_HEADER_RE = re.compile(r"(^|\n)\s*(\*\*)?\s*(chief complaint|cc)\s*[:\-]", flags=re.IGNORECASE)
+_THINK_TAG_RE = re.compile(r"<\s*/?\s*think\b", flags=re.IGNORECASE)
+
+
+def _has_minimal_note_structure(note_text: str) -> bool:
+    text = (note_text or "").strip()
+    if not text:
+        return False
+    return bool(_CHIEF_COMPLAINT_HEADER_RE.search(text))
+
+
+def _looks_like_invalid_model_output(note_text: str) -> bool:
+    text = (note_text or "").strip()
+    if not text:
+        return True
+    lower = text.casefold()
+    if _THINK_TAG_RE.search(text):
+        return True
+    if lower.count("wait, no") >= 3:
+        return True
+    return False
+
+
+def _ensure_chief_complaint_header(note_text: str) -> str:
+    text = (note_text or "").strip()
+    if not text:
+        return "**Chief Complaint:** Not clearly stated."
+    if _has_minimal_note_structure(text):
+        return text
+    return f"**Chief Complaint:** Not clearly stated.\n\n{text}"
+
+
+def _extract_fact_sheet(
+    transcript: str,
+    groq_token: str,
+) -> str:
+    print("── Step 2/4: Fact Sheet Extraction ──")
+    prompt = SUMMARY_FACT_SHEET_PROMPT_TEMPLATE.format(transcript=transcript)
+
+    response, used_model = _chat_completion_with_together_fallback(
+        groq_token,
+        [{"role": "user", "content": prompt}],
+        max_tokens=1800,
+        temperature=0.0,
+        fallback_models=GROQ_FALLBACK_MODELS,
+    )
+    print(f"[LLM] Fact sheet model used: {used_model}")
+
+    fact_sheet = response.choices[0].message.content.strip()
+    if _looks_like_invalid_model_output(fact_sheet):
+        print("[Guard] Fact sheet output failed validation; retrying with stricter formatting rules.")
+        retry_prompt = (
+            f"{prompt}\n\n"
+            "Hard output rules:\n"
+            "- Return only the structured fact sheet sections.\n"
+            "- Do not add prose, commentary, or extra headings.\n"
+            "- Keep symptoms, diagnoses, medications, and procedures as bullet lists."
+        )
+        retry_response, retry_model = _chat_completion_with_together_fallback(
+            groq_token,
+            [{"role": "user", "content": retry_prompt}],
+            max_tokens=1800,
+            temperature=0.0,
+            fallback_models=GROQ_FALLBACK_MODELS,
+        )
+        print(f"[LLM] Fact sheet retry model used: {retry_model}")
+        retry_fact_sheet = retry_response.choices[0].message.content.strip()
+        if not _looks_like_invalid_model_output(retry_fact_sheet):
+            fact_sheet = retry_fact_sheet
+
+    print("[Groq] Fact sheet extraction result:\n")
+    print(fact_sheet)
+    print()
+    return fact_sheet
+
+
+def _run_summary_quality_pass(
+    transcript: str,
+    summary: str,
+    groq_token: str,
+    *,
+    focus_name: str,
+    focus_guidance: str,
+    output_language: str,
+) -> str:
+    print(f"── Summary Evaluation: {focus_name} ──")
+    eval_prompt = EVALUATOR_PROMPT_TEMPLATE.format(
+        transcript=transcript,
+        summary=summary,
+        output_language=output_language,
+        focus_name=focus_name,
+        focus_guidance=focus_guidance,
+    )
+    eval_response, eval_model = _chat_completion_with_together_fallback(
+        groq_token,
+        [{"role": "user", "content": eval_prompt}],
+        max_tokens=1200,
+        temperature=0.1,
+        primary_model=GROQ_FALLBACK_MODELS[0],
+        fallback_models=GROQ_FALLBACK_MODELS[1:],
+    )
+    print(f"[LLM] Evaluation model used ({focus_name}): {eval_model}")
+    eval_text = eval_response.choices[0].message.content.strip()
+
+    if ("no_issues" in eval_text.casefold()) or ("no_missing_facts" in eval_text.casefold()):
+        print(f"Summary evaluation ({focus_name}): no missing facts found.\n")
+        return summary
+
+    refine_prompt = REFINER_PROMPT_TEMPLATE.format(
+        transcript=transcript,
+        summary=summary,
+        issues=eval_text,
+        output_language=output_language,
+    )
+    refine_response, refine_model = _chat_completion_with_together_fallback(
+        groq_token,
+        [{"role": "user", "content": refine_prompt}],
+        max_tokens=1500,
+        temperature=0.1,
+        primary_model=GROQ_FALLBACK_MODELS[0],
+        fallback_models=GROQ_FALLBACK_MODELS[1:],
+    )
+    print(f"[LLM] Refinement model used ({focus_name}): {refine_model}")
+    refined_summary = refine_response.choices[0].message.content.strip()
+
+    if _looks_like_invalid_model_output(refined_summary):
+        print(f"[Guard] Refined summary output invalid for {focus_name}; keeping previous version.")
+        return summary
+
+    return _ensure_chief_complaint_header(refined_summary)
+
 # ── SUMMARIZATION ─────────────────────────────────────────────────────────────
 
 def summarize_transcript(
@@ -1135,70 +1368,62 @@ def summarize_transcript(
     suggested_codes: Optional[List[dict]] = None,
 ) -> str:
     print("── Step 3/4: Summary ──")
-    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token, max_retries=0)
     output_language = _prompt_language_name(transcript)
 
     context_block = build_context_block(rag_context, "", suggested_codes=suggested_codes)
+    fact_sheet = _extract_fact_sheet(transcript, groq_token)
     prompt = SUMMARY_PROMPT_TEMPLATE.format(
         transcript=transcript,
         context_block=context_block,
+        fact_sheet_block=fact_sheet,
         output_language=output_language,
     )
 
-    response, used_model = _chat_completion_with_fallback(
-        client,
+    response, used_model = _chat_completion_with_together_fallback(
+        groq_token,
         [{"role": "user", "content": prompt}],
-        max_tokens=3000,
+        max_tokens=1800,
         temperature=0.2,
         fallback_models=GROQ_FALLBACK_MODELS,
     )
-    print(f"[Groq] Summary model used: {used_model}")
+    print(f"[LLM] Summary model used: {used_model}")
 
     summary = response.choices[0].message.content.strip()
+    if _looks_like_invalid_model_output(summary) or not _has_minimal_note_structure(summary):
+        print("[Guard] Initial summary output failed validation; retrying with strict structure rules.")
+        guarded_summary_prompt = (
+            f"{prompt}\n\n"
+            "Hard output rules:\n"
+            "- Return only the final note text (no reasoning, no <think> tags).\n"
+            "- The note must include a Chief Complaint section header.\n"
+            "- Use exactly this header format at minimum: **Chief Complaint:**"
+        )
+        retry_response, retry_model = _chat_completion_with_together_fallback(
+            groq_token,
+            [{"role": "user", "content": guarded_summary_prompt}],
+            max_tokens=1200,
+            temperature=0.0,
+            fallback_models=GROQ_FALLBACK_MODELS,
+        )
+        print(f"[LLM] Guarded summary retry model used: {retry_model}")
+        retry_summary = retry_response.choices[0].message.content.strip()
+        if not _looks_like_invalid_model_output(retry_summary):
+            summary = retry_summary
 
-    print("── Step 3b/4: Summary Evaluation ──")
-    eval_prompt = EVALUATOR_PROMPT_TEMPLATE.format(
-        transcript=transcript,
-        summary=summary,
+    summary = _ensure_chief_complaint_header(summary)
+    summary = _run_summary_quality_pass(
+        transcript,
+        summary,
+        groq_token,
+        focus_name="overall completeness",
+        focus_guidance=(
+            "Check ALL of the following for missing facts: symptoms, complaint locations, pain descriptors, and patient-reported changes; diagnoses, assessments, and suspected diagnoses; medications with exact name, dosage, and frequency; procedures with exact intervention names; treatment plan details including referrals, tests, imaging, home care, activity restrictions, self-monitoring instructions, and therapy; follow-up timelines and appointment instructions."
+        ),
         output_language=output_language,
     )
-    eval_response, eval_model = _chat_completion_with_fallback(
-        client,
-        [{"role": "user", "content": eval_prompt}],
-        max_tokens=600,
-        temperature=0.1,
-        primary_model=GROQ_FALLBACK_MODELS[0],
-        fallback_models=GROQ_FALLBACK_MODELS[1:],
-    )
-    print(f"[Groq] Evaluation model used: {eval_model}")
-    eval_text = eval_response.choices[0].message.content.strip()
-
-    # Accept either legacy token or new missing-facts token to preserve backward compatibility
-    if ("no_issues" in eval_text.casefold()) or ("no_missing_facts" in eval_text.casefold()):
-        print("Summary evaluation: no missing facts found.\n")
-        print("Summary complete.\n")
-        return summary
-
-    print("── Step 3c/4: Summary Refinement ──")
-    refine_prompt = REFINER_PROMPT_TEMPLATE.format(
-        transcript=transcript,
-        summary=summary,
-        issues=eval_text,
-        output_language=output_language,
-    )
-    refine_response, refine_model = _chat_completion_with_fallback(
-        client,
-        [{"role": "user", "content": refine_prompt}],
-        max_tokens=3000,
-        temperature=0.1,
-        primary_model=GROQ_FALLBACK_MODELS[0],
-        fallback_models=GROQ_FALLBACK_MODELS[1:],
-    )
-    print(f"[Groq] Refinement model used: {refine_model}")
-    refined_summary = refine_response.choices[0].message.content.strip()
 
     print("Summary complete.\n")
-    return refined_summary
+    return summary
 
 
 def summarize_soap_notes(
@@ -1208,7 +1433,6 @@ def summarize_soap_notes(
     suggested_codes: Optional[List[dict]] = None,
 ) -> str:
     print("── Step 4/4: SOAP Notes ──")
-    client = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_token, max_retries=0)
     output_language = _prompt_language_name(transcript)
 
     context_block = build_context_block(rag_context, "", suggested_codes=suggested_codes)
@@ -1218,14 +1442,14 @@ def summarize_soap_notes(
         output_language=output_language,
     )
 
-    response, used_model = _chat_completion_with_fallback(
-        client,
+    response, used_model = _chat_completion_with_together_fallback(
+        groq_token,
         [{"role": "user", "content": prompt}],
         max_tokens=2000,
         temperature=0.1,
         fallback_models=GROQ_FALLBACK_MODELS,
     )
-    print(f"[Groq] SOAP model used: {used_model}")
+    print(f"[LLM] SOAP model used: {used_model}")
 
     soap_notes = response.choices[0].message.content.strip()
 

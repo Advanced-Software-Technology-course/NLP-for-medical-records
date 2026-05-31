@@ -1,19 +1,38 @@
-CHIEF COMPLAINT:
-[doctor] patient , bruce ward
+**Chief Complaint:** Bruce Ward, a 52-year-old male, presents with worsening headaches.
 
-HISTORY OF PRESENT ILLNESS:
-- howard , on 3/1/21 complaining of worsening headaches over the past few months
-- he denied any trouble with headaches in the past
-- [doctor] worked out for worsening headaches was initiated with brain mri and serology where pituitary lesion was incidentally discovered
+**History of Present Illness:**
+The patient reports worsening headaches over the past few months, with an onset approximately three months ago. The headaches are rated 6/10, are located behind his eyes, and are described as a dull, nagging ache. The headaches are worse in the morning and last a few hours at a time. The patient denies any associated symptoms such as nausea, vomiting, fever, rash, neck stiffness, numbness, weakness, or passing out. The patient also reports recently bumping into door frames.
 
-MEDICATIONS:
-- let's see , do you have any other medical problems that you take medicine for ?
-- [patient] no i do n't have any medical problems and i do n't take any medicines
-- um , well let me take a good look at you
+- **Pertinent Negatives:** Denies trouble with headaches in the past, nausea, vomiting, fever, rash, neck stiffness, numbness, weakness, or passing out.
 
-ASSESSMENT AND PLAN:
-- i personally reviewed the labs dated 3/3/21 including cbc , unes , uh , coagulation , and crp
-- um , i personally reviewed pertinent radiology studies including mri for the brain with contrast from 3/4/21
-- [doctor] i was just reviewing your records from dr
+**Relevant Medical History:**
+- Conditions: None.
+- Regional Trauma: Denies prior injury to the affected area.
+- Past clinical history is unremarkable. The patient's date of birth is 5/21/1969.
 
-SOURCE: sample_7
+**Social History:**
+The patient works as a computer programmer and has been married for 25 years.
+
+**Physical Examination & Vitals:**
+- Vitals: Not explicitly stated.
+- Systemic Clearances: Not explicitly stated.
+- Localized Exam (MSK/Neuro): 
+  - Cranial nerve examination is grossly intact.
+  - No focal motor or sensory deficit in the upper or lower extremities.
+  - Visual acuity and eye movements are normal.
+  - Pupils are equal and reactive.
+  - Visual field testing reveals bitemporal hemianopia.
+  - Color vision is normal.
+
+**Assessment & Rationale:**
+1. **Pituitary Adenoma**: Supported by MRI findings showing a well-defined mass compressing the optic chiasm and clinical presentation of bitemporal hemianopia. The patient presented to his primary care provider, Dr. Howard, on 3/1/21. The patient is seen in consultation at the request of Dr. Henry Howard for possible surgical intervention.
+
+**Laboratory and Imaging Results:**
+The pituitary hormone profile demonstrates a low TSH, and all other results were normal.
+
+**Treatment Plan & Next Steps:**
+- Interventions: Transsphenoidal approach surgery to excise and decompress the pituitary fossa.
+- Risks discussed include anesthesia risks (heart attack, stroke, death) and surgical risks (infection, need for further surgery, wound issues, seizure, stroke, permanent numbness, weakness, difficulty speaking, or death).
+- Visual field test to be conducted prior to surgery for baseline.
+- The patient will be scheduled for surgery and a visual field test.
+- Follow-up: We can monitor after surgery to see if your vision is improving.

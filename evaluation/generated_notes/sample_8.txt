@@ -1,20 +1,30 @@
-CHIEF COMPLAINT:
-[doctor] next is betty hill , uh , date of birth is 2/21/1968
+**Chief Complaint:** Betty Hill, The patient was born on 2/21/1968, a 54-year-old female, presents with a history of chest pain and difficulty swallowing.
 
-HISTORY OF PRESENT ILLNESS:
-- when i called to make the appointment , i was having chest pains , but it stopped after four days , and i have n't had any since then
-- when did these four days of chest pain occur ?
-- can you think of anything that might have caused the chest pain ?
+**History of Present Illness:**
+The patient is a new patient with a referral from the ER for esophagitis. The patient reports experiencing chest pains that occurred over four days in early October 2020. The patient describes the pain as sharp and located in the center of her chest, right behind her breastbone, and felt like she was having a heart attack. The pain was aggravated by eating and associated with difficulty swallowing. The ER thought it might be related to the GI system. These symptoms resolved about three days after she went to the emergency room. The patient reports that the chest pains stopped after four days, and she hasn't had any since then. 
 
-MEDICATIONS:
-- [doctor] did they prescribe you any medications in the er ?
-- if you wan na lay down here on the table for me and lets take a look at you
-- [doctor] so we could do an , uh , egd or upper endoscopy to take a look at your esophagus and stomach
-- the other option is just to continue to monitor , uh , for any additional symptoms at which point we could do the egd
+- **Pertinent Negatives:** Denies having chest pain or difficulty swallowing since the initial episode three months ago. The patient is unsure about having heartburn.
 
-ASSESSMENT AND PLAN:
-- um , i reviewed our records from the er , including the normal cardiac workup , and we're about to go in and see her now
-- if not , you can follow up with me
-- follow up with me as needed for any other gi complaints
+**Relevant Medical History:**
+- The patient has a history of uterine fibroids and anemia.
+- Past Surgical History: The patient had a cholecystectomy (gallbladder removal) several years ago.
+- Regional Trauma: Denies.
 
-SOURCE: sample_8
+**Physical Examination & Vitals:**
+- Vitals: Not explicitly documented.
+- Systemic Clearances: Not explicitly documented.
+- Localized Exam: 
+  - Abdomen: The patient denies abdominal pain. When examined, she has mild tenderness to light palpation in the upper abdominal quadrants. No tenderness in the lower belly when the doctor push on it.
+
+**Assessment & Rationale:**
+1. Possible etiologies include GERD, dyspepsia, esophagitis, musculoskeletal etiologies, and anxiety.
+2. Suspected anxiety attack related to her job transition, potentially contributing to her symptoms. The patient has been trying to lose weight.
+
+**Treatment Plan & Next Steps:**
+- Interventions: 
+  - Patient elected to monitor symptoms rather than undergoing an EGD (esophagogastroduodenoscopy) at this time.
+- Medications: None prescribed during this visit.
+- Therapy: None scheduled at this time.
+- Logistics & Follow-up: 
+  - Patient will call the office if she experiences any additional episodes of pain or other concerning symptoms.
+  - Follow-up as needed for any other GI complaints.

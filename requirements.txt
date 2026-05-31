@@ -8,6 +8,7 @@ flask-cors>=4.0.0
 
 # Groq / OpenAI-compatible API client
 openai>=2.26.0
+together>=1.0.0
 
 # HTTP requests (Gladia API calls)
 requests>=2.32.5
