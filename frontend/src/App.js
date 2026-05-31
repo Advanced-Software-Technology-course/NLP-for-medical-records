@@ -5,12 +5,15 @@ import TranscriptPage from './Pages/TranscriptPage';
 import SummaryPage from './Pages/SummaryPage';
 import SettingsPage from './Pages/SettingPage';
 import HistoryPage from './Pages/HistoryPage';
+import CreateDoctorPage from './Pages/CreateDoctorPage';
+import CreatePatientPage from './Pages/CreatePatientPage';
 
 export default function App() {
   const [active, setActive] = useState('Home');
   const [duration, setDuration] = useState('00:00');
   const [consultationData, setConsultationData] = useState(null);
   const [sessionData, setSessionData] = useState({ doctorName: '', patientName: '' });
+  const [audioUrl, setAudioUrl] = useState(null);
 
   const handleNavigate = (page, props) => {
     if (props?.doctorName || props?.patientName) {
@@ -18,18 +21,19 @@ export default function App() {
     }
     if (props?.data) setConsultationData(props.data);
     if (props?.duration) setDuration(props.duration);
+    if (props?.audioUrl) setAudioUrl(props.audioUrl);
     setActive(page);
   };
 
   const handleLoadConsultation = (c) => {
-  setConsultationData(c);
-  setDuration(c.duration ?? '—');
-  setSessionData({
-    doctorName:  c.doctorName  ?? c.doctor_name  ?? '',
-    patientName: c.patientName ?? c.patient_name ?? '',
-  });
-  setActive('Summary');
-};
+    setConsultationData(c);
+    setDuration(c.duration ?? '—');
+    setSessionData({
+      doctorName:  c.doctorName  ?? c.doctor_name  ?? '',
+      patientName: c.patientName ?? c.patient_name ?? '',
+    });
+    setActive('Summary');
+  };
 
   const renderPage = () => {
     switch (active) {
@@ -49,6 +53,7 @@ export default function App() {
             patientName={sessionData.patientName}
             duration={duration}
             data={consultationData}
+            audioUrl={audioUrl}
           />
         );
       case 'Summary':
@@ -68,6 +73,10 @@ export default function App() {
             onLoadConsultation={handleLoadConsultation}
           />
         );
+      case 'Doctors':
+        return <CreateDoctorPage onNavigate={setActive} />;
+      case 'Patients':
+        return <CreatePatientPage onNavigate={setActive} />;
       default:
         return <SettingsPage />;
     }
