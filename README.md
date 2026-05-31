@@ -105,7 +105,7 @@ The system consists of:
 
 ---
 
-# Project Structure
+# Project Structure (Most important parts)
 
 ```text
 NLP-for-medical-records/
@@ -451,13 +451,11 @@ python pipeline/medical_pipeline.py \
 
 Audio Upload
 
-↓
 
 ## Step 2
 
 Audio Quality Analysis
 
-↓
 
 ## Step 3
 
@@ -467,7 +465,6 @@ Audio Preprocessing
 * Normalization
 * Noise reduction
 
-↓
 
 ## Step 4
 
@@ -477,31 +474,26 @@ Gladia Transcription
 * Diarization
 * Confidence scoring
 
-↓
 
 ## Step 5
 
 ICD-10 Lookup
 
-↓
 
 ## Step 6
 
 RAG Context Retrieval
 
-↓
 
 ## Step 7
 
 Groq Summary Generation
 
-↓
 
 ## Step 8
 
 SOAP Note Generation
 
-↓
 
 ## Step 9
 
