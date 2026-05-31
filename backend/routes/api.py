@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from models import db
@@ -139,7 +140,8 @@ def process_audio():
             patient_id=int(patient_id),
             transcript=transcript,
             summary=summary,
-            soap_notes=soap_notes
+            soap_notes=soap_notes,
+            sentence_confidences=json.dumps(sentence_confidences or [])
         )
         db.session.add(consultation)
         db.session.commit()
@@ -147,6 +149,7 @@ def process_audio():
         return jsonify({
             'message': 'Processing complete',
             'data': {
+                'id': consultation.id,
                 'transcript': transcript,
                 'summary': summary,
                 'soap_notes': soap_notes,
@@ -165,3 +168,44 @@ def process_audio():
 def get_history():
     consultations = md.Consultation.query.order_by(md.Consultation.created_at.desc()).all()
     return jsonify([c.to_dict() for c in consultations]), 200
+
+
+@api_bp.route('/consultations/<int:consultation_id>', methods=['PATCH'])
+def update_consultation(consultation_id):
+    """
+    Update the editable fields of a consultation (AI summary and/or SOAP notes).
+    This is what makes a doctor's edits persist when they revisit the note in History.
+
+    Accepts JSON with any of:
+      - summary: str               → the edited AI summary
+      - soap: { subjective, objective, assessment, plan }  → edited SOAP fields
+    """
+    consultation = md.Consultation.query.get(consultation_id)
+    if not consultation:
+        return jsonify({'error': 'Consultation not found'}), 404
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    if 'summary' in data:
+        consultation.summary = data['summary']
+
+    if 'soap' in data and isinstance(data['soap'], dict):
+        soap = data['soap']
+        # Re-serialize into the labelled text format that parse_soap_notes() understands,
+        # so the structured note round-trips correctly on the next load.
+        consultation.soap_notes = (
+            f"Subjective: {soap.get('subjective', '').strip()}\n"
+            f"Objective: {soap.get('objective', '').strip()}\n"
+            f"Assessment: {soap.get('assessment', '').strip()}\n"
+            f"Plan: {soap.get('plan', '').strip()}"
+        )
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+    return jsonify({'message': 'Consultation updated', 'data': consultation.to_dict()}), 200

@@ -13,6 +13,7 @@ export default function App() {
   const [duration, setDuration] = useState('00:00');
   const [consultationData, setConsultationData] = useState(null);
   const [sessionData, setSessionData] = useState({ doctorName: '', patientName: '' });
+  const [audioUrl, setAudioUrl] = useState(null);
 
   const handleNavigate = (page, props) => {
     if (props?.doctorName || props?.patientName) {
@@ -20,6 +21,7 @@ export default function App() {
     }
     if (props?.data) setConsultationData(props.data);
     if (props?.duration) setDuration(props.duration);
+    if (props?.audioUrl) setAudioUrl(props.audioUrl);
     setActive(page);
   };
 
@@ -51,6 +53,7 @@ export default function App() {
             patientName={sessionData.patientName}
             duration={duration}
             data={consultationData}
+            audioUrl={audioUrl}
           />
         );
       case 'Summary':

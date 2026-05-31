@@ -1,5 +1,6 @@
 from db import db
 from datetime import datetime
+import json
 import re
 
 class Doctor(db.Model):
@@ -57,7 +58,20 @@ class Consultation(db.Model):
     transcript = db.Column(db.Text, nullable=True)
     summary = db.Column(db.Text, nullable=True)
     soap_notes = db.Column(db.Text, nullable=True)
+    # Per-sentence transcription confidence data, stored as a JSON string so
+    # the confidence colouring on the Transcript page survives a reload from History.
+    sentence_confidences = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def get_sentence_confidences(self):
+        """Return the stored sentence confidences as a Python list (empty if none/invalid)."""
+        if not self.sentence_confidences:
+            return []
+        try:
+            data = json.loads(self.sentence_confidences)
+            return data if isinstance(data, list) else []
+        except (ValueError, TypeError):
+            return []
 
     def parse_soap_notes(self):
         """Attempts to parse the SOAP notes string into a dictionary."""
@@ -105,5 +119,6 @@ class Consultation(db.Model):
             "transcript": self.transcript,
             "aiSummary": self.summary,
             "soap": self.parse_soap_notes(),
+            "sentence_confidences": self.get_sentence_confidences(),
             "created_at": self.created_at.isoformat()
         }

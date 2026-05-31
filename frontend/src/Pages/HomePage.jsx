@@ -61,10 +61,10 @@ function RecordingCircle({ seconds }) {
 
 // ── Help popup ────────────────────────────────────────────────────────────────
 const HELP_STEPS = [
-  { title: "Start Recording", desc: 'Tap "Start Recording" — you\'ll be asked to fill in session details first.' },
-  { title: "Fill in Details", desc: "Enter the doctor name, patient name, and date of birth. Other fields are optional." },
-  { title: "Timer Runs", desc: "The timer tracks the duration of your recording in real time." },
-  { title: "Stop & Proceed", desc: "Hit the red stop button to end the session and go to the transcript." },
+  { title: "Start Recording", desc: 'Tap "Start Recording" — you\'ll be asked to give consent first.' },
+  { title: "Give Consent", desc: "Confirm you have the patient's permission to record the session." },
+  { title: "Fill in Details", desc: "Select the doctor and patient before recording begins." },
+  { title: "Stop & Proceed", desc: "Hit the stop button to end the session and go to the transcript." },
   { title: "Review Transcript", desc: "Read through the auto-generated transcript on the next page." },
 ];
 
@@ -121,6 +121,88 @@ function HelpPopup({ onClose }) {
   );
 }
 
+// ── Consent Modal ─────────────────────────────────────────────────────────────
+function ConsentModal({ onConfirm, onCancel }) {
+  const [consentChecked, setConsentChecked] = useState(false);
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 200,
+      background: "rgba(15,23,42,0.4)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 16,
+    }}>
+      <div style={{
+        background: "#fff", borderRadius: 20, padding: "28px 28px 24px",
+        width: "100%", maxWidth: 420, boxShadow: "0 8px 48px rgba(30,58,138,0.12)",
+      }}>
+        <div style={{ marginBottom: 24 }}>
+          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#1e3a8a" }}>
+            Recording Consent
+          </h3>
+          <p style={{ margin: "8px 0 0", fontSize: 14, color: "#64748b", lineHeight: 1.6 }}>
+            Before proceeding, please acknowledge that you have consent to record this consultation.
+          </p>
+        </div>
+
+        <div style={{
+          background: "#f8fafc", borderRadius: 12, padding: 16, marginBottom: 24,
+          border: "1px solid #e2e8f0",
+        }}>
+          <p style={{ margin: 0, fontSize: 13, color: "#475569", lineHeight: 1.6, fontWeight: 500 }}>
+            This session will be <strong>recorded and transcribed</strong> for medical documentation purposes. The recording includes:
+          </p>
+          <ul style={{ margin: "8px 0 0", paddingLeft: 20, fontSize: 13, color: "#475569" }}>
+            <li>Audio recording of the consultation</li>
+            <li>Automatic transcription and processing</li>
+            <li>Storage for medical records</li>
+          </ul>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 24 }}>
+          <input
+            type="checkbox"
+            id="consent-check"
+            checked={consentChecked}
+            onChange={(e) => setConsentChecked(e.target.checked)}
+            style={{ width: 18, height: 18, cursor: "pointer", marginTop: 2, accentColor: "#2563eb", flexShrink: 0 }}
+          />
+          <label htmlFor="consent-check" style={{ fontSize: 13, color: "#374151", cursor: "pointer", lineHeight: 1.5 }}>
+            I have obtained consent from the patient and agree to record this consultation
+          </label>
+        </div>
+
+        <div style={{ display: "flex", gap: 12 }}>
+          <button
+            onClick={onCancel}
+            style={{
+              flex: 1, height: 40, borderRadius: 40,
+              border: "0.5px solid rgba(0,0,0,0.15)",
+              background: "transparent", fontSize: 14, fontWeight: 600,
+              color: "#64748b", cursor: "pointer", fontFamily: "inherit",
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => consentChecked && onConfirm()}
+            disabled={!consentChecked}
+            style={{
+              flex: 1.5, height: 40, borderRadius: 40, border: "none",
+              background: consentChecked ? "#2563eb" : "#cbd5e1",
+              color: "#fff", fontSize: 14, fontWeight: 700,
+              cursor: consentChecked ? "pointer" : "not-allowed",
+              fontFamily: "inherit", transition: "all 0.2s",
+            }}
+          >
+            I Agree →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Session Modal ─────────────────────────────────────────────────────────────
 const CONSULTATION_TYPES = ["General", "Follow-up", "Specialist", "Emergency"];
 const LANGUAGES = ["English", "Hungarian", "German", "French", "Spanish"];
@@ -130,10 +212,7 @@ function SessionModal({ onConfirm, onCancel, onNavigate }) {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
-    doctorId: "",
-    patientId: "",
-    consultationType: "",
-    language: "English",
+    doctorId: "", patientId: "", consultationType: "", language: "English",
   });
   const [errors, setErrors] = useState({});
 
@@ -165,14 +244,10 @@ function SessionModal({ onConfirm, onCancel, onNavigate }) {
   const handleSubmit = () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    const doctor = doctors.find(d => String(d.id) === String(form.doctorId));
+    const doctor  = doctors.find(d => String(d.id) === String(form.doctorId));
     const patient = patients.find(p => String(p.id) === String(form.patientId));
-    const doctorName = doctor
-      ? [doctor.title, doctor.first_name, doctor.last_name].filter(Boolean).join(" ")
-      : "";
-    const patientName = patient
-      ? [patient.title, patient.first_name, patient.last_name].filter(Boolean).join(" ")
-      : "";
+    const doctorName  = doctor  ? [doctor.title,  doctor.first_name,  doctor.last_name].filter(Boolean).join(" ")  : "";
+    const patientName = patient ? [patient.title, patient.first_name, patient.last_name].filter(Boolean).join(" ") : "";
     onConfirm({ ...form, doctorName, patientName });
   };
 
@@ -215,9 +290,7 @@ function SessionModal({ onConfirm, onCancel, onNavigate }) {
         boxShadow: "0 8px 48px rgba(30,58,138,0.12)",
       }}>
         <div style={{ marginBottom: 20 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1e3a8a" }}>
-            Session details
-          </h3>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1e3a8a" }}>Session details</h3>
           <p style={{ margin: "4px 0 0", fontSize: 13, color: "#64748b", lineHeight: 1.5 }}>
             Select a doctor and patient before the recording begins.
           </p>
@@ -227,11 +300,8 @@ function SessionModal({ onConfirm, onCancel, onNavigate }) {
           <p style={{ color: "#94a3b8", fontSize: 14, textAlign: "center", padding: "20px 0" }}>Loading…</p>
         ) : (
           <>
-            {/* Doctor select */}
             <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>
-                Doctor <span style={{ color: "#ef4444" }}>*</span>
-              </label>
+              <label style={labelStyle}>Doctor <span style={{ color: "#ef4444" }}>*</span></label>
               <select style={selectStyle("doctorId")} value={form.doctorId} onChange={set("doctorId")}>
                 <option value="">Select doctor…</option>
                 {doctors.map(d => (
@@ -243,11 +313,8 @@ function SessionModal({ onConfirm, onCancel, onNavigate }) {
               {doctors.length === 0 && emptyHint("doctor", "Doctors")}
             </div>
 
-            {/* Patient select */}
             <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>
-                Patient <span style={{ color: "#ef4444" }}>*</span>
-              </label>
+              <label style={labelStyle}>Patient <span style={{ color: "#ef4444" }}>*</span></label>
               <select style={selectStyle("patientId")} value={form.patientId} onChange={set("patientId")}>
                 <option value="">Select patient…</option>
                 {patients.map(p => (
@@ -260,32 +327,29 @@ function SessionModal({ onConfirm, onCancel, onNavigate }) {
               {patients.length === 0 && emptyHint("patient", "Patients")}
             </div>
 
-            {/* Divider + optional section */}
             <hr style={{ border: "none", borderTop: "0.5px solid rgba(0,0,0,0.1)", margin: "16px 0 12px" }} />
             <p style={{ fontSize: 11, fontWeight: 600, color: "#94a3b8", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 12 }}>
               Optional
             </p>
 
-            {/* Consultation type + Language row */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
               <div>
                 <label style={labelStyle}>Consultation type</label>
                 <select style={{ ...selectStyle(), padding: "0 8px" }} value={form.consultationType} onChange={set("consultationType")}>
                   <option value="">Select…</option>
-                  {CONSULTATION_TYPES.map((t) => <option key={t}>{t}</option>)}
+                  {CONSULTATION_TYPES.map(t => <option key={t}>{t}</option>)}
                 </select>
               </div>
               <div>
                 <label style={labelStyle}>Language</label>
                 <select style={{ ...selectStyle(), padding: "0 8px" }} value={form.language} onChange={set("language")}>
-                  {LANGUAGES.map((l) => <option key={l}>{l}</option>)}
+                  {LANGUAGES.map(l => <option key={l}>{l}</option>)}
                 </select>
               </div>
             </div>
           </>
         )}
 
-        {/* Actions */}
         <div style={{ display: "flex", gap: 10 }}>
           <button
             onClick={onCancel}
@@ -318,16 +382,35 @@ function SessionModal({ onConfirm, onCancel, onNavigate }) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function HomePage({ onNavigate, onDurationSave, onDataReceived }) {
-  const [recording, setRecording]   = useState(false);
-  const [seconds, setSeconds]       = useState(0);
-  const [showHelp, setShowHelp]     = useState(false);
-  const [showModal, setShowModal]   = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const [recording, setRecording]     = useState(false);
+  const [seconds, setSeconds]         = useState(0);
+  const [showHelp, setShowHelp]       = useState(false);
+  const [showConsent, setShowConsent] = useState(false);
+  const [showModal, setShowModal]     = useState(false);
+  const [generating, setGenerating]   = useState(false);
+  // Live indicator: true while we have been recording for a moment but the mic
+  // is still picking up essentially nothing (so the user finds out immediately,
+  // not after the whole session).
+  const [silentLive, setSilentLive]   = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef   = useRef([]);
   const secondsRef       = useRef(0);
   const sessionDataRef   = useRef(null);
+  const audioBlobUrlRef  = useRef(null);  // ← stores object URL for playback
+
+  // ── Audio-level monitoring (silent-recording detection) ────────────────────
+  const audioContextRef  = useRef(null);
+  const analyserRef      = useRef(null);
+  const levelRafRef      = useRef(null);
+  const soundDetectedRef = useRef(false);  // did we ever hear meaningful audio?
+  const peakLevelRef     = useRef(0);      // loudest level seen (0..1)
+  const voicedFramesRef  = useRef(0);      // frames above the speech threshold
+
+  // Anything below this RMS level is treated as effectively silence (room noise floor).
+  const SILENCE_RMS_THRESHOLD = 0.015;
+  // We need at least this many voiced frames to consider the session "not silent".
+  const MIN_VOICED_FRAMES = 5;
 
   useEffect(() => {
     let interval = null;
@@ -345,6 +428,12 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
     return () => clearInterval(interval);
   }, [recording]);
 
+  // Tear down the audio analyser if the component unmounts mid-recording.
+  useEffect(() => {
+    return () => stopLevelMonitor();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -357,6 +446,13 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
 
       mediaRecorderRef.current.onstop = () => handleUpload();
 
+      // ── Set up live audio-level analysis to detect a silent recording ───────
+      soundDetectedRef.current = false;
+      peakLevelRef.current = 0;
+      voicedFramesRef.current = 0;
+      setSilentLive(false);
+      startLevelMonitor(stream);
+
       mediaRecorderRef.current.start();
       setRecording(true);
       setSeconds(0);
@@ -367,23 +463,108 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
     }
   };
 
+  // Continuously measure the microphone input level while recording. Updates the
+  // live "no sound" hint and records whether any meaningful audio was captured.
+  const startLevelMonitor = (stream) => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;  // graceful no-op if Web Audio unsupported
+
+      const audioContext = new AudioCtx();
+      const source   = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+
+      const buffer = new Uint8Array(analyser.fftSize);
+
+      const tick = () => {
+        analyser.getByteTimeDomainData(buffer);
+        // Compute RMS of the waveform centred on 128 (silence).
+        let sumSquares = 0;
+        for (let i = 0; i < buffer.length; i++) {
+          const v = (buffer[i] - 128) / 128;
+          sumSquares += v * v;
+        }
+        const rms = Math.sqrt(sumSquares / buffer.length);
+
+        if (rms > peakLevelRef.current) peakLevelRef.current = rms;
+
+        if (rms >= SILENCE_RMS_THRESHOLD) {
+          voicedFramesRef.current += 1;
+          if (voicedFramesRef.current >= MIN_VOICED_FRAMES) {
+            soundDetectedRef.current = true;
+          }
+        }
+
+        // Live hint: after ~3s of recording with nothing detected, flag it.
+        setSilentLive(!soundDetectedRef.current && secondsRef.current >= 3);
+
+        levelRafRef.current = requestAnimationFrame(tick);
+      };
+      tick();
+    } catch (err) {
+      console.warn("Audio level monitoring unavailable:", err);
+    }
+  };
+
+  const stopLevelMonitor = () => {
+    if (levelRafRef.current) {
+      cancelAnimationFrame(levelRafRef.current);
+      levelRafRef.current = null;
+    }
+    if (audioContextRef.current) {
+      try { audioContextRef.current.close(); } catch (_) {}
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+  };
+
   const stopRecording = () => {
     if (mediaRecorderRef.current && recording) {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      stopLevelMonitor();
       setRecording(false);
+      setSilentLive(false);
     }
   };
 
   const handleUpload = async () => {
+    // ── Silent-recording guard ──────────────────────────────────────────────
+    // If the mic never picked up meaningful audio, warn the user before spending
+    // time processing an empty recording. They can still proceed if they want.
+    if (!soundDetectedRef.current) {
+      const proceedAnyway = window.confirm(
+        "⚠️ No speech was detected in this recording — the microphone may not have " +
+        "picked up any audio.\n\n" +
+        "This often means the wrong microphone was selected or the mic was muted.\n\n" +
+        "• Click \"Cancel\" to discard this recording and try again.\n" +
+        "• Click \"OK\" to process it anyway."
+      );
+      if (!proceedAnyway) {
+        // Discard the silent recording so the user can re-record cleanly.
+        audioChunksRef.current = [];
+        return;
+      }
+    }
+
     setGenerating(true);
 
     const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-    const formData  = new FormData();
+
+    // Create a local object URL so TranscriptPage can play the audio back
+    if (audioBlobUrlRef.current) URL.revokeObjectURL(audioBlobUrlRef.current);
+    audioBlobUrlRef.current = URL.createObjectURL(audioBlob);
+
+    const formData = new FormData();
     formData.append("file", audioBlob, "recording.webm");
 
     if (sessionDataRef.current) {
-      formData.append("doctor_id", sessionDataRef.current.doctorId);
+      formData.append("doctor_id",  sessionDataRef.current.doctorId);
       formData.append("patient_id", sessionDataRef.current.patientId);
     }
 
@@ -404,11 +585,12 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
         if (onDataReceived) onDataReceived(data.data);
 
         onNavigate("Transcript", {
-  data: data.data,
-  doctorName: sessionDataRef.current?.doctorName,
-  patientName: sessionDataRef.current?.patientName,
-  duration: `${mm}:${ss}`
-});
+          data:        data.data,
+          doctorName:  sessionDataRef.current?.doctorName,
+          patientName: sessionDataRef.current?.patientName,
+          duration:    `${mm}:${ss}`,
+          audioUrl:    audioBlobUrlRef.current,  // ← passed to transcript
+        });
       } else {
         alert(`Error: ${data.error || "Failed to process audio"}`);
       }
@@ -420,11 +602,15 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
     }
   };
 
-  // Called when user submits the session modal — saves data then starts recording
   const handleModalConfirm = async (formData) => {
     sessionDataRef.current = formData;
     setShowModal(false);
     await startRecording();
+  };
+
+  const handleConsentConfirm = () => {
+    setShowConsent(false);
+    setShowModal(true);
   };
 
   return (
@@ -436,13 +622,12 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {!recording ? (
             <button
-              onClick={() => setShowModal(true)}   // ← opens modal, not startRecording directly
+              onClick={() => setShowConsent(true)}
               disabled={generating}
               style={{
                 padding: "14px 48px", borderRadius: 40, border: "none", cursor: "pointer",
-                background: "#2563eb",
-                color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "inherit",
-                transition: "all 0.2s",
+                background: "#2563eb", color: "#fff", fontWeight: 700, fontSize: 16,
+                fontFamily: "inherit", transition: "all 0.2s",
                 opacity: generating ? 0.5 : 1,
               }}
             >
@@ -453,9 +638,8 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
               onClick={stopRecording}
               style={{
                 padding: "14px 48px", borderRadius: 40, border: "none", cursor: "pointer",
-                background: "#1e40af",
-                color: "#fff", fontWeight: 700, fontSize: 16, fontFamily: "inherit",
-                boxShadow: "0 0 0 4px rgba(37,99,235,0.25)",
+                background: "#1e40af", color: "#fff", fontWeight: 700, fontSize: 16,
+                fontFamily: "inherit", boxShadow: "0 0 0 4px rgba(37,99,235,0.25)",
                 display: "flex", alignItems: "center", gap: 10,
               }}
             >
@@ -468,17 +652,32 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
         {generating && (
           <p
             className="generating-dots"
-            style={{
-              margin: 0, fontSize: 14, fontWeight: 600, color: "#2563eb",
-              animation: "fadeInUp 0.3s ease",
-            }}
+            style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#2563eb", animation: "fadeInUp 0.3s ease" }}
           >
             Processing audio... this may take a moment
           </p>
         )}
+
+        {recording && silentLive && (
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8,
+            background: "#fef2f2", border: "1.5px solid #fca5a5", borderRadius: 40,
+            padding: "8px 18px", fontSize: 13, fontWeight: 700, color: "#b91c1c",
+            animation: "fadeInUp 0.3s ease",
+          }}>
+            <span style={{ fontSize: 15 }}>🔇</span>
+            No sound detected — check your microphone
+          </div>
+        )}
       </div>
 
-      {/* Session modal */}
+      {showConsent && (
+        <ConsentModal
+          onConfirm={handleConsentConfirm}
+          onCancel={() => setShowConsent(false)}
+        />
+      )}
+
       {showModal && (
         <SessionModal
           onConfirm={handleModalConfirm}
@@ -487,10 +686,8 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
         />
       )}
 
-      {/* Help popup — rendered once */}
       {showHelp && <HelpPopup onClose={() => setShowHelp(false)} />}
 
-      {/* Help FAB */}
       <button
         onClick={() => setShowHelp(true)}
         style={{
@@ -499,8 +696,7 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
           background: "#2563eb", border: "none", cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
           boxShadow: "0 4px 16px rgba(37,99,235,0.35)",
-          color: "#fff", fontSize: 20, fontWeight: 700,
-          zIndex: 50,
+          color: "#fff", fontSize: 20, fontWeight: 700, zIndex: 50,
         }}
       >
         ?
