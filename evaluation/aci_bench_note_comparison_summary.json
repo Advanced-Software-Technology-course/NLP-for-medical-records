@@ -1,13 +1,13 @@
 {
     "samples_evaluated": 20,
-    "rougeL_raw_mean": 0.2746747248262251,
-    "rougeL_styled_mean": 0.2746747248262251,
-    "rougeL_aligned_mean": 0.7049654783588621,
+    "rougeL_raw_mean": 0.278567758960954,
+    "rougeL_styled_mean": 0.278567758960954,
+    "rougeL_aligned_mean": 0.6930979582977612,
     "reference_section_count_mean": 6.7,
-    "generated_section_count_mean": 6.85,
-    "styled_section_count_mean": 6.85,
+    "generated_section_count_mean": 6.8,
+    "styled_section_count_mean": 6.8,
     "aligned_section_count_mean": 5.5,
-    "clinical_completeness_mean": 74.00320512820511,
+    "clinical_completeness_mean": 67.48909353322344,
     "clinical_completeness_target": 90.0,
     "clinical_completeness_target_met": false
 }

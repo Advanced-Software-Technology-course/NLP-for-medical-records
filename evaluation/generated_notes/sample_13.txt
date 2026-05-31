@@ -1,33 +1,27 @@
-**Chief Complaint:** Andrea, a [age not mentioned]-year-old female presents with left knee pain. Patient initially reported right knee pain but corrected to left knee pain.
+**Chief Complaint:** Andrea presents with left knee pain.
 
 **History of Present Illness:**
-The patient reports experiencing occasional left knee pain, described as the knee "giving out," which occurs less than once a day, typically when walking. The episodes are transient, lasting as long as they take to come on, and are not associated with a specific mechanism of injury. The pain is located internally and around the whole kneecap. The patient does not recall hearing a pop or feeling a sudden onset of pain. The episodes are alleviated by holding onto something, such as a grocery cart. The patient does not take any pain medication for these episodes as they resolve quickly. The patient has a trip planned to Columbus, Georgia, for a Lion's Club function with line dancing, which she's worried about participating in due to her knee pain.
-
-- **Pertinent Negatives:** Denies any history of trauma to the left knee.
+The patient reports left knee pain occurring occasionally, less than once a day, when walking. The pain is described as internal and affects the whole kneecap. The patient experiences a sensation of the knee giving out, but this is transient and resolves quickly. The patient does not recall any specific injury to the knee. 
+- **Pertinent Negatives:** Denies hearing or feeling a pop, and denies taking anything for pain due to the transient nature of the symptoms.
 
 **Relevant Medical History:**
-- Conditions: Hypertension, diabetes mellitus, managed by medications.
-- Regional Trauma: Denies any prior injury to the left knee.
+- Conditions: Hypertension, Diabetes mellitus, and a systolic ejection murmur at the left base. 
+- Medications: The patient's current medications include Farxiga, Amlodipine, Lisinopril, and Hydrochlorothiazide. The patient takes their medications, Farxiga, Amlodipine, Lisinopril, and Hydrochlorothiazide, at 8:30 in the morning and 8:30 at night. The patient is also taking Metformin.
+- Regional Trauma: Denies prior injury to the left knee.
 
 **Physical Examination & Vitals:**
-- Vitals: BP: 122/70, HR: 72, RR: 16, Temp: 98.2.
-- Systemic Clearances: Lungs clear to auscultation bilaterally, heart exam shows a regular rate and rhythm with a slight 2/6 systolic ejection murmur at the left base.
-- Localized Exam: 
-  - Left knee exam: No ecchymosis, edema, or effusion. No pain to palpation. Full range of motion without any limitations. Negative varus and valgus test.
+- Vitals: The patient's vital signs are: temperature 98.2, pulse 72, respirations 16, blood pressure 122/70.
+- Systemic Clearances: Heart exam shows a slight 2 over 6 systolic ejection murmur at the left base, The patient's lungs are clear to auscultation bilaterally.
+- Localized Exam (MSK): No ecchymosis, edema, or effusion in the left knee. No pain to palpation of the left medial knee. No decreased range of motion, negative varus and valgus test.
 
 **Assessment & Rationale:**
-1. **Knee Pain of Uncertain Etiology**: Supported by the patient's episodic symptoms of the knee "giving out" without a clear traumatic incident or structural abnormality on X-ray. 
-2. **Arthritis**: Suspected, as a possible cause for the knee pain, although no specific radiographic evidence mentioned.
+1. **Arthritis in the left knee [UNCERTAIN]**: Supported by the clinical presentation of internal knee pain and the sensation of the knee giving out.
+2. Hypertension: Managed with current medications.
+3. Diabetes mellitus: The patient's blood sugar has been running a little higher, at about 130. The patient has been informed that morning blood sugars can sometimes be higher. The patient is not overly concerned about their blood sugar levels as long as they do not become too high. The patient typically eats dinner by 6 pm.
+4. Systolic ejection murmur at the left base: To be evaluated with an echocardiogram.
 
 **Treatment Plan & Next Steps:**
-- Medications: 
-  - Meloxicam 15 mg once daily for knee pain.
-  - Continue current medications for hypertension (lisinopril 20 mg daily, amlodipine, hydrochlorothiazide 20 mg daily, and Farxiga) and diabetes mellitus (metformin).
-- Therapy: Physical therapy to strengthen muscles around the knee, frequency not specified.
-- Diagnostics: 
-  - Echocardiogram to evaluate the heart murmur.
-  - Hemoglobin A1c to assess diabetes control.
-  - Lipid panel.
-- Logistics & Follow-up: The patient is to be scheduled for the echocardiogram. No specific follow-up timeline mentioned.
-
-The patient takes her medications at 8:30 AM and 8:30 PM daily, using an alarm on her phone to remind her. Her fasting blood sugar has been running higher at about 130, which she attributes to a normal variation in morning blood sugars. The patient is not interested in using a cane due to concerns about tracking it.
+- Medications: Meloxicam (15 milligrams a day) for left knee pain.
+- Interventions: Physical therapy to strengthen the muscles around the left knee area.
+- Diagnostic Tests: Echocardiogram to evaluate the systolic ejection murmur, A hemoglobin A1c test will be ordered to assess the need for adjustments to the patient's Metformin, and A lipid panel will also be ordered. The left knee x-ray showed no evidence of fracture or bony abnormality.
+- Logistics & Follow-up: The patient has a trip planned in the next month and is advised to avoid activities that might exacerbate the knee condition, such as line dancing. The patient inquired about the timeline for the scheduled tests and follow-up. The nurse will schedule the echocardiogram. The nurse will assist with setting up the scheduled tests.

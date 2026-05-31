@@ -1,39 +1,46 @@
-**Chief Complaint:** David, a [age not mentioned]-year-old male presents with chest pain and shortness of breath.
+**Chief Complaint:** David, a patient of unspecified age, presents with chest pain and shortness of breath.
 
 **History of Present Illness:**
-The patient reports falling down while walking outside, which occurred on an unspecified date. He initially experienced chest pain but did not think much of it and continued walking. He later developed swelling in his ankles and shortness of breath. The patient reports that his chest pain was intermittent, sometimes thinking it was heartburn. He describes his shortness of breath as mild and manageable, particularly when walking outside, which improved a little but was largely ignored. The patient mentioned taking his medication but sometimes misses doses, having taken one on the day of the conversation. The patient reported eating a variety of foods, including a lot of chips.
-
-- **Pertinent Negatives:** Denies problems sleeping.
+The patient reports falling down while walking outside, which was followed by chest pain and shortness of breath. The exact date of the incident is not specified. 
+- Symptoms include:
+  * Chest pain
+  * Shortness of breath
+  * The patient experienced shortness of breath, but did not think it was significant.
+  * The patient's ankles were swelling.
+  * The patient has experienced slight chest pain, which they attributed to heartburn.
+  * The patient experienced shortness of breath while walking, but it improved with continued walking.
+  * Trace edema in lower extremities
+- **Pertinent Negatives:** The patient reports sleeping well. Denies nausea/vomiting.
 
 **Relevant Medical History:**
-- Conditions: Hypertension, Congestive Heart Failure (CHF) in the hospital (date not specified).
-- Medications: Bumex, Cozaar, and Norvasc.
-- Regional Trauma: No prior trauma to the affected areas mentioned.
-- Smoking: Reports smoking about once a week after quitting a couple of years ago.
+- Conditions: Hypertension managed by Bumex, Cozaar, and Norvasc. The patient has a history of smoking but stopped a couple of years ago. The patient has been mostly compliant with smoking cessation, with occasional lapses.
+- Medications: The patient admits to missing medications, including the one taken today.
+- Regional Trauma: No prior injury to the affected area is explicitly mentioned.
 
 **Physical Examination & Vitals:**
-- Vitals: BP: with a previous blood pressure reading of 200/90 in the ER, and current office reading of 128/72, other vital signs not mentioned.
-- Systemic Clearances: Lungs clear bilaterally, no jugular venous distention observed.
-- Localized Exam: 
-  - Neck: No jugular venous distention.
-  - Heart: A 2/6 systolic ejection murmur was appreciated, previously noted and stable.
-  - Lower extremities: The patient had trace edema.
+- Vitals: BP: 128/72.
+- Systemic Clearances: 
+  * Neck exam: No jugular venous distention.
+  * Heart exam: 2 out of 6 systolic ejection murmur (stable).
+  * Lung exam: Lungs clear bilaterally.
+- Localized Exam: Trace edema in lower extremities.
 
 **Assessment & Rationale:**
-1. **Uncontrolled Hypertension**: Supported by elevated blood pressure readings (200/90 in the ER, 128/72 in the office).
-2. **Congestive Heart Failure (CHF)**: Likely exacerbated by dietary indiscretion and uncontrolled hypertension, with echocardiogram showing preserved ejection fraction of 55%, normal diastolic filling, and mild to moderate mitral regurgitation.
+1. Hypertension: Supported by the patient's blood pressure readings and medical history.
+2. Congestive heart failure (CHF) [UNCERTAIN]: The patient was in the hospital with symptoms that could be related to CHF, but the diagnosis is not explicitly confirmed.
+3. Mild to moderate mitral regurgitation: Supported by the echocardiogram results. The echocardiogram showed a preserved ejection fraction of 55% and normal diastolic filling. The echocardiogram also showed mild to moderate mitral regurgitation.
 
 **Treatment Plan & Next Steps:**
 - Medications: 
-  - Bumex 2 milligrams once daily, with emphasis on taking medications consistently.
-  - Cozaar 100 milligrams daily.
-  - Norvasc 5 milligrams once daily.
+  * Bumex: 2 milligrams, once daily.
+  * Cozaar: 100 milligrams, daily.
+  * Norvasc: 5 milligrams, once daily.
 - Interventions: 
-  - Consult to nutrition to advise on diet, specifically watching salty foods.
-  - Order for a renal artery ultrasound.
-- Therapy: None specified.
+  * Echocardiogram (already performed).
+  * Renal artery ultrasound (ordered).
+  * Consult to nutrition (ordered).
 - Logistics & Follow-up: 
-  - The patient was advised to obtain a scale and weigh himself daily.
-  - The patient was instructed to call if he gained three pounds in two days.
-  - Obtain a blood pressure cuff for home monitoring, which the patient had not obtained yet.
-  - Follow-up not explicitly stated but implied in the discharge summary.
+  * The patient should obtain a scale and weigh themselves daily.
+  * The patient should call if they gain 3 pounds in 2 days.
+  * The patient should track their blood pressures at home.
+  * The patient should follow up with the nutritionist to address dietary issues. The patient agreed to the treatment plan, including the nutrition consult and renal artery ultrasound. The patient reports eating anything, including salty foods and chips.

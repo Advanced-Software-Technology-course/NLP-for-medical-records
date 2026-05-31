@@ -1,7 +1,7 @@
 **Chief Complaint:** Nicholas, presents with a nonhealing diabetic foot ulcer on his right foot.
 
 **History of Present Illness:**
-The patient reports a burning sensation and stinging on the foot, which started six weeks ago when he wore a new pair of shoes that were too tight. He initially noticed a blister on the pad of the bottom of his foot, around his heel. The blister became unroofed, and underneath, there was thick, soft, mushy skin with a bad smell and yellow drainage. Associated symptoms include:
+The patient reports noticing a blister on the pad of the bottom of his foot around the heel about six weeks ago, after wearing a new pair of shoes that were a little too tight. He experienced burning and stinging sensations and noticed a foul smell from the wound. The blister became unroofed, revealing thick, soft, mushy skin with a bad smell and yellow drainage. He was started on antibiotics about six days ago and has been taking them since then. Associated symptoms include:
 - Burning sensation on the foot
 - Stinging sensation on the foot
 - Foul smell from the wound
@@ -10,31 +10,32 @@ The patient reports a burning sensation and stinging on the foot, which started 
 - Cramping in the calf muscle
 - Red streak moving up the leg
 - Throbbing pain in the foot
-- Coughing
-- Difficulty catching breath while walking
+- Coughing for the last two days
+- Difficulty catching breath while walking around the house
 - Pain in the calf muscle
 - Swelling in the calf
 - **Pertinent Negatives:** Denies nausea/vomiting.
 
-The patient started antibiotics six days ago and has been taking them for 6-7 days, with a planned 10-day course. He mentions that the wound has turned black around the outside, and he is experiencing cramping in his calf muscle. The patient received a new pair of shoes and was advised by the prosthetist to check his feet daily for the first week or two, which he did. The patient believes that hiking may have caused the blister, as he may have overexerted himself. The patient uses diabetic shoes and inserts, which are replaced annually, with insert changes every 3-4 months.
-
 **Relevant Medical History:**
-- Conditions: Diabetic neuropathy, diabetes (previously managed with an insulin pump, currently with a well-controlled hemoglobin A1c of 6.7). The patient's hemoglobin A1c has been 6.7 for approximately two years, with rare blood sugar readings over 200. The patient checks his blood sugar two to three times a day, and more often if he feels unwell. The patient's blood sugars have been trending between 300-400 in the last two weeks, with one spike at 500-600.
-- Regional Trauma: The patient denies any prior injury to the foot, but mentions that he went hiking to Charlie's Bunion about a week before the wound appeared, which might have caused the blister.
+- Conditions: Diabetic neuropathy, managed by an insulin pump in the past, with a Previous A1c value of 13, and currently controlled with a Current A1c value of 6.7.
+- The patient practices Self-monitoring of blood sugars two to three times a day and has noticed Recent blood sugar trends: 300-400 range for two weeks, with one spike at 500-600.
+- Regional Trauma: The patient denies any prior injury to the affected area. He recently got a New pair of shoes with instructions to check feet daily for the first week or two and engaged in Recent hiking activity, potentially contributing to the ulcer. His recreational activities, including hiking, have been impacted by the current condition, as Patient's recreational activities, including hiking, impacted by the current condition.
 
 **Physical Examination & Vitals:**
-- Vitals: The patient has a slight fever, but other vitals are not explicitly stated.
-- Systemic Clearances: Not explicitly mentioned.
-- Localized Exam (MSK/Neuro): The patient has a necrotic wound on his heel, approximately 2x2 cm, with sloughing of tissue, cellulitis, and erythemia. There is no bony exposure. The vascular exam shows bilateral palpable pulses femorally and popliteal pulses are present, but no palpable pulse dorsalis pedis or posterior tibial; however, Pulses are present via Doppler for the dorsalis pedis and posterior tibial arteries.
+- Vitals: Temperature: 99.7, with a Slight fever noted, but overall vitals are good.
+- Systemic Clearances: Not explicitly stated.
+- Localized Exam: 
+  - The patient has a necrotic wound on his heel, approximately 2x2 cm, with sloughing of tissue, cellulitis, and erythemia.
+  - No palpable pulse dorsalis pedis or posterior tibial, but pulses are present via Doppler.
+  - Bilateral palpable pulses femorally and popliteal pulses are present.
+  - The patient does not feel pain when the affected area of the wound is pressed.
 
 **Assessment & Rationale:**
-1. Nonhealing diabetic foot ulcer: Supported by the presence of a necrotic wound, cellulitis, and erythemia.
+1. Nonhealing diabetic foot ulcer: Supported by the presence of a necrotic wound, cellulitis, and erythemia. There is No evidence of osteomyelitis.
 2. Diabetic neuropathy: Supported by the patient's history of diabetes and symptoms.
-3. Cellulitis: Supported by the presence of redness, swelling, and pain in the calf.
-4. [UNCERTAIN] Osteomyelitis: Ruled out by the x-ray, which shows no evidence of osteomyelitis.
 
 **Treatment Plan & Next Steps:**
-- Interventions: Debridement was performed in the office, and a culture test was ordered. A test will be ordered to assess blood supply to the wound.
-- Medications: The patient is currently taking antibiotics (name, dosage, and frequency not stated) for 10 days, and the doctor plans to continue or change the antibiotic therapy based on the culture results. Alternative antibiotic therapies may be considered based on culture results. The patient will complete a 10-12 day course of antibiotics. The decision to continue or change the current antibiotic therapy will be made after receiving the culture results.
-- Therapy: Not explicitly mentioned.
-- Logistics & Follow-up: The patient is scheduled for a follow-up appointment in 7 days. He is also advised to follow up with his endocrinologist to monitor his diabetes and keep his hemoglobin A1c below 7. The patient's blood sugars will be closely monitored during antibiotic therapy and potential additional medication.
+- Interventions: Debridement was performed in the office. An Order for blood supply test for the wound has been placed.
+- Medications: The patient is currently on antibiotics, which will be continued for 10-12 days, with a Possible change in antibiotic therapy based on culture results.
+- Therapy: None explicitly stated.
+- Logistics & Follow-up: The patient will have a Follow-up appointment in 7 days and is advised to follow up with his endocrinologist to maintain hemoglobin A1c below 7. He will require Close monitoring of blood sugars during medication therapy.

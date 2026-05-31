@@ -1,22 +1,23 @@
 **Chief Complaint:** Ms. Thompson, a 43-year-old female, presents with right knee pain.
 
 **History of Present Illness:**
-The patient reports a stumble and twist of her knee while changing a light bulb on a ladder, occurring yesterday. Pain is located on the inside of her knee and is aggravated by bending the knee forward and twisting. The patient has been using ice on her knee. The patient has been taking ibuprofen and using ice. Associated symptoms include tenderness over the medial portion of the knee and pain when bending or twisting the knee. The patient reports that ibuprofen and ice do not seem to help much.
-- **Pertinent Negatives:** Denies injury to any other area besides the knee.
+The patient reports a stumble and twist of her knee while changing a light bulb on a ladder, occurring yesterday. Pain is located on the inside of her knee and is aggravated by bending the knee forward and twisting. Associated symptoms include tenderness over the medial portion of the knee. The patient has been putting ice on her knee. The patient has been taking ibuprofen, but it doesn't seem to help much.
+- **Pertinent Negatives:** Denies nausea, vomiting, and pain in the calves.
 
 **Relevant Medical History:**
 - Conditions: Atrial fibrillation (afib) managed by Digoxin.
-- Regional Trauma: No prior injury to the knee is mentioned, but the patient does have a history of a nose job.
+- Regional Trauma: No prior injury to the affected knee area mentioned.
+- Past surgeries: The patient has had a nose job.
 
 **Physical Examination & Vitals:**
-No vitals are explicitly reported. 
-- Localized Exam (MSK): The patient has tenderness over the medial portion of her knee, specifically over the medial meniscus area. There is tenderness when valgus stressing is applied to her leg. She has normal sensation in her knee area. No other pain is noted in her calves.
+No vitals were explicitly mentioned in the transcript. 
+- Localized Exam (MSK): The patient has tenderness over the medial portion of her knee, specifically over the medial meniscus area. There is also tenderness when valgus stressing is applied to her leg. The patient has normal sensation in her leg. No other specific physical deformities, crepitus, or range of motion limitations were mentioned.
 
 **Assessment & Rationale:**
-1. **Acute medial meniscus sprain or strain [UNCERTAIN]**: Supported by tenderness over the medial meniscus area and the patient's clinical presentation of pain on the inside of her knee, which is aggravated by bending and twisting. X-rays were reviewed. The x-ray of the left knee was reviewed, but it was noted that the injury is to the right knee. The x-ray shows some fluid in the knee. The x-ray shows that everything else is lined up properly. 
+1. **Acute medial meniscus sprain [UNCERTAIN] / strain**: Supported by tenderness over the medial meniscus area, pain when bending the knee forward and twisting, and the presence of a little bit of fluid on the X-ray. The X-ray shows a little bit of fluid in the knee.
 
 **Treatment Plan & Next Steps:**
-- Interventions: The patient will use crutches temporarily for the next couple of days.
-- Immobilization: A knee brace will be used.
-- Medications: Motrin 800 milligrams will be taken every 6 hours with food for 2 weeks.
-- Logistics & Follow-up: The patient will follow up in a week. If symptoms persist, an MRI will be considered at that time. The patient was asked if she had any questions. The medications and procedures discussed were ordered. The report was finalized. The patient was escorted to check out.
+- Interventions: Placement of a knee brace and temporary use of crutches for the next couple of days.
+- Medications: Motrin 800 milligrams every 6 hours with food. The patient will be given a two-week supply of Motrin.
+- Imaging: An X-ray was taken, showing no fractures and a little bit of fluid, but no dislocation. A possible MRI in a week if symptoms persist.
+- Logistics & Follow-up: The patient is to follow up in about a week to assess her condition, and an MRI may be ordered at that time if her symptoms have not improved. The doctor asked the patient if she had any questions. The patient was instructed to follow the doctor to get checked out.

@@ -1,33 +1,35 @@
-**Chief Complaint:** Beverly, a 53-year-old female, presents for follow-up during neoadjuvant chemotherapy for stage three nonsmall cell lung cancer.
+**Chief Complaint:** Beverly, a 53-year-old female, presents for follow-up during neo-adjuvant chemotherapy for stage three non-small cell lung cancer. 
 
 **History of Present Illness:**
-The patient reports a recent diagnosis of a 4.4 centimeter left upper lobe nodule, which was biopsied and positive for adenocarcinoma. Molecular testing is pending. She presents with symptoms of a minimal cough and sore throat. The cough is described as dry and lingering, with no associated shortness of breath. The sore throat is persistent, coming and going, and is worse at times. She has been trying to drink lots of fluids to alleviate the symptoms. She reports slight fatigue but no nausea or vomiting. She has been eating but not as much as she normally would. The patient reports that the nursing staff and office have been very supportive. She also has supportive family members who have attended her treatment sessions.
-
-**Pertinent Negatives:** Denies shortness of breath, nausea, vomiting, and difficulty swallowing.
+The patient reports a recent diagnosis of stage three non-small cell lung cancer. A 4.4 centimeter left upper lobe nodule was diagnosed, and biopsy was positive for adenocarcinoma. Molecular testing is pending at this time. Symptoms include:
+- Minimal cough
+- Sore throat
+- Fatigue
+- Dry cough
+- Decreased appetite
+**Pertinent Negatives:** Denies nausea/vomiting, shortness of breath, and difficulty swallowing with food getting stuck.
 
 **Relevant Medical History:**
-- Conditions: Stage three nonsmall cell lung cancer, recent diagnosis.
-- Regional Trauma: No prior trauma or injuries to the affected area mentioned.
+- Conditions: Stage three non-small cell lung cancer, adenocarcinoma.
+- Regional Trauma: No prior trauma to the lungs mentioned.
 
 **Physical Examination & Vitals:**
-- The doctor proceeds with the physical exam, starting with reviewing her vitals. 
-- Vitals: Not explicitly stated, but oxygen levels are noted to be good.
-- Systemic Clearances: Lungs have bilateral crackles, indicating possible fluid presence. 
-- Localized Exam: 
-  - Neck: No cervical lymphadenopathy or supraclavicular adenopathy.
-  - Heart: Regular rate and rhythm with no murmurs.
-  - Skin: The skin exam reveals erythema on the anterior side of the chest on the left side, possibly related to radiation.
-  - Lower extremities: No edema.
+- Vitals: Not explicitly stated, but oxygen levels are mentioned as looking good.
+- Systemic Clearances: 
+  - HEENT: Sore throat, no cervical lymphadenopathy, and no supraclavicular adenopathy.
+  - CV: Regular heart rate and rhythm with no murmurs.
+  - Respiratory: Bilateral crackles were noted in the lungs, erythema was noted on the anterior side of the chest on the left side.
+  - MSK/Neuro: Not explicitly examined.
+- Localized Exam: No edema in lower extremities.
 
 **Assessment & Rationale:**
-1. **Lung Cancer**: Supported by the presence of a 4.4 cm left upper lobe nodule positive for adenocarcinoma.
-2. **Radiation Pneumonitis**: Supported by chest X-ray results showing mild radiation pneumonitis, indicating inflammation of the lungs likely due to radiation.
+1. **Stage three non-small cell lung cancer**: Supported by biopsy of left upper lobe nodule positive for adenocarcinoma.
+2. **Radiation pneumonitis**: Supported by chest x-ray showing mild radiation pneumonitis, indicating inflammation of the lungs likely due to radiation, and clinical presentation of cough and fatigue.
 
 **Treatment Plan & Next Steps:**
-- **Chemotherapy**: The patient is on a combination of two different chemotherapies: cisplatin and etoposide. Continue current regimen.
-- **Radiation**: Continue current dose of radiation at 45 Gy. After completing the current dose of radiation, imaging will be repeated to assess if the tumor has shrunk enough for surgical removal.
-- **Medications**: 
-  - **Prednisone**: 40 milligrams daily for five days to reduce inflammation caused by radiation pneumonitis. The doctor prescribes a low dose of prednisone to help reduce inflammation caused by radiation pneumonitis.
-  - **Lidocaine Swish and Swallow**: Four times a day. The lidocaine swish and swallow will help the patient eat and prevent dehydration and further weight loss.
-
-**Logistics & Follow-up:** Follow up in an unspecified number of weeks or days. The patient is to continue with current support systems, including nursing staff and family members.
+- Interventions: Continue with current regimen of chemotherapy (Cisplatin and Etoposide) and radiation therapy at 45 Gy. Planned surgical removal of tumor after completion of radiation therapy.
+- Medications: 
+  - Prednisone 40 milligrams daily for 5 days to help with inflammation due to radiation pneumonitis.
+  - Lidocaine swish and swallow 4 times a day to help with painful swallowing. The patient can eat immediately after taking the lidocaine swish and swallow, which will help prevent dehydration and further weight loss.
+- Therapy: Not explicitly mentioned.
+- Logistics & Follow-up: The patient reports that the nursing staff and office have been supportive. The patient has good family support and they have accompanied her to treatment. Follow-up visit scheduled, exact timeline not specified. Patient to continue with current treatment plan and repeat imaging after completion of radiation therapy. Inflammation is present not only in the lungs but also in the esophagus.

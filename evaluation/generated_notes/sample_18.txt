@@ -1,36 +1,41 @@
-**Chief Complaint:** Russell, presents with sharp pain on the right side of his abdomen below his ribs for the last several days.
+**Chief Complaint:** Russell, presents with sharp pain on the right side of his abdomen below the ribs.
 
 **History of Present Illness:**
-The patient reports sharp pain on the right side of his abdomen below his ribs for the last several days. 
+The patient reports sharp pain on the right side of his abdomen below the ribs for the last several days. 
 - Symptoms and complaints:
   * Sharp pain on the right side of the abdomen below the ribs
-  * Pain radiating to the lower abdomen and into my groin
-  * Burning sensation while urinating, a burning sensation that is described as a little bit
-  * Dark urine, and sometimes the urine looks a little dark
-  * Nausea and nausea without vomiting
-  * Pain that comes and goes, and when it comes, it's pretty bad
-The pain is described as coming and going, with no specific pattern or trigger mentioned. The patient notes that when the pain occurs, it is severe and he cannot find a comfortable position. He also experiences a burning sensation while urinating and notices that his urine looks dark sometimes. He has taken some Tylenol but it hasn't really helped.
+  * Pain radiates to lower abdomen and groin
+  * Pain comes and goes
+  * Burning sensation while urinating
+  * Denies frank blood, but reports dark urine
+  * Nausea
+  * Denies: vomiting
+  * Denies: fever
+  * Denies: chills
+The pain is described as coming and going, with the patient unable to find a comfortable position when it occurs. The patient has taken Tylenol, previously taken, but exact dosage and frequency not specified by the patient, for the pain, but it has not helped. The patient has a history of kidney stones, with family history of kidney stones, including his father. He has had kidney stones before but has been able to pass them.
 
 **Relevant Medical History:**
-- Conditions: The patient has a history of kidney stones and has been able to pass them before, and he has had kidney stones before but was able to pass them. His father also has a history of kidney stones, and a family history of kidney stones, with his father having had them.
+- Conditions: Kidney stones, managed previously without specified medication or dosage.
+- Regional Trauma: The patient has had previous kidney stones, but there is no mention of prior injury to the affected area.
 
 **Physical Examination & Vitals:**
 - Vitals: Not explicitly stated.
 - Systemic Clearances: Not explicitly stated.
-- Localized Exam: 
-  * Abdominal exam: The abdominal exam shows no tenderness to palpation, no rebound, no guarding, and no peritoneal signs, and positive CVA tenderness on the right flank, which indicates tenderness over the right kidney and possible inflammation.
+- Localized Exam (e.g., MSK/Neuro): 
+  * Abdominal exam shows no tenderness to palpation.
+  * No evidence of rebound or guarding.
+  * No peritoneal signs.
+  * Positive CVA tenderness on the right flank.
 
 **Assessment & Rationale:**
-1. **Acute nephrolithiasis (Kidney stone)**: Supported by the CT scan of the abdomen showing a 0.5 centimeter kidney stone located in the proximal right ureter, and the patient's clinical presentation of sharp pain on the right side of the abdomen, radiating to the lower abdomen and groin, and burning sensation while urinating, and the doctor reviewed the CT scan results of the abdomen. and there is no evidence of hydronephrosis, which means there is no swelling of the kidney, and urine flow is not obstructed.
+1. **Acute Nephrolithiasis (Kidney Stone)**: Supported by the CT scan showing a 0.5 centimeter kidney stone located in the proximal right ureter and the patient's clinical presentation of sharp pain and burning sensation while urinating. There is no evidence of hydronephrosis.
+2. **[UNCERTAIN] Possible inflammation of the right kidney**: Suggested by the positive CVA tenderness on the right flank.
 
 **Treatment Plan & Next Steps:**
-- Interventions: The patient is advised to push fluids to help facilitate urination and pass the stone, and to push fluids to help pass the stone.
+- Interventions: The patient is advised to push fluids to facilitate urination. The patient will be given a strainer to strain urine. Possible further treatments include lithotripsy or ureteroscopy if symptoms persist.
 - Medications: 
   * Oxycodone 5 milligrams every 6 to 8 hours as needed for pain.
-  * Tylenol to be alternated with oxycodone for pain management, and continue to alternate with Tylenol.
-- Ancillary therapies: The patient is given a strainer to strain his urine to catch the stone when it passes, and to send it for tests, and a strainer to catch the stone when it passes for further testing.
-- Diagnostic tests: 
-  * Basic metabolic panel
-  * Urinalysis
-  * Urine culture, and to order a basic metabolic panel, urinalysis, and urine culture.
-- Logistics & Follow-up: The patient is to follow up in 1 to 2 weeks, and to follow up in 1 to 2 weeks to assess symptoms and discuss further treatment if needed. If symptoms persist, further treatment options such as lithotripsy, a shock wave procedure to break up the stone, or ureteroscopy, which is a small telescope, small camera used to go up to the urethra and bladder and up into the ureter to retrieve the stone may be discussed. The patient is advised to contact the doctor if he experiences worsening symptoms.
+  * Tylenol (dosage and frequency not specified).
+- Diagnostic Tests: basic metabolic panel, urinalysis and a urine culture
+- Therapy: None specified.
+- Logistics & Follow-up: The patient is to follow up in 1 to 2 weeks. The patient is instructed to contact the doctor if symptoms worsen.

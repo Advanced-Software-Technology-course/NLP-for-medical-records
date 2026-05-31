@@ -1,38 +1,40 @@
 **Chief Complaint:** Bruce Ward, a 52-year-old male, presents with worsening headaches.
 
 **History of Present Illness:**
-The patient reports worsening headaches over the past few months, with an onset approximately three months ago. The headaches are rated 6/10, are located behind his eyes, and are described as a dull, nagging ache. The headaches are worse in the morning and last a few hours at a time. The patient denies any associated symptoms such as nausea, vomiting, fever, rash, neck stiffness, numbness, weakness, or passing out. The patient also reports recently bumping into door frames.
-
-- **Pertinent Negatives:** Denies trouble with headaches in the past, nausea, vomiting, fever, rash, neck stiffness, numbness, weakness, or passing out.
+The patient reports headaches that started approximately three months ago, with a gradual worsening over time. The pain is located behind the eyes, described as a dull nagging ache, and is worse in the morning. The severity of the headaches has increased from 3 out of 10 to 6 out of 10 over time. The patient also reports bumping into door frames but denies any other symptoms such as feeling sick, fever, rashes, neck stiffness, numbness, weakness, or passing out. The patient previously tried taking Tylenol for the headaches, but it did not provide relief.
+- **Pertinent Negatives:** Denies feeling sick, fever, rashes, neck stiffness, numbness, weakness, and passing out.
 
 **Relevant Medical History:**
-- Conditions: None.
-- Regional Trauma: Denies prior injury to the affected area.
-- Past clinical history is unremarkable. The patient's date of birth is 5/21/1969.
+- Conditions: None mentioned.
+- Regional Trauma: No prior history of similar complaints or regional trauma mentioned. The patient's family history is unknown because he was adopted.
 
 **Social History:**
-The patient works as a computer programmer and has been married for 25 years.
+The patient works as a computer programmer and has been married for 25 years. The patient denies using alcohol, smoking, or recreational drugs.
 
 **Physical Examination & Vitals:**
 - Vitals: Not explicitly stated.
 - Systemic Clearances: Not explicitly stated.
-- Localized Exam (MSK/Neuro): 
+- Localized Exam: 
+  - The patient is alert, oriented to time, place, and person.
+  - Affect is appropriate and speech is fluent.
   - Cranial nerve examination is grossly intact.
-  - No focal motor or sensory deficit in the upper or lower extremities.
+  - No focal, motor, or sensory deficit in the upper or lower extremities.
   - Visual acuity and eye movements are normal.
   - Pupils are equal and reactive.
   - Visual field testing reveals bitemporal hemianopia.
   - Color vision is normal.
 
-**Assessment & Rationale:**
-1. **Pituitary Adenoma**: Supported by MRI findings showing a well-defined mass compressing the optic chiasm and clinical presentation of bitemporal hemianopia. The patient presented to his primary care provider, Dr. Howard, on 3/1/21. The patient is seen in consultation at the request of Dr. Henry Howard for possible surgical intervention.
+**Laboratory Results:**
+Laboratory results, including CBC, unes, coagulation, and CRP, were all normal. The patient has a low TSH level, as shown in the pituitary hormone profile.
 
-**Laboratory and Imaging Results:**
-The pituitary hormone profile demonstrates a low TSH, and all other results were normal.
+**Assessment & Rationale:**
+1. **Pituitary Adenoma**: Supported by the presence of a pituitary lesion with elevation and compression of the optic chiasm on MRI, and clinical presentation of worsening headaches and bitemporal hemianopia. The patient is symptomatic with clinical and radiographical evidence of optic chiasmal compression.
+2. **Optic Chiasmal Compression**: Supported by the MRI findings and the patient's visual field defects.
 
 **Treatment Plan & Next Steps:**
-- Interventions: Transsphenoidal approach surgery to excise and decompress the pituitary fossa.
-- Risks discussed include anesthesia risks (heart attack, stroke, death) and surgical risks (infection, need for further surgery, wound issues, seizure, stroke, permanent numbness, weakness, difficulty speaking, or death).
-- Visual field test to be conducted prior to surgery for baseline.
-- The patient will be scheduled for surgery and a visual field test.
-- Follow-up: We can monitor after surgery to see if your vision is improving.
+- Interventions: **Transsphenoidal approach surgery** to excise and decompress the pituitary fossa. The patient was informed of the risks of surgery, including infection, need for further surgery, wound issues such as spinal fluid leak or infection. The patient was also informed of the risks of anesthesia, including but not limited to the risk of heart attack, stroke, and death. Additional risks of surgery include seizure, stroke, permanent numbness, weakness, difficulty speaking, or even death.
+- Medications: **Tylenol** was tried by the patient a few times for the headaches but with no relief; dosage and frequency not specified.
+- Therapy/Tests: 
+  - **Visual field test** scheduled before surgery to map out the patient's peripheral vision. The patient is scheduled to have the visual field test today or tomorrow.
+  - The patient will be referred to an eye doctor for a full exam, possibly after surgery. The patient may not be able to see the eye doctor for a full exam until after surgery.
+- Logistics & Follow-up: The patient will see the surgery scheduler, Deborah, to get the surgery scheduled fairly quickly. Follow-up details, including the exact timeline, are not explicitly stated.

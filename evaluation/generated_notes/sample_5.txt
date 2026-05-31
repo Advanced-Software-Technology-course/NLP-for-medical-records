@@ -1,31 +1,26 @@
-**Chief Complaint:** Sharon Brooks, a 48-year-old female presents with right finger pain. The patient's age is 48 years old.
+**Chief Complaint:** Sharon Brooks, a 48-year-old female, presents with right finger pain.
 
 **History of Present Illness:**
-The patient reports a mechanism of injury occurring on Sunday while skiing, specifically when her strap got caught on her finger and it bent backwards. Pain is rated as severe, aggravated by movement, and alleviated by rest and ice. Associated symptoms include pain and tenderness on the tip of her finger.
-
-- **Pertinent Negatives:** Denies any other symptoms.
+The patient reports an injury occurring on Sunday while skiing, specifically trying moguls, which resulted in her finger getting bent back. The exact mechanism of injury involved her strap catching on her finger, causing hyperextension or bending backwards. The patient has been taking ibuprofen prior to the visit. Pain is aggravated by movement. The patient experiences pain on flexion. 
+- **Pertinent Negatives:** Not explicitly stated.
 
 **Relevant Medical History:**
-- Conditions: The patient has been suffering from constipation recently. Constipation managed by Miralax. The patient is taking Miralax for constipation, which is sufficient.
-- Past Surgical History: Appendectomy at age 18.
-- Regional Trauma: Denies prior injury to the right finger.
+The patient was asked about other past medical history. 
+- Conditions: Constipation managed by Miralax.
+- Regional Trauma: No prior injury to the affected area is explicitly denied or confirmed.
+- Past surgeries: The patient had an appendectomy at the age of 18.
 
 **Physical Examination & Vitals:**
-- Vitals: Not explicitly stated.
-- Systemic Clearances: Not explicitly stated.
-- Localized Exam (MSK): 
-  - Tenderness over the distal phalanx of the right index finger.
-  - Tenderness over the distal interphalangeal (DIP) joint.
-  - There is no tenderness over the proximal interphalangeal (PIP) joint or metacarpophalangeal (MCP) joint.
-  - Pain with flexion.
-  - Able to bend and extend the finger, and touch thumb with the finger.
+- Vitals: Not mentioned.
+- Systemic Clearances: Not mentioned.
+- Localized Exam (MSK): The patient has tenderness over the distal phalanx and the joint itself, with pain on flexion. The patient can bend and extend the finger and touch the thumb with it. No tenderness is noted over the proximal joint or the metacarpophalangeal joint.
 
 **Assessment & Rationale:**
-1. Right index finger contusion: Supported by the presence of tenderness over the distal phalanx and DIP joint, pain with flexion, and a normal X-ray with no fractures.
+An X-ray was ordered and reviewed. The X-ray results showed no abnormalities. 
+1. **Right hand index finger contusion on the tip of the finger**: Supported by the absence of fractures on the X-ray and clinical presentation of tenderness over the distal phalanx and the joint itself, with pain on flexion.
 
 **Treatment Plan & Next Steps:**
-- Interventions: The doctor will review the patient's x-rays. The doctor requests to see the x-rays. The x-ray appears normal at this time.
-- Immobilization: Aluminum foam splint recommended.
-- Medications: Motrin 600 mg every six hours for one week.
-- Therapy: None mentioned.
-- Logistics & Follow-up: The patient is advised to follow up if symptoms do not improve.
+- Interventions: Application of ice and an aluminum foam splint.
+- Medications: Ibuprofen (Motrin) 600 milligrams every six hours for about a week.
+- Therapy: Not mentioned.
+- Logistics & Follow-up: The patient is advised to return if symptoms do not improve. The treatment plan, including medication and procedures, was ordered. The patient expressed agreement with the treatment plan. No specific accommodations for lifestyle or vacations are discussed. Follow-up is recommended if there's no improvement, but no exact timeline is provided beyond the initial week of treatment. The patient was escorted to complete the checkout process. The visit report was finalized.

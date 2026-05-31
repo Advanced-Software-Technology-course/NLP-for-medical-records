@@ -1,45 +1,43 @@
-**Chief Complaint:** Brian, a 58-year-old male, presents with feelings of being "out of sorts," fatigue, feeling out of it, lack of energy, and lightheadedness.
+**Chief Complaint:** Brian, a 58-year-old male, presents with feeling "out of sorts" lately, including lack of energy, fatigue, lightheadedness, and feeling out of it.
 
 **History of Present Illness:**
-The patient reports feeling tired and fatigued, with occasional lightheadedness, bloating, shortness of breath when doing projects, shortness of breath occurs even without heavy lifting, feeling short of breath when exerting energy, slight chest cramps that resolve after about an hour, and a slight cough, possibly due to seasonal changes. He also mentions that his diet has been a struggle due to kitchen construction and poor diet due to eating out during kitchen construction. These symptoms have been present since Labor Day, approximately five weeks ago. 
-- **Symptoms:** 
-  * Fatigue
-  * Lightheadedness
-  * Bloating
-  * Shortness of breath when doing projects
-  * Shortness of breath occurs even without heavy lifting
-  * Feeling short of breath when exerting energy
-  * Slight chest cramps that resolve after about an hour
-  * Slight cough, possibly due to seasonal changes
-- **Pertinent Negatives:** Denies nausea, vomiting, diarrhea, fever, and chills.
+The patient reports symptoms occurring approximately five weeks prior to the consultation, around Labor Day. Associated symptoms include:
+- Fatigue
+- Lightheadedness
+- Bloating
+- Shortness of breath when exerting energy
+- Slight cramps in the chest
+- Slight cough
+- **Pertinent Negatives:** Denies nausea, vomiting, and diarrhea, fever, and chills.
 
 **Relevant Medical History:**
-- Conditions: Congestive heart failure and hypertension, managed by Lasix and Lisinopril, respectively. The patient has been good about watching healthy food intake, and his wife helps monitor blood pressure. His blood pressure has been well-managed.
+- Conditions: Congestive heart failure and hypertension, managed by Lasix and Lisinopril.
+- The patient had construction on kitchen, eating out, and not always the best food, which may have affected his condition.
 - Regional Trauma: No prior injury to the affected area mentioned.
 
 **Physical Examination & Vitals:**
-- Vitals: Vitals are within normal limits, including blood pressure, heart rate, and oxygenation.
+- Vitals: Not explicitly stated, but mentioned as "looking good" with blood pressure, heart rate, and oxygenation all within normal limits.
 - Systemic Clearances: 
-  * CV: Jugular venous distention to about 8 centimeters, 3 out of 6 systolic ejection murmur.
-  * Respiratory: Fine crackles at the bases bilaterally in the lungs.
-  * MSK: 1+ pitting edema in the lower extremities.
-- Localized Exam: No specific visual deformities, tenderness locations, or crepitus mentioned.
+  - CV: Jugular venous distention to about 8 centimeters, 3 out of 6 systolic ejection murmur.
+  - Respiratory: Fine crackles at the bases bilaterally on lung exam.
+  - MSK: 1+ pitting edema in lower extremities.
 
 **Assessment & Rationale:**
-1. **Congestive Heart Failure:** Supported by the presence of fluid in the lungs on the chest x-ray, reduced pumping function of the heart at 45% on the echocardiogram, mitral regurgitation confirmed by echocardiogram, and clinical presentation of fatigue, shortness of breath, and lightheadedness. Suspected fluid retention is also a concern.
-2. **Hypertension:** Managed with Lisinopril 20 mg a day, with the patient monitoring blood pressure at home.
-3. **Fluid Retention:** Suggested by the presence of jugular venous distention and 1+ pitting edema.
+1. **Congestive Heart Failure**: Supported by fluid retention symptoms, jugular venous distention, fine crackles at the bases bilaterally on lung exam, and 1+ pitting edema in lower extremities.
+2. **Hypertension**: Managed with current medication regimen, and the patient monitors blood pressure regularly with his wife's involvement in monitoring blood pressure.
+3. **Mitral Regurgitation**: Diagnosed with a leaky valve.
+4. **Fluid Retention** [UNCERTAIN]: Suspected due to symptoms and physical exam findings.
+5. **Heart Failure with Reduced Ejection Fraction (HFrEF)** [UNCERTAIN]: Previous echocardiogram showed reduced pumping function of the heart at 45%.
 
 **Treatment Plan & Next Steps:**
 - Medications: 
-  * Lasix 80 mg once a day (increased from previous dosage).
-  * Lisinopril 20 mg a day (continued).
+  - Lasix increased to 80 mg once a day.
+  - Lisinopril 20 mg a day to be continued.
 - Interventions: 
-  * Monitoring of blood pressure at home.
-  * Daily weight monitoring.
-  * Call doctor if gaining weight.
-  * Call doctor if experiencing shortness of breath.
+  - Monitoring of blood pressure at home, and the patient will report elevated blood pressures through patient portal.
+  - Weighing himself every day and calling if gaining more weight.
+  - Calling if experiencing shortness of breath or other symptoms.
 - Diagnostic Tests: 
-  * Echocardiogram (new echocardiogram ordered, with a previous one done about four months ago).
-  * Chest x-ray (already done, showing fluid in the lungs).
-- Logistics & Follow-up: The patient's home renovations are expected to be complete by Halloween. Follow-up after test results are received.
+  - Another echocardiogram to be ordered.
+  - Previous chest x-ray showed fluid in the lungs.
+- Logistics & Follow-up: Follow-up after test results are received, with no specific date mentioned. The patient is looking forward to Halloween, and his home renovations are expected to be complete by Halloween.

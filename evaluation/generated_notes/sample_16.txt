@@ -1,27 +1,24 @@
-**Chief Complaint:** Lawrence, a [age not mentioned]-year-old patient, presents with right elbow pain, aside from this elbow pain.
+**Chief Complaint:** Lawrence presents with right elbow pain.
 
 **History of Present Illness:**
-The patient reports developing right elbow pain over the past week, which started after increased activity in ceramics and pottery. The pain is located on the inside of his right elbow, rated as a 6/10, and radiates down to his forearm but not to his shoulder. He denies any trauma to the elbow. The pain does not wake him up at night but does interfere with his activities, making it difficult to lift and perform tasks. He reports that ibuprofen helps a little but not much. The patient reports the pain has been going on for about four days now.
-
-- **Pertinent Negatives:** Denies any previous injury to the right elbow and any trauma.
+The patient reports elbow pain that started about 4 days prior to the consultation. The pain is located on the inside of the right elbow and radiates down into the forearm. The pain is rated 6/10 and keeps the patient up at night. The patient reported pain upon palpation of the right elbow. It is exacerbated by activities such as lifting and is alleviated by ibuprofen. The patient has tried ibuprofen prior to the consultation, which provided slight relief. Associated symptoms include difficulty lifting and doing activities due to pain, tenderness of the medial epicondyle, pain with resistance against flexion of the wrist, and pain with pronation of the forearm. The patient experienced pain with pronation of the forearm. The patient reported pain with resistance against flexion of the wrist.
+- **Pertinent Negatives:** Denies any trauma or previous injury to the right elbow.
 
 **Relevant Medical History:**
-- No prior elbow injuries or conditions mentioned.
+- Conditions: None mentioned.
+- Regional Trauma: The patient denies any prior injury to the right elbow.
 
 **Physical Examination & Vitals:**
-- Vitals: Not explicitly mentioned.
-- Localized Exam: 
-  - The physical examination reveals the patient is positive for pain to palpation and has moderate tenderness of the medial epicondyle.
-  - The patient has moderate tenderness over the medial epicondyle.
-  - Positive for pain to palpation over the medial epicondyle.
-  - Pain is exacerbated by pronation of the forearm and flexion of the wrist against resistance.
+- Vitals: Not explicitly stated.
+- Systemic Clearances: Not mentioned.
+- Localized Exam (MSK): The patient has moderate tenderness of the medial epicondyle, pain with palpation, pain with resistance against flexion of the wrist, and pain with pronation of the forearm.
 
 **Assessment & Rationale:**
-1. **Medial Epicondylitis**: Supported by the patient's clinical presentation of pain over the medial epicondyle, exacerbated by specific movements (pronation and flexion against resistance), and the absence of fracture or bony abnormality on the X-ray. The doctor reviews the X-ray of the patient's elbow. The X-ray shows no fracture or bony abnormality of the right elbow.
+1. **Medial Epicondylitis**: Supported by the clinical presentation of pain on the inside of the elbow, tenderness of the medial epicondyle, pain with resistance against flexion of the wrist, and pain with pronation of the forearm, as well as the absence of any fracture or bony abnormality on the X-ray of the right elbow. The X-ray of the right elbow showed no fracture or bony abnormality.
 
 **Treatment Plan & Next Steps:**
-- Interventions: The doctor reviews the X-ray of the patient's elbow.
-- Immobilization: The treatment plan includes ordering a sling for the patient to wear while awake.
-- Medications: The patient is prescribed ibuprofen 600 mg every 6 hours with food for a full week.
-- Therapy: Not explicitly mentioned but advised to rest and avoid pottery work for a couple of weeks. The patient is advised to avoid pottery work for the next couple of weeks.
-- Logistics & Follow-up: The patient is instructed to apply ice to the elbow for twenty minutes three times a day. The patient is scheduled for a follow-up in one week to assess progress.
+- Interventions: The patient is to rest the elbow and wear a sling while awake. The patient is instructed to wear the sling while awake. A nurse will assist the patient with setting up the sling.
+- Immobilization: A sling is to be worn while awake for an unspecified duration.
+- Medications: Ibuprofen 600 milligrams q.6 h. with food for a full week.
+- Therapy: The patient is advised to apply ice to the elbow for 20 minutes, three times a day, for a full week.
+- Logistics & Follow-up: The patient is to avoid pottery work for the next couple of weeks. The patient is scheduled for a follow-up appointment in one week.
