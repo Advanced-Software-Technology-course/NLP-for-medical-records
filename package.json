@@ -1,0 +1,41 @@
+{
+  "name": "nlp-for-medical-records",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.5",
+    "@babel/preset-react": "^7.28.5",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "babel-jest": "^30.4.1",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "transform": {
+      "^.+\\.(js|jsx|ts|tsx)$": [
+        "babel-jest",
+        {
+          "presets": [
+            ["@babel/preset-env", { "targets": { "node": "current" } }],
+            ["@babel/preset-react", { "runtime": "automatic" }]
+          ]
+        }
+      ]
+    },
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy",
+      "^react$": "<rootDir>/node_modules/react",
+      "^react-dom$": "<rootDir>/node_modules/react-dom"
+    },
+    "moduleDirectories": [
+      "node_modules",
+      "frontend/src"
+    ]
+  }
+}
