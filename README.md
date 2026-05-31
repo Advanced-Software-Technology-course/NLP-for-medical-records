@@ -876,5 +876,3 @@ These files should generally not be committed.
 # License
 
 This project was developed as part of an academic software engineering project.
-
-Add an appropriate license before public distribution.
