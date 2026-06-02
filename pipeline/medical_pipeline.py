@@ -519,6 +519,7 @@ def transcribe_audio(audio_path: str, gladia_token: str):
     sentence_confidences = []
     transcription_confidence_avg = None
 
+    sentence_confidences = []
     if utterances:
         lines = []
         for i, utt in enumerate(utterances):
