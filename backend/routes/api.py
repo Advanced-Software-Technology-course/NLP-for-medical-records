@@ -121,17 +121,17 @@ def process_audio():
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
 
-        try:
-            cpu_avg = cpu_monitor.stop()
+    try:
+        cpu_avg = cpu_monitor.stop()
 
-            gladia_token = current_app.config.get('GLADIA_TOKEN')
-            groq_token = current_app.config.get('GROQ_TOKEN')
- 
-            if not gladia_token or not groq_token:
-                print("Warning: Missing API tokens.")
- 
-            # 1. Transcribe
-            transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(filepath, gladia_token)
+        gladia_token = current_app.config.get('GLADIA_TOKEN')
+        groq_token = current_app.config.get('GROQ_TOKEN')
+
+        if not gladia_token or not groq_token:
+            print("Warning: Missing API tokens.")
+
+        # 1. Transcribe
+        transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(filepath, gladia_token)
 
         print("SENTENCE CONFIDENCES:", sentence_confidences)
         print("TRANSCRIPTION CONFIDENCE AVG:", transcription_confidence_avg)
