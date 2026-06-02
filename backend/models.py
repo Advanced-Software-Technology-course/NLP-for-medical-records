@@ -61,6 +61,7 @@ class Consultation(db.Model):
     # Per-sentence transcription confidence data, stored as a JSON string so
     # the confidence colouring on the Transcript page survives a reload from History.
     sentence_confidences = db.Column(db.Text, nullable=True)
+    cpu_usage = db.Column(db.Float, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def get_sentence_confidences(self):
@@ -120,5 +121,6 @@ class Consultation(db.Model):
             "aiSummary": self.summary,
             "soap": self.parse_soap_notes(),
             "sentence_confidences": self.get_sentence_confidences(),
+            "cpu_usage": self.cpu_usage,
             "created_at": self.created_at.isoformat()
         }

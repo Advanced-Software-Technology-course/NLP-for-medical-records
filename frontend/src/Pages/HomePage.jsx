@@ -457,6 +457,9 @@ export default function HomePage({ onNavigate, onDurationSave, onDataReceived })
       setRecording(true);
       setSeconds(0);
       secondsRef.current = 0;
+
+      fetch("http://localhost:5000/api/cpu/start", { method: "POST" }).catch(() => {});
+
     } catch (err) {
       console.error("Error accessing microphone:", err);
       alert("Could not access microphone. Please ensure you have granted permission.");

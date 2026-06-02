@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from models import db
 import models as md
+import cpu_monitor
 
 # Add project root to sys.path so we can import 'pipeline'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
@@ -21,6 +22,11 @@ except ImportError as e:
 api_bp = Blueprint('api', __name__)
 
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'm4a', 'flac', 'webm'}
+
+@api_bp.route('/cpu/start', methods=['POST'])
+def cpu_start():
+    cpu_monitor.start()
+    return jsonify({'status': 'monitoring started'}), 200
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -115,14 +121,17 @@ def process_audio():
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
 
-    try:
-        gladia_token = current_app.config.get('GLADIA_TOKEN')
-        groq_token = current_app.config.get('GROQ_TOKEN')
+        try:
+            cpu_avg = cpu_monitor.stop()
 
-        if not gladia_token or not groq_token:
-            print("Warning: Missing API tokens.")
-
-        transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(filepath, gladia_token)
+            gladia_token = current_app.config.get('GLADIA_TOKEN')
+            groq_token = current_app.config.get('GROQ_TOKEN')
+ 
+            if not gladia_token or not groq_token:
+                print("Warning: Missing API tokens.")
+ 
+            # 1. Transcribe
+            transcript, sentence_confidences, transcription_confidence_avg = transcribe_audio(filepath, gladia_token)
 
         print("SENTENCE CONFIDENCES:", sentence_confidences)
         print("TRANSCRIPTION CONFIDENCE AVG:", transcription_confidence_avg)
@@ -141,6 +150,7 @@ def process_audio():
             transcript=transcript,
             summary=summary,
             soap_notes=soap_notes,
+            cpu_usage=cpu_avg,
             sentence_confidences=json.dumps(sentence_confidences or [])
         )
         db.session.add(consultation)
