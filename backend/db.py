@@ -7,9 +7,14 @@ def _migrate(db):
     """Add any new columns to existing tables without dropping data."""
     with db.engine.connect() as conn:
         cols = {row[1] for row in conn.execute(text("PRAGMA table_info(consultations)"))}
-        if "cpu_usage" not in cols:
-            conn.execute(text("ALTER TABLE consultations ADD COLUMN cpu_usage REAL"))
-            conn.commit()
+        new_cols = {
+            "cpu_usage": "REAL",
+            "sentence_confidences": "TEXT",
+        }
+        for col, col_type in new_cols.items():
+            if col not in cols:
+                conn.execute(text(f"ALTER TABLE consultations ADD COLUMN {col} {col_type}"))
+        conn.commit()
 
 
 def init_db(app):
