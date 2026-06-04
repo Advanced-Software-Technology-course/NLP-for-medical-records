@@ -198,19 +198,25 @@ def update_consultation(consultation_id):
     if not data:
         return jsonify({'error': 'No data provided'}), 400
 
+    from datetime import datetime as dt, timezone
+
     if 'summary' in data:
+        if consultation.original_summary is None:
+            consultation.original_summary = consultation.summary
         consultation.summary = data['summary']
 
     if 'soap' in data and isinstance(data['soap'], dict):
+        if consultation.original_soap_notes is None:
+            consultation.original_soap_notes = consultation.soap_notes
         soap = data['soap']
-        # Re-serialize into the labelled text format that parse_soap_notes() understands,
-        # so the structured note round-trips correctly on the next load.
         consultation.soap_notes = (
             f"Subjective: {soap.get('subjective', '').strip()}\n"
             f"Objective: {soap.get('objective', '').strip()}\n"
             f"Assessment: {soap.get('assessment', '').strip()}\n"
             f"Plan: {soap.get('plan', '').strip()}"
         )
+
+    consultation.edited_at = dt.now(timezone.utc)
 
     try:
         db.session.commit()

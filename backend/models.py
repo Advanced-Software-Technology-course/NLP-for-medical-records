@@ -62,6 +62,9 @@ class Consultation(db.Model):
     # the confidence colouring on the Transcript page survives a reload from History.
     sentence_confidences = db.Column(db.Text, nullable=True)
     cpu_usage = db.Column(db.Float, nullable=True)
+    original_summary = db.Column(db.Text, nullable=True)
+    original_soap_notes = db.Column(db.Text, nullable=True)
+    edited_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def get_sentence_confidences(self):
@@ -74,35 +77,27 @@ class Consultation(db.Model):
         except (ValueError, TypeError):
             return []
 
-    def parse_soap_notes(self):
-        """Attempts to parse the SOAP notes string into a dictionary."""
-        if not self.soap_notes:
+    @staticmethod
+    def _parse_soap(text):
+        if not text:
             return {k: '' for k in ['subjective', 'objective', 'assessment', 'plan']}
-
-        text = self.soap_notes
-        sections = {
-            'subjective': '',
-            'objective': '',
-            'assessment': '',
-            'plan': ''
-        }
-
+        sections = {k: '' for k in ['subjective', 'objective', 'assessment', 'plan']}
         patterns = {
             'subjective': re.compile(r'subjective[:\-\s]*(.*?)(?=(?:objective|assessment|plan)|\Z)', re.IGNORECASE | re.DOTALL),
             'objective': re.compile(r'objective[:\-\s]*(.*?)(?=(?:assessment|plan)|\Z)', re.IGNORECASE | re.DOTALL),
             'assessment': re.compile(r'assessment[:\-\s]*(.*?)(?=(?:plan)|\Z)', re.IGNORECASE | re.DOTALL),
-            'plan': re.compile(r'plan[:\-\s]*(.*?)(?=\Z)', re.IGNORECASE | re.DOTALL)
+            'plan': re.compile(r'plan[:\-\s]*(.*?)(?=\Z)', re.IGNORECASE | re.DOTALL),
         }
-
         for key, pattern in patterns.items():
             match = pattern.search(text)
             if match:
                 sections[key] = match.group(1).strip()
-
         if all(v == '' for v in sections.values()):
             sections['subjective'] = text
-
         return sections
+
+    def parse_soap_notes(self):
+        return self._parse_soap(self.soap_notes)
 
     def to_dict(self):
         def full_name(person):
@@ -122,5 +117,8 @@ class Consultation(db.Model):
             "soap": self.parse_soap_notes(),
             "sentence_confidences": self.get_sentence_confidences(),
             "cpu_usage": self.cpu_usage,
+            "original_summary": self.original_summary,
+            "original_soap": self._parse_soap(self.original_soap_notes),
+            "edited_at": self.edited_at.isoformat() if self.edited_at else None,
             "created_at": self.created_at.isoformat()
         }

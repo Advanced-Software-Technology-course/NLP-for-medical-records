@@ -10,6 +10,9 @@ def _migrate(db):
         new_cols = {
             "cpu_usage": "REAL",
             "sentence_confidences": "TEXT",
+            "original_summary": "TEXT",
+            "original_soap_notes": "TEXT",
+            "edited_at": "DATETIME",
         }
         for col, col_type in new_cols.items():
             if col not in cols:
