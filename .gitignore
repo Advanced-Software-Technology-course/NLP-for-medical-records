@@ -18,3 +18,5 @@ backend/medical.db
 backend/medical.db
 node_modules/
 dist/
+backend/key.pem
+backend/cert.pem
