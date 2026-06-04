@@ -218,6 +218,9 @@ def update_consultation(consultation_id):
 
     consultation.edited_at = dt.now(timezone.utc)
 
+    if 'edit_duration_seconds' in data and data['edit_duration_seconds'] is not None:
+        consultation.edit_duration_seconds = (consultation.edit_duration_seconds or 0) + int(data['edit_duration_seconds'])
+
     try:
         db.session.commit()
     except Exception as e:

@@ -13,6 +13,7 @@ def _migrate(db):
             "original_summary": "TEXT",
             "original_soap_notes": "TEXT",
             "edited_at": "DATETIME",
+            "edit_duration_seconds": "INTEGER",
         }
         for col, col_type in new_cols.items():
             if col not in cols:

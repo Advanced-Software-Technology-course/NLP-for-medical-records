@@ -127,6 +127,8 @@ export default function SummaryPage({ onNavigate, doctorName, patientName, durat
     setEditing(false);
     setSaveError(null);
     setJustSaved(false);
+    accumulatedRef.current = data?.edit_duration_seconds ?? 0;
+    setDisplaySeconds(data?.edit_duration_seconds ?? 0);
   }, [data]);
 
   // ── Unsaved-changes detection ──────────────────────────────────────────────
@@ -134,6 +136,11 @@ export default function SummaryPage({ onNavigate, doctorName, patientName, durat
     editing &&
     (aiSummary !== savedSummary ||
       JSON.stringify(soap) !== JSON.stringify(savedSoap));
+
+  const editStartRef    = useRef(null);
+  const accumulatedRef  = useRef(data?.edit_duration_seconds ?? 0);
+  const timerIntervalRef = useRef(null);
+  const [displaySeconds, setDisplaySeconds] = useState(data?.edit_duration_seconds ?? 0);
 
   const isDirtyRef = useRef(isDirty);
   useEffect(() => { isDirtyRef.current = isDirty; }, [isDirty]);
@@ -183,9 +190,18 @@ export default function SummaryPage({ onNavigate, doctorName, patientName, durat
       const res = await fetch(`${API_BASE}/api/consultations/${consultationId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ summary: aiSummary, soap }),
+        body: JSON.stringify({
+          summary: aiSummary,
+          soap,
+          edit_duration_seconds: editStartRef.current
+            ? Math.round((Date.now() - editStartRef.current) / 1000)
+            : 0,
+        }),
       });
       if (!res.ok) throw new Error(`Save failed (${res.status})`);
+
+      clearInterval(timerIntervalRef.current);
+      accumulatedRef.current = displaySeconds;
 
       // Commit the new baseline so the dirty check resets.
       setSavedSummary(aiSummary);
@@ -208,6 +224,8 @@ export default function SummaryPage({ onNavigate, doctorName, patientName, durat
     ) {
       return;
     }
+    clearInterval(timerIntervalRef.current);
+    setDisplaySeconds(accumulatedRef.current);
     setAiSummary(savedSummary);
     setSoap(savedSoap);
     setEditing(false);
@@ -338,7 +356,12 @@ export default function SummaryPage({ onNavigate, doctorName, patientName, durat
         >
           ← View transcript
         </button>
-        <div style={{ display: "flex", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {editing && (
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b", fontFamily: "'DM Mono', monospace" }}>
+              {String(Math.floor(displaySeconds / 60)).padStart(2, "0")}:{String(displaySeconds % 60).padStart(2, "0")}
+            </span>
+          )}
           {editing && (
             <button
               onClick={handleCancel}
@@ -349,7 +372,14 @@ export default function SummaryPage({ onNavigate, doctorName, patientName, durat
             </button>
           )}
           <button
-            onClick={editing ? handleSave : () => { setJustSaved(false); setEditing(true); }}
+            onClick={editing ? handleSave : () => {
+              setJustSaved(false);
+              editStartRef.current = Date.now();
+              setEditing(true);
+              timerIntervalRef.current = setInterval(() => {
+                setDisplaySeconds(accumulatedRef.current + Math.round((Date.now() - editStartRef.current) / 1000));
+              }, 1000);
+            }}
             disabled={saving}
             style={{
               padding: "12px 28px", borderRadius: 40,

@@ -65,6 +65,7 @@ class Consultation(db.Model):
     original_summary = db.Column(db.Text, nullable=True)
     original_soap_notes = db.Column(db.Text, nullable=True)
     edited_at = db.Column(db.DateTime, nullable=True)
+    edit_duration_seconds = db.Column(db.Integer, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def get_sentence_confidences(self):
@@ -117,6 +118,7 @@ class Consultation(db.Model):
             "soap": self.parse_soap_notes(),
             "sentence_confidences": self.get_sentence_confidences(),
             "cpu_usage": self.cpu_usage,
+            "edit_duration_seconds": self.edit_duration_seconds,
             "original_summary": self.original_summary,
             "original_soap": self._parse_soap(self.original_soap_notes),
             "edited_at": self.edited_at.isoformat() if self.edited_at else None,
