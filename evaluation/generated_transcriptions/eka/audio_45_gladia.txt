@@ -1,0 +1,4 @@
+SPEAKER_0: Patient is having mild fever,
+SPEAKER_0: headache and body ache.
+SPEAKER_0: I prescribe him Dolo 650 for next 5 days.
+SPEAKER_0: Please take care.

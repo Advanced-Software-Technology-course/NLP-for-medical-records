@@ -1,0 +1,5 @@
+SPEAKER_0: Give patient Dolo 650 tablet three times a day, give Pentop
+SPEAKER_0: DSR, give Pentaprazole, give Gimiparide, give Metformin, give Thyroxine,
+SPEAKER_0: also
+SPEAKER_0: Gelucel tablet, Eno sachet,
+SPEAKER_1: also recommend Volini.

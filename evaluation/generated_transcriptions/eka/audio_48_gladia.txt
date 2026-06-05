@@ -1,0 +1,4 @@
+SPEAKER_0: Post lunch,
+SPEAKER_0: take two warm water goggles morning and evening. Also Azithromycin,
+SPEAKER_0: it's an antibiotic,
+SPEAKER_0: it will help if there are any bacterial infections.

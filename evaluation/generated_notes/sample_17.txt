@@ -1,0 +1,46 @@
+**Chief Complaint:** David, a patient of unspecified age, presents with chest pain and shortness of breath.
+
+**History of Present Illness:**
+The patient reports falling down while walking outside, which was followed by chest pain and shortness of breath. The exact date of the incident is not specified. 
+- Symptoms include:
+  * Chest pain
+  * Shortness of breath
+  * The patient experienced shortness of breath, but did not think it was significant.
+  * The patient's ankles were swelling.
+  * The patient has experienced slight chest pain, which they attributed to heartburn.
+  * The patient experienced shortness of breath while walking, but it improved with continued walking.
+  * Trace edema in lower extremities
+- **Pertinent Negatives:** The patient reports sleeping well. Denies nausea/vomiting.
+
+**Relevant Medical History:**
+- Conditions: Hypertension managed by Bumex, Cozaar, and Norvasc. The patient has a history of smoking but stopped a couple of years ago. The patient has been mostly compliant with smoking cessation, with occasional lapses.
+- Medications: The patient admits to missing medications, including the one taken today.
+- Regional Trauma: No prior injury to the affected area is explicitly mentioned.
+
+**Physical Examination & Vitals:**
+- Vitals: BP: 128/72.
+- Systemic Clearances: 
+  * Neck exam: No jugular venous distention.
+  * Heart exam: 2 out of 6 systolic ejection murmur (stable).
+  * Lung exam: Lungs clear bilaterally.
+- Localized Exam: Trace edema in lower extremities.
+
+**Assessment & Rationale:**
+1. Hypertension: Supported by the patient's blood pressure readings and medical history.
+2. Congestive heart failure (CHF) [UNCERTAIN]: The patient was in the hospital with symptoms that could be related to CHF, but the diagnosis is not explicitly confirmed.
+3. Mild to moderate mitral regurgitation: Supported by the echocardiogram results. The echocardiogram showed a preserved ejection fraction of 55% and normal diastolic filling. The echocardiogram also showed mild to moderate mitral regurgitation.
+
+**Treatment Plan & Next Steps:**
+- Medications: 
+  * Bumex: 2 milligrams, once daily.
+  * Cozaar: 100 milligrams, daily.
+  * Norvasc: 5 milligrams, once daily.
+- Interventions: 
+  * Echocardiogram (already performed).
+  * Renal artery ultrasound (ordered).
+  * Consult to nutrition (ordered).
+- Logistics & Follow-up: 
+  * The patient should obtain a scale and weigh themselves daily.
+  * The patient should call if they gain 3 pounds in 2 days.
+  * The patient should track their blood pressures at home.
+  * The patient should follow up with the nutritionist to address dietary issues. The patient agreed to the treatment plan, including the nutrition consult and renal artery ultrasound. The patient reports eating anything, including salty foods and chips.

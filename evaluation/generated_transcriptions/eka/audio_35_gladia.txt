@@ -1,0 +1,2 @@
+SPEAKER_0: Diabetes for father
+SPEAKER_0: Diabetes in medical conditions since 3 years

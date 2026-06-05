@@ -1,0 +1,4 @@
+SPEAKER_0: Dolo 650 tablet thrice a day after meals for five days.
+SPEAKER_0: Pantop DSR 40 for six days once a day before breakfast and give Gelucil tablet,
+SPEAKER_0: give Ino Seshay and also take Calpol,
+SPEAKER_1: take Glimeparide.

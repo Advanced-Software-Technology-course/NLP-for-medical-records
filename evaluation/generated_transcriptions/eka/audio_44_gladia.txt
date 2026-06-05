@@ -1,0 +1,2 @@
+SPEAKER_0: I also prescribe
+SPEAKER_0: HbA1c lab test.

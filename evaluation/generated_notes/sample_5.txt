@@ -1,23 +1,26 @@
-'''
-**Chief Complaint:** Right finger pain.
+**Chief Complaint:** Sharon Brooks, a 48-year-old female, presents with right finger pain.
 
 **History of Present Illness:**
-The patient reports pain in her right finger after a skiing accident, where her finger got bent backward while attempting moguls. The pain is exacerbated by movement and has not improved with ice and ibuprofen.
-- **Pertinent Negatives:** No fever or other systemic symptoms mentioned.
+The patient reports an injury occurring on Sunday while skiing, specifically trying moguls, which resulted in her finger getting bent back. The exact mechanism of injury involved her strap catching on her finger, causing hyperextension or bending backwards. The patient has been taking ibuprofen prior to the visit. Pain is aggravated by movement. The patient experiences pain on flexion. 
+- **Pertinent Negatives:** Not explicitly stated.
 
 **Relevant Medical History:**
-- Constipation: Managed with Miralax.
-- Past Surgery: Appendectomy at age 18.
+The patient was asked about other past medical history. 
+- Conditions: Constipation managed by Miralax.
+- Regional Trauma: No prior injury to the affected area is explicitly denied or confirmed.
+- Past surgeries: The patient had an appendectomy at the age of 18.
 
 **Physical Examination & Vitals:**
-- **Key Symptoms:** Tenderness over the distal phalanx of the right index finger, pain on flexion, but no tenderness over the proximal joint or metacarpophalangeal joint.
-- Vitals: [UNCERTAIN - no specific vitals mentioned in the transcript].
+- Vitals: Not mentioned.
+- Systemic Clearances: Not mentioned.
+- Localized Exam (MSK): The patient has tenderness over the distal phalanx and the joint itself, with pain on flexion. The patient can bend and extend the finger and touch the thumb with it. No tenderness is noted over the proximal joint or the metacarpophalangeal joint.
 
 **Assessment & Rationale:**
-1. Right index finger contusion: Suggested by the mechanism of injury, tenderness over the distal phalanx, and pain on flexion, with normal X-ray findings.
+An X-ray was ordered and reviewed. The X-ray results showed no abnormalities. 
+1. **Right hand index finger contusion on the tip of the finger**: Supported by the absence of fractures on the X-ray and clinical presentation of tenderness over the distal phalanx and the joint itself, with pain on flexion.
 
 **Treatment Plan & Next Steps:**
-- Medication: Motrin 600mg every 6 hours for about a week.
-- Supportive Care: Aluminum foam splint for the affected finger.
-- Follow-up: Return in a week if symptoms do not improve.
-'''
+- Interventions: Application of ice and an aluminum foam splint.
+- Medications: Ibuprofen (Motrin) 600 milligrams every six hours for about a week.
+- Therapy: Not mentioned.
+- Logistics & Follow-up: The patient is advised to return if symptoms do not improve. The treatment plan, including medication and procedures, was ordered. The patient expressed agreement with the treatment plan. No specific accommodations for lifestyle or vacations are discussed. Follow-up is recommended if there's no improvement, but no exact timeline is provided beyond the initial week of treatment. The patient was escorted to complete the checkout process. The visit report was finalized.

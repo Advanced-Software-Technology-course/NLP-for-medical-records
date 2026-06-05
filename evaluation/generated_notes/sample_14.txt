@@ -1,0 +1,35 @@
+**Chief Complaint:** Beverly, a 53-year-old female, presents for follow-up during neo-adjuvant chemotherapy for stage three non-small cell lung cancer. 
+
+**History of Present Illness:**
+The patient reports a recent diagnosis of stage three non-small cell lung cancer. A 4.4 centimeter left upper lobe nodule was diagnosed, and biopsy was positive for adenocarcinoma. Molecular testing is pending at this time. Symptoms include:
+- Minimal cough
+- Sore throat
+- Fatigue
+- Dry cough
+- Decreased appetite
+**Pertinent Negatives:** Denies nausea/vomiting, shortness of breath, and difficulty swallowing with food getting stuck.
+
+**Relevant Medical History:**
+- Conditions: Stage three non-small cell lung cancer, adenocarcinoma.
+- Regional Trauma: No prior trauma to the lungs mentioned.
+
+**Physical Examination & Vitals:**
+- Vitals: Not explicitly stated, but oxygen levels are mentioned as looking good.
+- Systemic Clearances: 
+  - HEENT: Sore throat, no cervical lymphadenopathy, and no supraclavicular adenopathy.
+  - CV: Regular heart rate and rhythm with no murmurs.
+  - Respiratory: Bilateral crackles were noted in the lungs, erythema was noted on the anterior side of the chest on the left side.
+  - MSK/Neuro: Not explicitly examined.
+- Localized Exam: No edema in lower extremities.
+
+**Assessment & Rationale:**
+1. **Stage three non-small cell lung cancer**: Supported by biopsy of left upper lobe nodule positive for adenocarcinoma.
+2. **Radiation pneumonitis**: Supported by chest x-ray showing mild radiation pneumonitis, indicating inflammation of the lungs likely due to radiation, and clinical presentation of cough and fatigue.
+
+**Treatment Plan & Next Steps:**
+- Interventions: Continue with current regimen of chemotherapy (Cisplatin and Etoposide) and radiation therapy at 45 Gy. Planned surgical removal of tumor after completion of radiation therapy.
+- Medications: 
+  - Prednisone 40 milligrams daily for 5 days to help with inflammation due to radiation pneumonitis.
+  - Lidocaine swish and swallow 4 times a day to help with painful swallowing. The patient can eat immediately after taking the lidocaine swish and swallow, which will help prevent dehydration and further weight loss.
+- Therapy: Not explicitly mentioned.
+- Logistics & Follow-up: The patient reports that the nursing staff and office have been supportive. The patient has good family support and they have accompanied her to treatment. Follow-up visit scheduled, exact timeline not specified. Patient to continue with current treatment plan and repeat imaging after completion of radiation therapy. Inflammation is present not only in the lungs but also in the esophagus.

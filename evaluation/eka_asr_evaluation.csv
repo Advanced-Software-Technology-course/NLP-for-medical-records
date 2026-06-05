@@ -1,0 +1,47 @@
+audio_id,predicted_file,reference_exists,predicted_exists,reference_text,predicted_text,wer
+audio_0,evaluation\generated_transcriptions\eka\audio_0_gladia.json,True,True,"not having adequate rest. Okay okay. So that continues for better part of the day. Hmm, hmm, hmm. Then",Not having adequate rest. That continues for better part of the day.,0.3684210526315789
+audio_0,evaluation\generated_transcriptions\eka\audio_0_gladia.txt,True,True,"not having adequate rest. Okay okay. So that continues for better part of the day. Hmm, hmm, hmm. Then","SPEAKER_0: Not having adequate rest.
+SPEAKER_0: That continues for better part of the day.",0.47368421052631576
+audio_10,evaluation\generated_transcriptions\eka\audio_10_gladia.json,True,True,"and then there was also this problem of headaches, and we did eye checkups and there is no problem. So, and there is a problem of wheezing and sneezing, so we're giving him sinus antibiotics, uh, and also cetrizine","And then there was also this problem of headache and we did eye checkups and there is no problem. So, and there is a problem of wheezing and sneezing. So we're giving him sinus antibiotics and also aspirin.",0.1282051282051282
+audio_10,evaluation\generated_transcriptions\eka\audio_10_gladia.txt,True,True,"and then there was also this problem of headaches, and we did eye checkups and there is no problem. So, and there is a problem of wheezing and sneezing, so we're giving him sinus antibiotics, uh, and also cetrizine","SPEAKER_0: And then there was also this problem of headache and we did eye checkups and there is no problem.
+SPEAKER_0: So,
+SPEAKER_0: and there is a problem of wheezing and sneezing.
+SPEAKER_0: So we're giving him sinus antibiotics and also aspirin.",0.20512820512820512
+audio_11,evaluation\generated_transcriptions\eka\audio_11_gladia.json,True,True,"So it seems like the patient is seems really sad and is not able to wake up in the morning and feels energy less, and we did a blood test, so it's thyroid, so we're administering him thyroxine.","So it seems like the patient is, seems really sad and is not able to wake up in the morning and feels energy less. And we did a blood test, so it's thyroid, so we're administering him free thyroxine.",0.07894736842105263
+audio_11,evaluation\generated_transcriptions\eka\audio_11_gladia.txt,True,True,"So it seems like the patient is seems really sad and is not able to wake up in the morning and feels energy less, and we did a blood test, so it's thyroid, so we're administering him thyroxine.","SPEAKER_0: So it seems like the patient is,
+SPEAKER_0: seems really sad and is not able to wake up in the morning and feels energy less.
+SPEAKER_0: And we did a blood test,
+SPEAKER_0: so it's thyroid,
+SPEAKER_0: so we're administering him free thyroxine.",0.15789473684210525
+audio_12,evaluation\generated_transcriptions\eka\audio_12_gladia.json,True,True,"In the morning and evening with warm water. Another suggestion is to get yourself tested for complete blood count. Oh yeah, I forgot, continue your thyroxine, Thyronorm tablet.","in the morning and evening with warm water. Another suggestion is to get yourself tested for complete blood count. Oh yeah, I forgot. Continue your free thyroxine, thyronome tablet.",0.10714285714285714
+audio_12,evaluation\generated_transcriptions\eka\audio_12_gladia.txt,True,True,"In the morning and evening with warm water. Another suggestion is to get yourself tested for complete blood count. Oh yeah, I forgot, continue your thyroxine, Thyronorm tablet.","SPEAKER_0: in the morning and evening with warm water.
+SPEAKER_0: Another suggestion is to get yourself tested for complete blood count. Oh yeah, I forgot.
+SPEAKER_0: Continue your free thyroxine,
+SPEAKER_0: thyronome tablet.",0.21428571428571427
+audio_1,evaluation\generated_transcriptions\eka\audio_1_gladia.json,True,True,"2 times in a day, please have, an antibiotic named azithromycin.",Two times in a day please have an antibiotic named Azithromycin.,0.2727272727272727
+audio_1,evaluation\generated_transcriptions\eka\audio_1_gladia.txt,True,True,"2 times in a day, please have, an antibiotic named azithromycin.",SPEAKER_0: Two times in a day please have an antibiotic named Azithromycin.,0.36363636363636365
+audio_2,evaluation\generated_transcriptions\eka\audio_2_gladia.json,True,True,"500 mg. Also, Because you're feeling weak. Take Zincovit once in a day.",500 mg also because you are feeling weak take zinkovit once in a day,0.5384615384615384
+audio_2,evaluation\generated_transcriptions\eka\audio_2_gladia.txt,True,True,"500 mg. Also, Because you're feeling weak. Take Zincovit once in a day.",SPEAKER_0: 500 mg also because you are feeling weak take zinkovit once in a day,0.6153846153846154
+audio_3,evaluation\generated_transcriptions\eka\audio_3_gladia.json,True,True,"Patient has fever, headache, back pain, leg pain all over the body, I recommend to give Dolo 650 tablet thrice a day for 6 days, and I also want to give Pantop DSR for 7 days. Ask patient to come after 12 days and give thyroxine 25 mcg for 15 days.","Patient has fever, headache, back pain, leg pain all over the body. I recommend to give Dolo 650 tablet thrice a day for 6 days and I also want to give Pantop DSR for 7 days. Ask patient to come after 12 days and give Free thyroxine 25 mcg for 15 days.",0.058823529411764705
+audio_3,evaluation\generated_transcriptions\eka\audio_3_gladia.txt,True,True,"Patient has fever, headache, back pain, leg pain all over the body, I recommend to give Dolo 650 tablet thrice a day for 6 days, and I also want to give Pantop DSR for 7 days. Ask patient to come after 12 days and give thyroxine 25 mcg for 15 days.","SPEAKER_0: Patient has fever, headache, back pain,
+SPEAKER_0: leg pain all over the body.
+SPEAKER_0: I recommend to give Dolo 650 tablet thrice a day for 6 days and I also want to give Pantop DSR for 7 days.
+SPEAKER_0: Ask patient to come after 12 days and give Free thyroxine 25 mcg for 15 days.",0.11764705882352941
+audio_5,evaluation\generated_transcriptions\eka\audio_5_gladia.json,True,True,"Hello. The patient has fever, headache, body ache all over the body, and there's also so much happening. I recommend him to do antigen test. I'm suspecting dengue, and the patient should take dolo 650, the patient should take Pantop DSR 40.",Jell-o silk tablet and many more drugs and see after seven days,0.9523809523809523
+audio_5,evaluation\generated_transcriptions\eka\audio_5_gladia.txt,True,True,"Hello. The patient has fever, headache, body ache all over the body, and there's also so much happening. I recommend him to do antigen test. I'm suspecting dengue, and the patient should take dolo 650, the patient should take Pantop DSR 40.",SPEAKER_0: Jell-o silk tablet and many more drugs and see after seven days,0.9523809523809523
+audio_6,evaluation\generated_transcriptions\eka\audio_6_gladia.json,True,True,"And, I want to also give Pantop DSR 40. And then, give some Eno for 5 days and ask the patient to come and see me after 10 days.","Hello, the patient has fever, headache, body ache all over the body and there's also so much happening. I recommend him to do a T-gen test. I am suspecting Dengue and the patient should take DOLO 650. The patient should take Pantop DSR 40.",1.4137931034482758
+audio_6,evaluation\generated_transcriptions\eka\audio_6_gladia.txt,True,True,"And, I want to also give Pantop DSR 40. And then, give some Eno for 5 days and ask the patient to come and see me after 10 days.","SPEAKER_0: Hello,
+SPEAKER_0: the patient has fever, headache,
+SPEAKER_0: body ache all over the body and there's also so much happening.
+SPEAKER_0: I recommend him to do a T-gen test.
+SPEAKER_0: I am suspecting Dengue and the patient should take DOLO 650.
+SPEAKER_0: The patient should take
+SPEAKER_0: Pantop DSR 40.",1.4482758620689655
+audio_8,evaluation\generated_transcriptions\eka\audio_8_gladia.json,True,True,"For the medicine, take thyroxine. Also take Dolo 650. Avoid eating outside food, take proper bed rest and, go for morning walks regularly. Next follow-up is scheduled within a week.","For the medicine take free thyroxine, also take dolo 650, avoid eating outside food, take proper bed rest and go for morning walks regularly. Next follow-up is scheduled within week.",0.2
+audio_8,evaluation\generated_transcriptions\eka\audio_8_gladia.txt,True,True,"For the medicine, take thyroxine. Also take Dolo 650. Avoid eating outside food, take proper bed rest and, go for morning walks regularly. Next follow-up is scheduled within a week.","SPEAKER_0: For the medicine take free thyroxine,
+SPEAKER_0: also take dolo 650,
+SPEAKER_0: avoid eating outside food,
+SPEAKER_0: take proper bed rest and go for morning walks regularly.
+SPEAKER_0: Next follow-up is scheduled within week.",0.3
+audio_9,evaluation\generated_transcriptions\eka\audio_9_gladia.json,True,True,"plus,there was this issue of,stomach ache, and,yeah, so we want to give him digene because I don't think it's a problem, it's a big problem.",Plus there was this issue of stomach ache and yeah so we want to give him diagen because I don't think it's a problem,0.52
+audio_9,evaluation\generated_transcriptions\eka\audio_9_gladia.txt,True,True,"plus,there was this issue of,stomach ache, and,yeah, so we want to give him digene because I don't think it's a problem, it's a big problem.",SPEAKER_0: Plus there was this issue of stomach ache and yeah so we want to give him diagen because I don't think it's a problem,0.56

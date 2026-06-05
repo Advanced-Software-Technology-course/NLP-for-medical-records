@@ -1,0 +1,1 @@
+{"avg_conf": 0.63, "sentence_confidences": [{"sentence_index": 0, "speaker": 0, "text": "I also prescribe", "confidence": 0.68, "confidence_percent": 68.0, "start": 1.228, "end": 2.651}, {"sentence_index": 1, "speaker": 0, "text": "HbA1c lab test.", "confidence": 0.58, "confidence_percent": 58.0, "start": 4.675, "end": 5.978}]}

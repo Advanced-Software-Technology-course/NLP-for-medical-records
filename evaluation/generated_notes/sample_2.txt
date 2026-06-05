@@ -1,25 +1,23 @@
-'''
-**Chief Complaint:** Right knee pain after a fall.
+**Chief Complaint:** Ms. Thompson, a 43-year-old female, presents with right knee pain.
 
 **History of Present Illness:**
-The patient reports twisting her right knee while falling from a ladder, resulting in pain on the inside of the knee. The pain is exacerbated by bending and twisting the knee. She has been using ice and taking ibuprofen without significant relief.
-- **Pertinent Negatives:** Denies injury to other areas, fever, or other systemic symptoms.
+The patient reports a stumble and twist of her knee while changing a light bulb on a ladder, occurring yesterday. Pain is located on the inside of her knee and is aggravated by bending the knee forward and twisting. Associated symptoms include tenderness over the medial portion of the knee. The patient has been putting ice on her knee. The patient has been taking ibuprofen, but it doesn't seem to help much.
+- **Pertinent Negatives:** Denies nausea, vomiting, and pain in the calves.
 
 **Relevant Medical History:**
-- Atrial Fibrillation (AFib): Managed with digoxin.
-- Past Surgery: Nose job.
+- Conditions: Atrial fibrillation (afib) managed by Digoxin.
+- Regional Trauma: No prior injury to the affected knee area mentioned.
+- Past surgeries: The patient has had a nose job.
 
 **Physical Examination & Vitals:**
-- **Key Symptoms:** Tender to palpation over the medial portion of the knee, pain with flexion and valgus stress, normal sensation.
-- Vitals: [UNCERTAIN - no specific vitals mentioned].
-- Musculoskeletal: Tenderness over the medial meniscus area, no other significant findings.
+No vitals were explicitly mentioned in the transcript. 
+- Localized Exam (MSK): The patient has tenderness over the medial portion of her knee, specifically over the medial meniscus area. There is also tenderness when valgus stressing is applied to her leg. The patient has normal sensation in her leg. No other specific physical deformities, crepitus, or range of motion limitations were mentioned.
 
 **Assessment & Rationale:**
-1. Acute Medial Meniscus Sprain/Strain: Suggested by the mechanism of injury, location of pain, and physical examination findings.
+1. **Acute medial meniscus sprain [UNCERTAIN] / strain**: Supported by tenderness over the medial meniscus area, pain when bending the knee forward and twisting, and the presence of a little bit of fluid on the X-ray. The X-ray shows a little bit of fluid in the knee.
 
 **Treatment Plan & Next Steps:**
-- **Medication:** Motrin 800mg every 6 hours with food for pain management.
-- **Lifestyle:** Use of a knee brace and crutches for the next couple of days to reduce stress on the knee.
-- **Diagnostics:** X-rays were taken, showing no fracture or dislocation but some fluid; an MRI is planned if symptoms do not improve within a week.
-- **Follow-up:** Return in about a week to assess improvement and consider further diagnostic steps if necessary.
-'''
+- Interventions: Placement of a knee brace and temporary use of crutches for the next couple of days.
+- Medications: Motrin 800 milligrams every 6 hours with food. The patient will be given a two-week supply of Motrin.
+- Imaging: An X-ray was taken, showing no fractures and a little bit of fluid, but no dislocation. A possible MRI in a week if symptoms persist.
+- Logistics & Follow-up: The patient is to follow up in about a week to assess her condition, and an MRI may be ordered at that time if her symptoms have not improved. The doctor asked the patient if she had any questions. The patient was instructed to follow the doctor to get checked out.

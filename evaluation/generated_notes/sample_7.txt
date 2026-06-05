@@ -1,0 +1,40 @@
+**Chief Complaint:** Bruce Ward, a 52-year-old male, presents with worsening headaches.
+
+**History of Present Illness:**
+The patient reports headaches that started approximately three months ago, with a gradual worsening over time. The pain is located behind the eyes, described as a dull nagging ache, and is worse in the morning. The severity of the headaches has increased from 3 out of 10 to 6 out of 10 over time. The patient also reports bumping into door frames but denies any other symptoms such as feeling sick, fever, rashes, neck stiffness, numbness, weakness, or passing out. The patient previously tried taking Tylenol for the headaches, but it did not provide relief.
+- **Pertinent Negatives:** Denies feeling sick, fever, rashes, neck stiffness, numbness, weakness, and passing out.
+
+**Relevant Medical History:**
+- Conditions: None mentioned.
+- Regional Trauma: No prior history of similar complaints or regional trauma mentioned. The patient's family history is unknown because he was adopted.
+
+**Social History:**
+The patient works as a computer programmer and has been married for 25 years. The patient denies using alcohol, smoking, or recreational drugs.
+
+**Physical Examination & Vitals:**
+- Vitals: Not explicitly stated.
+- Systemic Clearances: Not explicitly stated.
+- Localized Exam: 
+  - The patient is alert, oriented to time, place, and person.
+  - Affect is appropriate and speech is fluent.
+  - Cranial nerve examination is grossly intact.
+  - No focal, motor, or sensory deficit in the upper or lower extremities.
+  - Visual acuity and eye movements are normal.
+  - Pupils are equal and reactive.
+  - Visual field testing reveals bitemporal hemianopia.
+  - Color vision is normal.
+
+**Laboratory Results:**
+Laboratory results, including CBC, unes, coagulation, and CRP, were all normal. The patient has a low TSH level, as shown in the pituitary hormone profile.
+
+**Assessment & Rationale:**
+1. **Pituitary Adenoma**: Supported by the presence of a pituitary lesion with elevation and compression of the optic chiasm on MRI, and clinical presentation of worsening headaches and bitemporal hemianopia. The patient is symptomatic with clinical and radiographical evidence of optic chiasmal compression.
+2. **Optic Chiasmal Compression**: Supported by the MRI findings and the patient's visual field defects.
+
+**Treatment Plan & Next Steps:**
+- Interventions: **Transsphenoidal approach surgery** to excise and decompress the pituitary fossa. The patient was informed of the risks of surgery, including infection, need for further surgery, wound issues such as spinal fluid leak or infection. The patient was also informed of the risks of anesthesia, including but not limited to the risk of heart attack, stroke, and death. Additional risks of surgery include seizure, stroke, permanent numbness, weakness, difficulty speaking, or even death.
+- Medications: **Tylenol** was tried by the patient a few times for the headaches but with no relief; dosage and frequency not specified.
+- Therapy/Tests: 
+  - **Visual field test** scheduled before surgery to map out the patient's peripheral vision. The patient is scheduled to have the visual field test today or tomorrow.
+  - The patient will be referred to an eye doctor for a full exam, possibly after surgery. The patient may not be able to see the eye doctor for a full exam until after surgery.
+- Logistics & Follow-up: The patient will see the surgery scheduler, Deborah, to get the surgery scheduled fairly quickly. Follow-up details, including the exact timeline, are not explicitly stated.

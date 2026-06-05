@@ -1,28 +1,40 @@
-'''
-**Chief Complaint:** Annual exam, with concerns about managing depression, hypertension, and prior lobectomy.
+**Chief Complaint:** Ralph, a 62-year-old male, presents for his annual exam.
 
 **History of Present Illness:**
-The patient reports doing relatively well, despite a tough spring with allergies and stress from dropping off his daughter at college. He has been managing his depression with Prozac and has not had any incidents recently. He is still working on managing his hypertension, with some difficulty in remembering to take his medication on weekends.
+The patient reports experiencing nasal congestion due to allergies to pollen and shortness of breath with exertion. He also experiences pounding in his chest, particularly when running in humid conditions, and shortness of breath occurs in humid conditions. He recently experienced a recent life event of dropping off daughter at college. 
+- **Symptoms:** 
+  * Nasal congestion
+  * Shortness of breath with exertion
+  * Pounding in chest
+- **Pertinent Negatives:** Denies muscle aches, cough.
 
 **Relevant Medical History:**
-- Depression: Managed with Prozac 20mg daily.
-- Hypertension: Managed with Norvasc, with some difficulty in adherence on weekends.
-- Prior Lobectomy: No current issues, but patient experiences shortness of breath with exertion, especially in humid conditions.
+- Conditions: 
+  * Depression, managed by Prozac 20 milligrams a day
+  * Hypertension, managed by Norvasc (dosage not stated), and hypertension has been a struggle
+  * Prior lobectomy
+- Regional Trauma: The patient had a prior lobectomy a couple of years ago.
 
 **Physical Examination & Vitals:**
-- Vitals: Blood pressure 120/80, which is an improvement from previous readings.
-- Cardiovascular: Slight 2/6 systolic ejection murmur, but otherwise normal heart sounds.
-- Respiratory: Lungs sound clear, with some pain to palpation of the sinuses.
-- Musculoskeletal: No lower extremity edema.
+- Vitals: BP: 120/80
+- Systemic Clearances: 
+  * Heart: slight two out of six systolic ejection murmur
+  * Lungs: clear
+  * Lower extremity: no edema
+- Localized Exam: The patient has pain to palpation of the sinuses.
 
 **Assessment & Rationale:**
-1. Depression: Well-managed on current medication.
-2. Hypertension: Blood pressure is well-controlled, but patient needs to improve adherence to medication regimen.
-3. Prior Lobectomy: No current issues, but patient experiences shortness of breath with exertion.
+1. **Depression**: The patient is doing well on his current medication, Prozac 20 milligrams a day.
+2. **Hypertension**: The patient's blood pressure is well-controlled, but patient sometimes forgets to take Norvasc on weekends.
+3. **Prior Lobectomy**: The patient is exercising regularly, runs 4 to 5 miles a day, and has no issues with his breathing function.
+4. **Systolic Ejection Murmur**: An echocardiogram has been ordered to further evaluate this condition.
 
 **Treatment Plan & Next Steps:**
-- Medication: Continue Prozac 20mg daily, with a refill ordered.
-- Lifestyle: Improve adherence to Norvasc medication regimen, especially on weekends.
-- Diagnostics: Order an echocardiogram to investigate the systolic ejection murmur, and routine blood work.
-- Follow-up: Patient will be contacted through the patient portal with results, and will follow up as needed.
-'''
+- Medications: 
+  * Prozac 20 milligrams a day (refill ordered)
+  * Norvasc (continue taking, with emphasis on taking it regularly, including on weekends)
+- Diagnostic Tests: 
+  * Echocardiogram (ordered to evaluate the systolic ejection murmur), and EKG results are normal
+  * Chest x-ray results are normal
+  * Routine blood work (ordered)
+- Follow-up: The patient will be contacted through the patient portal with the results of the tests. No follow-up with the surgeon for the prior lobectomy is necessary.

@@ -1,0 +1,4 @@
+SPEAKER_0: Cold,
+SPEAKER_0: blocked nose and cough.
+SPEAKER_0: The possible diagnosis is it could be influenza since three days or it could be dengue or malaria.
+SPEAKER_0: Lab investigation of dengue and malaria suggested for the patient.
