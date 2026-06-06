@@ -1,0 +1,32 @@
+**Chief Complaint:** Richard, presents with a tick bite and associated symptoms.
+
+**History of Present Illness:**
+The patient reports a tick bite around his knee, which occurred over a week ago, with no specific recall of the exact date. He had gone hunting a couple of weeks prior to the visit. The patient complains of a burning sensation around the tick bite, warmth on the spot, headache, and generally not feeling well. He also experiences typical arthritic pain and a grinding sensation in the knee. 
+- **Pertinent Negatives:** Denies fever, chills, body aches, cough, shortness of breath, or dizziness.
+
+**Relevant Medical History:**
+- Conditions: Hypertension managed by Lisinopril 20 milligrams once a day, started about a year or two ago; Diabetes managed by Metformin 1000 milligrams twice a day, with no specified start date.
+- Regional Trauma: The patient has had tick bites before, especially in his younger years when he spent more time in the woods, but no prior diagnosis of Lyme disease.
+
+**Physical Examination & Vitals:**
+- Vitals: BP: 122/72, The patient's heart rate is 67, The patient has a normal temperature of 98.4 degrees.
+- Systemic Clearances: Heart exam shows a regular rate and rhythm with no murmur, rub, or gallop; The patient's lungs are clear to auscultation bilaterally.
+- Localized Exam: Right knee exam reveals erythema, edema, and an area of fluctuance over the right patella, with pain to palpation of the right anterior knee. There is a full range of motion of the right knee, with a grinding sensation noted by the patient. A bull's-eye rash is present over the right knee.
+
+**Assessment & Rationale:**
+1. **Possible Lyme disease [UNCERTAIN]**: Supported by the presence of a tick bite, bull's-eye rash over the right knee, and associated symptoms like headache and general malaise.
+2. Hypertension: Managed with current medications.
+3. Diabetes: Managed with current medications and lifestyle adjustments. The patient tries to check his blood sugars pretty regularly. The patient's blood sugars are running around 120 with the metformin.
+
+**Treatment Plan & Next Steps:**
+- Medications: 
+  - Continue Lisinopril 20 milligrams once a day for hypertension.
+  - Continue Metformin 1000 milligrams twice a day for diabetes.
+  - Start Doxycycline 100 milligrams twice a day for possible Lyme disease, to be taken for about three weeks.
+- Diagnostic Tests: 
+  - A Lyme titer and Western blot will be sent to confirm Lyme disease.
+  - The doctor would like to avoid intravenous antibiotics if possible.
+  - A lipid panel will be ordered to assess cholesterol levels.
+  - A hemoglobin A1c will be ordered to evaluate long-term blood sugar control.
+  - A basic metabolic panel will be ordered to check kidney function. The patient asks when to start checking kidney function due to potential metformin side effects. The doctor will order a basic metabolic panel since blood work is already being done.
+- Follow-up: Scheduled after three weeks of Doxycycline treatment to assess response to treatment and review test results. The patient is advised to monitor blood sugars and kidney function.

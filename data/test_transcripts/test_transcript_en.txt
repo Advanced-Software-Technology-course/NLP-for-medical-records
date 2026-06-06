@@ -1,7 +1,4 @@
-Doctor-Patient Consultation – Test Transcript (English)
-Duration: ~10 minutes
-Complaints: headache/migraine, abdominal pain, fatigue/weakness
---------------------------------------------------------------
+
 
 DOCTOR: Good morning, please take a seat. What brings you in today?
 

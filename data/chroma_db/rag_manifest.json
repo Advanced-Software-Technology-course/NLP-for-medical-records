@@ -1,0 +1,15 @@
+{
+  "fingerprint": "aec68945326e89fd925bd206ef2138353012420d5e4d6a7715e290c02c847fa1",
+  "indexed_at_epoch": 1777720566,
+  "kb_path": "../knowledge_base",
+  "chroma_path": ".",
+  "embedding_model": "all-MiniLM-L6-v2",
+  "chunk_size": 1000,
+  "chunk_overlap": 200,
+  "batch_size": 2000,
+  "rag_limit": null,
+  "csv_whitelist": [
+    "DDI_data_clean.csv",
+    "clinical_lab_facts.csv"
+  ]
+}

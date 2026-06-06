@@ -1,0 +1,7 @@
+SPEAKER_0: Hello,
+SPEAKER_0: the patient has fever, headache,
+SPEAKER_0: body ache all over the body and there's also so much happening.
+SPEAKER_0: I recommend him to do a T-gen test.
+SPEAKER_0: I am suspecting Dengue and the patient should take DOLO 650.
+SPEAKER_0: The patient should take
+SPEAKER_0: Pantop DSR 40.

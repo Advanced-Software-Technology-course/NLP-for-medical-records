@@ -1,0 +1,17 @@
+{
+  "samples_requested": 3619,
+  "samples_with_audio": 49,
+  "samples_evaluated": 49,
+  "wer_mean": 0.0973057369680877,
+  "cer_mean": 0.05172446238371272,
+  "mer_mean": 0.09420430920481047,
+  "wil_mean": 0.14366166725688082,
+  "wip_mean": 0.8563383327431191,
+  "rouge1_mean": 0.9232797243644916,
+  "rouge2_mean": 0.8217915993407795,
+  "rougeL_mean": 0.9232797243644916,
+  "semantic_similarity_mean": 0.8872943521480958,
+  "gladia_avg_sentence_confidence_mean": 0.6152915451895045,
+  "gladia_avg_sentence_confidence_percent_mean": 61.5,
+  "note": "Use the later final normalized WER score cell for the stricter reportable WER."
+}

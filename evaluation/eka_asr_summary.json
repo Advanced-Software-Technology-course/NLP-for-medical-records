@@ -1,0 +1,9 @@
+{
+  "pairs_evaluated": 22,
+  "matched_pairs": 22,
+  "skipped_no_ref": 0,
+  "mean_wer": 0.45669184190487216,
+  "median_wer": 0.3318181818181818,
+  "min_wer": 0.058823529411764705,
+  "max_wer": 1.4482758620689655
+}

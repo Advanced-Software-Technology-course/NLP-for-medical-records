@@ -1,0 +1,5 @@
+SPEAKER_0: So it seems like the patient is,
+SPEAKER_0: seems really sad and is not able to wake up in the morning and feels energy less.
+SPEAKER_0: And we did a blood test,
+SPEAKER_0: so it's thyroid,
+SPEAKER_0: so we're administering him thyroxine.

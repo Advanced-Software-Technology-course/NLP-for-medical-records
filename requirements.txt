@@ -1,8 +1,49 @@
 # Medical Transcription Pipeline - Requirements
 # Install with: pip install -r requirements.txt
 
+# Core Backend
+flask>=3.0.0
+flask-sqlalchemy>=3.1.1
+flask-cors>=4.0.0
+
 # Groq / OpenAI-compatible API client
 openai>=2.26.0
+together>=1.0.0
 
 # HTTP requests (Gladia API calls)
 requests>=2.32.5
+
+
+# RAG / LangChain dependencies
+langchain>=0.0.300
+langchain-huggingface>=0.0.300
+langchain-community>=0.0.300
+chromadb>=0.3.0
+sentence-transformers>=2.3.0
+rapidfuzz>=3.10.0
+
+
+# Data Scraping
+beautifulsoup4>=4.13.0
+pandas>=2.0.0
+
+# Data handling
+datasets>=3.2.0
+numpy>=1.24.0
+librosa>=0.9.2
+soundfile>=0.12.1
+
+# Backend FLASK
+flask>=2.3.0
+flask-cors>=3.0.0
+
+# Testing dependencies
+pytest>=7.0.0
+
+
+# RAG pipeline
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-huggingface>=0.1.0
+chromadb>=0.6.0
+sentence-transformers>=3.0.0
